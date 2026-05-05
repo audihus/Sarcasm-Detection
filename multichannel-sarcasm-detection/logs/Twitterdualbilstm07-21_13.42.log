@@ -1,0 +1,3153 @@
+Mon, 21 Jul 2025 13:43:25 dataUtils.py INFO 构建词汇表...
+Mon, 21 Jul 2025 13:43:25 main.py INFO model parameters: Namespace(batch_size=128, bidirectional=1, breakpoint=-1, cell_dropout_rate=0.5, data_dir='./Twitter/spacy/', device=device(type='cuda'), dim_bert=768, dim_hidden=256, dim_input=300, embed_dropout_rate=0.5, final_dropout_rate=0.5, iter_num=4800, lambda1=0.5, learning_rate=0.001, linear_dropout_rate=0.1, lr_bert=5e-05, lr_word_vector=0.0001, margin=0.5, max_length_sen=100, model_dir='models/Twitter_dualbilstm/', multi_dim=20, n_class=2, n_layers=3, name_dataset='Twitter', name_model='dualbilstm', optim_type='Adam', path_wordvec='glove.840B.300d.txt', per_checkpoint=64, predict=0, predict_dir='./predict/', rnn_type='LSTM', save_model=1, seed=2021, supcon=1, t_sne=0, tokenizer='spacy', voc_size=30000, weight_decay=0)
+Mon, 21 Jul 2025 13:43:25 main.py INFO Use device: cuda
+Mon, 21 Jul 2025 13:43:26 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:43:26 main.py INFO Time of iter training 0.00 s
+Mon, 21 Jul 2025 13:43:26 main.py INFO On iter step 0.0:, global step 0 Loss-step [2.7183 2.7183 2.7183 2.7183]
+Mon, 21 Jul 2025 13:43:27 main.py INFO In dataset train: Loss is [2.0984 0.6943 0.7106 0.6935]
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Acc is 0.5033, F1-micro is 0.5033
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		F1-macro is 0.3965, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Pre-macro is 0.5064, Rec_macro is 0.5019
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		For sarcasm, C_M is 
+[[1679  144]
+ [1661  150]]
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Acc is 0.2240, F1-micro is 0.2240
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		F1-macro is 0.1830, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Pre-macro is 0.1120, Rec_macro is 0.5000
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [2820    0]]
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Acc is 0.5000, F1-micro is 0.5000
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		F1-macro is 0.3333, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Pre-macro is 0.2500, Rec_macro is 0.5000
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		For deep, C_M is 
+[[1817    0]
+ [1817    0]]
+Mon, 21 Jul 2025 13:43:27 main.py INFO In dataset test: Loss is [2.0940 0.6905 0.7094 0.6941]
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Acc is 0.5855, F1-micro is 0.5855
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		F1-macro is 0.4035, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Pre-macro is 0.4622, Rec_macro is 0.4924
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		For sarcasm, C_M is 
+[[446  27]
+ [298  13]]
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Acc is 0.2360, F1-micro is 0.2360
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		F1-macro is 0.1909, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Pre-macro is 0.1180, Rec_macro is 0.5000
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [599   0]]
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Acc is 0.4541, F1-micro is 0.4541
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		F1-macro is 0.3123, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		Pre-macro is 0.2270, Rec_macro is 0.5000
+Mon, 21 Jul 2025 13:43:27 main.py INFO 		For deep, C_M is 
+[[356   0]
+ [428   0]]
+Mon, 21 Jul 2025 13:43:27 main.py INFO testacc: 0.5855
+Mon, 21 Jul 2025 13:43:34 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:43:34 main.py INFO Time of iter training 6.96 s
+Mon, 21 Jul 2025 13:43:34 main.py INFO On iter step 1.0:, global step 64 Loss-step [2.8238 1.8950 1.1264 1.3229]
+Mon, 21 Jul 2025 13:43:36 main.py INFO In dataset train: Loss is [0.8204 0.6053 0.0005 0.2146]
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Acc is 0.6767, F1-micro is 0.6767
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		F1-macro is 0.6693, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Pre-macro is 0.6950, Rec_macro is 0.6772
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		For sarcasm, C_M is 
+[[ 958  865]
+ [ 310 1501]]
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:43:36 main.py INFO In dataset test: Loss is [0.7885 0.6065 0.0005 0.1816]
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Acc is 0.6518, F1-micro is 0.6518
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		F1-macro is 0.6517, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Pre-macro is 0.6853, Rec_macro is 0.6833
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		For sarcasm, C_M is 
+[[251 222]
+ [ 51 260]]
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:43:36 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:43:36 main.py INFO testacc: 0.6518
+Mon, 21 Jul 2025 13:43:43 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:43:43 main.py INFO Time of iter training 6.61 s
+Mon, 21 Jul 2025 13:43:43 main.py INFO On iter step 2.0:, global step 128 Loss-step [2.2201 1.7902 1.0002 1.2399]
+Mon, 21 Jul 2025 13:43:44 main.py INFO In dataset train: Loss is [0.7953 0.5821 0.0001 0.2131]
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		Acc is 0.7975, F1-micro is 0.7975
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		F1-macro is 0.7932, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		Pre-macro is 0.8233, Rec_macro is 0.7970
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		For sarcasm, C_M is 
+[[1711  112]
+ [ 624 1187]]
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:43:44 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:43:45 main.py INFO In dataset test: Loss is [0.7521 0.5631 0.0001 0.1889]
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		Acc is 0.8087, F1-micro is 0.8087
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		F1-macro is 0.7926, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		Pre-macro is 0.8105, Rec_macro is 0.7847
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		For sarcasm, C_M is 
+[[426  47]
+ [103 208]]
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:43:45 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:43:45 main.py INFO testacc: 0.8087
+Mon, 21 Jul 2025 13:43:53 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:43:53 main.py INFO Time of iter training 8.27 s
+Mon, 21 Jul 2025 13:43:53 main.py INFO On iter step 3.0:, global step 192 Loss-step [2.1078 1.7079 1.0002 1.2339]
+Mon, 21 Jul 2025 13:43:55 main.py INFO In dataset train: Loss is [0.6855 0.4723 0.0001 0.2132]
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Acc is 0.8431, F1-micro is 0.8431
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		F1-macro is 0.8428, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Pre-macro is 0.8468, Rec_macro is 0.8433
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		For sarcasm, C_M is 
+[[1444  379]
+ [ 191 1620]]
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:43:55 main.py INFO In dataset test: Loss is [0.7346 0.5515 0.0001 0.1830]
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Acc is 0.7959, F1-micro is 0.7959
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		F1-macro is 0.7945, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Pre-macro is 0.8010, Rec_macro is 0.8138
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		For sarcasm, C_M is 
+[[344 129]
+ [ 31 280]]
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:43:55 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:43:55 main.py INFO testacc: 0.8087
+Mon, 21 Jul 2025 13:44:02 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:44:02 main.py INFO Time of iter training 7.22 s
+Mon, 21 Jul 2025 13:44:02 main.py INFO On iter step 4.0:, global step 256 Loss-step [2.0044 1.6140 1.0003 1.2416]
+Mon, 21 Jul 2025 13:44:04 main.py INFO In dataset train: Loss is [0.5935 0.3808 0.0002 0.2125]
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Acc is 0.8737, F1-micro is 0.8737
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		F1-macro is 0.8737, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Pre-macro is 0.8738, Rec_macro is 0.8737
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		For sarcasm, C_M is 
+[[1577  246]
+ [ 213 1598]]
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:44:04 main.py INFO In dataset test: Loss is [0.6962 0.5098 0.0002 0.1862]
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Acc is 0.8163, F1-micro is 0.8163
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		F1-macro is 0.8136, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Pre-macro is 0.8132, Rec_macro is 0.8269
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		For sarcasm, C_M is 
+[[367 106]
+ [ 38 273]]
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:44:04 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:44:04 main.py INFO testacc: 0.8163
+Mon, 21 Jul 2025 13:44:10 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:44:10 main.py INFO Time of iter training 6.37 s
+Mon, 21 Jul 2025 13:44:10 main.py INFO On iter step 5.0:, global step 320 Loss-step [1.9032 1.5326 1.0002 1.2416]
+Mon, 21 Jul 2025 13:44:12 main.py INFO In dataset train: Loss is [0.5391 0.3264 0.0002 0.2125]
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Acc is 0.8941, F1-micro is 0.8941
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		F1-macro is 0.8941, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Pre-macro is 0.8941, Rec_macro is 0.8940
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		For sarcasm, C_M is 
+[[1635  188]
+ [ 197 1614]]
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:44:12 main.py INFO In dataset test: Loss is [0.8728 0.6862 0.0003 0.1863]
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Acc is 0.8278, F1-micro is 0.8278
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		F1-macro is 0.8230, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Pre-macro is 0.8200, Rec_macro is 0.8292
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		For sarcasm, C_M is 
+[[389  84]
+ [ 51 260]]
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:44:12 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:44:12 main.py INFO testacc: 0.8278
+Mon, 21 Jul 2025 13:44:18 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:44:18 main.py INFO Time of iter training 6.12 s
+Mon, 21 Jul 2025 13:44:18 main.py INFO On iter step 6.0:, global step 384 Loss-step [1.7726 1.4321 1.0002 1.2375]
+Mon, 21 Jul 2025 13:44:19 main.py INFO In dataset train: Loss is [0.5088 0.2955 0.0001 0.2133]
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		Acc is 0.9078, F1-micro is 0.9078
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		F1-macro is 0.9076, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		Pre-macro is 0.9116, Rec_macro is 0.9077
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		For sarcasm, C_M is 
+[[1741   82]
+ [ 253 1558]]
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:44:19 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:44:20 main.py INFO In dataset test: Loss is [0.7955 0.6132 0.0001 0.1823]
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		Acc is 0.8316, F1-micro is 0.8316
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		F1-macro is 0.8256, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		Pre-macro is 0.8234, Rec_macro is 0.8285
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		For sarcasm, C_M is 
+[[399  74]
+ [ 58 253]]
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:44:20 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:44:20 main.py INFO testacc: 0.8316
+Mon, 21 Jul 2025 13:44:26 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:44:26 main.py INFO Time of iter training 6.26 s
+Mon, 21 Jul 2025 13:44:26 main.py INFO On iter step 7.0:, global step 448 Loss-step [1.7158 1.3858 1.0002 1.2379]
+Mon, 21 Jul 2025 13:44:27 main.py INFO In dataset train: Loss is [0.4636 0.2496 0.0003 0.2136]
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		Acc is 0.9282, F1-micro is 0.9282
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		F1-macro is 0.9281, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		Pre-macro is 0.9297, Rec_macro is 0.9283
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		For sarcasm, C_M is 
+[[1638  185]
+ [  76 1735]]
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:44:27 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:44:28 main.py INFO In dataset test: Loss is [0.7525 0.5617 0.0003 0.1905]
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		Acc is 0.8227, F1-micro is 0.8227
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		F1-macro is 0.8212, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		Pre-macro is 0.8249, Rec_macro is 0.8393
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		For sarcasm, C_M is 
+[[359 114]
+ [ 25 286]]
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:44:28 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:44:28 main.py INFO testacc: 0.8316
+Mon, 21 Jul 2025 13:44:34 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:44:34 main.py INFO Time of iter training 6.48 s
+Mon, 21 Jul 2025 13:44:34 main.py INFO On iter step 8.0:, global step 512 Loss-step [1.6577 1.3364 1.0002 1.2402]
+Mon, 21 Jul 2025 13:44:36 main.py INFO In dataset train: Loss is [0.4045 0.1918 0.0002 0.2126]
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Acc is 0.9307, F1-micro is 0.9307
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		F1-macro is 0.9305, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Pre-macro is 0.9348, Rec_macro is 0.9308
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		For sarcasm, C_M is 
+[[1607  216]
+ [  36 1775]]
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:44:36 main.py INFO In dataset test: Loss is [0.9883 0.8011 0.0002 0.1870]
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Acc is 0.8227, F1-micro is 0.8227
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		F1-macro is 0.8218, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Pre-macro is 0.8310, Rec_macro is 0.8443
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		For sarcasm, C_M is 
+[[350 123]
+ [ 16 295]]
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:44:36 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:44:36 main.py INFO testacc: 0.8316
+Mon, 21 Jul 2025 13:44:42 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:44:42 main.py INFO Time of iter training 6.45 s
+Mon, 21 Jul 2025 13:44:42 main.py INFO On iter step 9.0:, global step 576 Loss-step [1.5800 1.2755 1.0001 1.2386]
+Mon, 21 Jul 2025 13:44:44 main.py INFO In dataset train: Loss is [0.3268 0.1142 0.0001 0.2125]
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Acc is 0.9623, F1-micro is 0.9623
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		F1-macro is 0.9623, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Pre-macro is 0.9628, Rec_macro is 0.9624
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		For sarcasm, C_M is 
+[[1723  100]
+ [  37 1774]]
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:44:44 main.py INFO In dataset test: Loss is [1.0513 0.8646 0.0001 0.1865]
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Acc is 0.8265, F1-micro is 0.8265
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		F1-macro is 0.8243, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Pre-macro is 0.8248, Rec_macro is 0.8392
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		For sarcasm, C_M is 
+[[368 105]
+ [ 31 280]]
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:44:44 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:44:44 main.py INFO testacc: 0.8316
+Mon, 21 Jul 2025 13:44:50 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:44:50 main.py INFO Time of iter training 6.35 s
+Mon, 21 Jul 2025 13:44:50 main.py INFO On iter step 10.0:, global step 640 Loss-step [1.5155 1.2248 1.0001 1.2372]
+Mon, 21 Jul 2025 13:44:52 main.py INFO In dataset train: Loss is [0.3021 0.0894 0.0001 0.2126]
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Acc is 0.9700, F1-micro is 0.9700
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		F1-macro is 0.9700, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Pre-macro is 0.9701, Rec_macro is 0.9700
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		For sarcasm, C_M is 
+[[1753   70]
+ [  39 1772]]
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:44:52 main.py INFO In dataset test: Loss is [0.9620 0.7745 0.0001 0.1875]
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Acc is 0.8329, F1-micro is 0.8329
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		F1-macro is 0.8303, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Pre-macro is 0.8292, Rec_macro is 0.8434
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		For sarcasm, C_M is 
+[[375  98]
+ [ 33 278]]
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:44:52 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:44:52 main.py INFO testacc: 0.8329
+Mon, 21 Jul 2025 13:44:58 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:44:58 main.py INFO Time of iter training 6.24 s
+Mon, 21 Jul 2025 13:44:58 main.py INFO On iter step 11.0:, global step 704 Loss-step [1.5034 1.2232 1.0001 1.2290]
+Mon, 21 Jul 2025 13:44:59 main.py INFO In dataset train: Loss is [0.3310 0.1182 0.0001 0.2127]
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		Acc is 0.9689, F1-micro is 0.9689
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		F1-macro is 0.9689, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		Pre-macro is 0.9696, Rec_macro is 0.9690
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		For sarcasm, C_M is 
+[[1729   94]
+ [  19 1792]]
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:44:59 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:45:00 main.py INFO In dataset test: Loss is [1.0870 0.8991 0.0001 0.1878]
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		Acc is 0.8036, F1-micro is 0.8036
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		F1-macro is 0.8020, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		Pre-macro is 0.8067, Rec_macro is 0.8201
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		For sarcasm, C_M is 
+[[350 123]
+ [ 31 280]]
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:45:00 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:45:00 main.py INFO testacc: 0.8329
+Mon, 21 Jul 2025 13:45:06 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:45:06 main.py INFO Time of iter training 6.40 s
+Mon, 21 Jul 2025 13:45:06 main.py INFO On iter step 12.0:, global step 768 Loss-step [1.4316 1.1551 1.0002 1.2392]
+Mon, 21 Jul 2025 13:45:08 main.py INFO In dataset train: Loss is [0.2801 0.0677 0.0001 0.2123]
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Acc is 0.9802, F1-micro is 0.9802
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		F1-macro is 0.9802, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Pre-macro is 0.9805, Rec_macro is 0.9802
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		For sarcasm, C_M is 
+[[1807   16]
+ [  56 1755]]
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:45:08 main.py INFO In dataset test: Loss is [1.0572 0.8720 0.0001 0.1851]
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Acc is 0.8406, F1-micro is 0.8406
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		F1-macro is 0.8352, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Pre-macro is 0.8325, Rec_macro is 0.8392
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		For sarcasm, C_M is 
+[[400  73]
+ [ 52 259]]
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:45:08 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:45:08 main.py INFO testacc: 0.8406
+Mon, 21 Jul 2025 13:45:15 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:45:15 main.py INFO Time of iter training 7.00 s
+Mon, 21 Jul 2025 13:45:15 main.py INFO On iter step 13.0:, global step 832 Loss-step [1.4117 1.1478 1.0001 1.2298]
+Mon, 21 Jul 2025 13:45:16 main.py INFO In dataset train: Loss is [0.2541 0.0404 0.0001 0.2136]
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		Acc is 0.9882, F1-micro is 0.9882
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		F1-macro is 0.9882, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		Pre-macro is 0.9882, Rec_macro is 0.9882
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		For sarcasm, C_M is 
+[[1803   20]
+ [  23 1788]]
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:45:16 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:45:17 main.py INFO In dataset test: Loss is [1.1798 0.9977 0.0001 0.1820]
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		Acc is 0.8291, F1-micro is 0.8291
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		F1-macro is 0.8253, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		Pre-macro is 0.8224, Rec_macro is 0.8341
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		For sarcasm, C_M is 
+[[383  90]
+ [ 44 267]]
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:45:17 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:45:17 main.py INFO testacc: 0.8406
+Mon, 21 Jul 2025 13:45:23 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:45:23 main.py INFO Time of iter training 6.49 s
+Mon, 21 Jul 2025 13:45:23 main.py INFO On iter step 14.0:, global step 896 Loss-step [1.3888 1.1148 1.0001 1.2456]
+Mon, 21 Jul 2025 13:45:24 main.py INFO In dataset train: Loss is [0.2453 0.0329 0.0000 0.2123]
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Acc is 0.9909, F1-micro is 0.9909
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		F1-macro is 0.9909, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Pre-macro is 0.9909, Rec_macro is 0.9909
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		For sarcasm, C_M is 
+[[1807   16]
+ [  17 1794]]
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:45:24 main.py INFO In dataset test: Loss is [1.2451 1.0599 0.0000 0.1851]
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Acc is 0.8291, F1-micro is 0.8291
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		F1-macro is 0.8264, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Pre-macro is 0.8252, Rec_macro is 0.8391
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		For sarcasm, C_M is 
+[[374  99]
+ [ 35 276]]
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:45:24 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:45:24 main.py INFO testacc: 0.8406
+Mon, 21 Jul 2025 13:45:32 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:45:32 main.py INFO Time of iter training 7.50 s
+Mon, 21 Jul 2025 13:45:32 main.py INFO On iter step 15.0:, global step 960 Loss-step [1.3673 1.0984 1.0000 1.2448]
+Mon, 21 Jul 2025 13:45:34 main.py INFO In dataset train: Loss is [0.2397 0.0273 0.0001 0.2123]
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Acc is 0.9956, F1-micro is 0.9956
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		F1-macro is 0.9956, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Pre-macro is 0.9956, Rec_macro is 0.9956
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		For sarcasm, C_M is 
+[[1817    6]
+ [  10 1801]]
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:45:34 main.py INFO In dataset test: Loss is [1.2670 1.0822 0.0001 0.1846]
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Acc is 0.8253, F1-micro is 0.8253
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		F1-macro is 0.8201, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Pre-macro is 0.8171, Rec_macro is 0.8254
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		For sarcasm, C_M is 
+[[390  83]
+ [ 54 257]]
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:45:34 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:45:34 main.py INFO testacc: 0.8406
+Mon, 21 Jul 2025 13:45:41 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:45:41 main.py INFO Time of iter training 7.16 s
+Mon, 21 Jul 2025 13:45:41 main.py INFO On iter step 16.0:, global step 1024 Loss-step [1.3475 1.0954 1.0000 1.2301]
+Mon, 21 Jul 2025 13:45:43 main.py INFO In dataset train: Loss is [0.2480 0.0354 0.0000 0.2126]
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Acc is 0.9923, F1-micro is 0.9923
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		F1-macro is 0.9923, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Pre-macro is 0.9923, Rec_macro is 0.9923
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		For sarcasm, C_M is 
+[[1806   17]
+ [  11 1800]]
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:45:43 main.py INFO In dataset test: Loss is [1.1908 1.0033 0.0000 0.1874]
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Acc is 0.8291, F1-micro is 0.8291
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		F1-macro is 0.8254, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Pre-macro is 0.8227, Rec_macro is 0.8347
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		For sarcasm, C_M is 
+[[382  91]
+ [ 43 268]]
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:45:43 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:45:43 main.py INFO testacc: 0.8406
+Mon, 21 Jul 2025 13:45:49 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:45:49 main.py INFO Time of iter training 6.30 s
+Mon, 21 Jul 2025 13:45:49 main.py INFO On iter step 17.0:, global step 1088 Loss-step [1.3526 1.0922 1.0000 1.2383]
+Mon, 21 Jul 2025 13:45:51 main.py INFO In dataset train: Loss is [0.2273 0.0148 0.0000 0.2124]
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Acc is 0.9981, F1-micro is 0.9981
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		F1-macro is 0.9981, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Pre-macro is 0.9981, Rec_macro is 0.9981
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		For sarcasm, C_M is 
+[[1820    3]
+ [   4 1807]]
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:45:51 main.py INFO In dataset test: Loss is [1.2991 1.1129 0.0000 0.1862]
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Acc is 0.8482, F1-micro is 0.8482
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		F1-macro is 0.8427, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Pre-macro is 0.8405, Rec_macro is 0.8456
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		For sarcasm, C_M is 
+[[406  67]
+ [ 52 259]]
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:45:51 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:45:51 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:45:57 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:45:57 main.py INFO Time of iter training 5.97 s
+Mon, 21 Jul 2025 13:45:57 main.py INFO On iter step 18.0:, global step 1152 Loss-step [1.3231 1.0690 1.0000 1.2377]
+Mon, 21 Jul 2025 13:45:58 main.py INFO In dataset train: Loss is [0.2305 0.0182 0.0000 0.2123]
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		Acc is 0.9959, F1-micro is 0.9959
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		F1-macro is 0.9959, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		Pre-macro is 0.9959, Rec_macro is 0.9959
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		For sarcasm, C_M is 
+[[1812   11]
+ [   4 1807]]
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:45:58 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:45:59 main.py INFO In dataset test: Loss is [1.4883 1.3038 0.0000 0.1845]
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		Acc is 0.8125, F1-micro is 0.8125
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		F1-macro is 0.8076, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		Pre-macro is 0.8047, Rec_macro is 0.8143
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		For sarcasm, C_M is 
+[[381  92]
+ [ 55 256]]
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:45:59 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:45:59 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:46:05 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:46:05 main.py INFO Time of iter training 6.41 s
+Mon, 21 Jul 2025 13:46:05 main.py INFO On iter step 19.0:, global step 1216 Loss-step [1.3152 1.0664 1.0000 1.2333]
+Mon, 21 Jul 2025 13:46:06 main.py INFO In dataset train: Loss is [0.2218 0.0095 0.0000 0.2123]
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		Acc is 0.9989, F1-micro is 0.9989
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		F1-macro is 0.9989, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		Pre-macro is 0.9989, Rec_macro is 0.9989
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		For sarcasm, C_M is 
+[[1822    1]
+ [   3 1808]]
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:46:06 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:46:07 main.py INFO In dataset test: Loss is [1.5056 1.3210 0.0000 0.1846]
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		Acc is 0.8418, F1-micro is 0.8418
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		F1-macro is 0.8360, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		Pre-macro is 0.8339, Rec_macro is 0.8386
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		For sarcasm, C_M is 
+[[404  69]
+ [ 55 256]]
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:46:07 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:46:07 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:46:13 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:46:13 main.py INFO Time of iter training 6.36 s
+Mon, 21 Jul 2025 13:46:13 main.py INFO On iter step 20.0:, global step 1280 Loss-step [1.3070 1.0590 1.0001 1.2341]
+Mon, 21 Jul 2025 13:46:14 main.py INFO In dataset train: Loss is [0.2232 0.0107 0.0001 0.2124]
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		Acc is 0.9989, F1-micro is 0.9989
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		F1-macro is 0.9989, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		Pre-macro is 0.9989, Rec_macro is 0.9989
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		For sarcasm, C_M is 
+[[1821    2]
+ [   2 1809]]
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:46:14 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:46:15 main.py INFO In dataset test: Loss is [1.2171 1.0329 0.0001 0.1840]
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		Acc is 0.8367, F1-micro is 0.8367
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		F1-macro is 0.8330, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		Pre-macro is 0.8299, Rec_macro is 0.8416
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		For sarcasm, C_M is 
+[[387  86]
+ [ 42 269]]
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:46:15 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:46:15 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:46:21 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:46:21 main.py INFO Time of iter training 6.53 s
+Mon, 21 Jul 2025 13:46:21 main.py INFO On iter step 21.0:, global step 1344 Loss-step [1.2831 1.0459 1.0001 1.2266]
+Mon, 21 Jul 2025 13:46:23 main.py INFO In dataset train: Loss is [0.2187 0.0045 0.0000 0.2141]
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:46:23 main.py INFO In dataset test: Loss is [1.5003 1.3186 0.0000 0.1817]
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Acc is 0.8393, F1-micro is 0.8393
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		F1-macro is 0.8341, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Pre-macro is 0.8313, Rec_macro is 0.8387
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		For sarcasm, C_M is 
+[[398  75]
+ [ 51 260]]
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:46:23 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:46:23 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:46:29 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:46:29 main.py INFO Time of iter training 6.34 s
+Mon, 21 Jul 2025 13:46:29 main.py INFO On iter step 22.0:, global step 1408 Loss-step [1.2691 1.0306 1.0000 1.2314]
+Mon, 21 Jul 2025 13:46:31 main.py INFO In dataset train: Loss is [0.2159 0.0034 0.0000 0.2125]
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   1 1810]]
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:46:31 main.py INFO In dataset test: Loss is [1.7996 1.6128 0.0000 0.1868]
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Acc is 0.8304, F1-micro is 0.8304
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		F1-macro is 0.8250, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Pre-macro is 0.8222, Rec_macro is 0.8297
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		For sarcasm, C_M is 
+[[394  79]
+ [ 54 257]]
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:46:31 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:46:31 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:46:37 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:46:37 main.py INFO Time of iter training 6.29 s
+Mon, 21 Jul 2025 13:46:37 main.py INFO On iter step 23.0:, global step 1472 Loss-step [1.2981 1.0437 1.0000 1.2438]
+Mon, 21 Jul 2025 13:46:39 main.py INFO In dataset train: Loss is [0.2155 0.0025 0.0000 0.2129]
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   1 1810]]
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:46:39 main.py INFO In dataset test: Loss is [1.6849 1.4964 0.0000 0.1885]
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Acc is 0.8444, F1-micro is 0.8444
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		F1-macro is 0.8394, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Pre-macro is 0.8365, Rec_macro is 0.8441
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		For sarcasm, C_M is 
+[[400  73]
+ [ 49 262]]
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:46:39 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:46:39 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:46:45 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:46:45 main.py INFO Time of iter training 6.19 s
+Mon, 21 Jul 2025 13:46:45 main.py INFO On iter step 24.0:, global step 1536 Loss-step [1.2961 1.0498 1.0000 1.2346]
+Mon, 21 Jul 2025 13:46:46 main.py INFO In dataset train: Loss is [0.2180 0.0057 0.0000 0.2123]
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		Acc is 0.9994, F1-micro is 0.9994
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		F1-macro is 0.9994, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		Pre-macro is 0.9994, Rec_macro is 0.9994
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		For sarcasm, C_M is 
+[[1822    1]
+ [   1 1810]]
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:46:46 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:46:47 main.py INFO In dataset test: Loss is [1.4064 1.2208 0.0000 0.1856]
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		Acc is 0.8112, F1-micro is 0.8112
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		F1-macro is 0.8087, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		Pre-macro is 0.8090, Rec_macro is 0.8226
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		For sarcasm, C_M is 
+[[363 110]
+ [ 38 273]]
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:46:47 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:46:47 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:46:53 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:46:53 main.py INFO Time of iter training 6.33 s
+Mon, 21 Jul 2025 13:46:53 main.py INFO On iter step 25.0:, global step 1600 Loss-step [1.2937 1.0395 1.0000 1.2445]
+Mon, 21 Jul 2025 13:46:54 main.py INFO In dataset train: Loss is [0.2169 0.0046 0.0000 0.2123]
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   1 1810]]
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:46:54 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:46:55 main.py INFO In dataset test: Loss is [1.5755 1.3900 0.0000 0.1854]
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		Acc is 0.8329, F1-micro is 0.8329
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		F1-macro is 0.8307, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		Pre-macro is 0.8309, Rec_macro is 0.8456
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		For sarcasm, C_M is 
+[[371 102]
+ [ 29 282]]
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:46:55 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:46:55 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:47:01 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:47:01 main.py INFO Time of iter training 6.49 s
+Mon, 21 Jul 2025 13:47:01 main.py INFO On iter step 26.0:, global step 1664 Loss-step [1.2644 1.0258 1.0000 1.2326]
+Mon, 21 Jul 2025 13:47:03 main.py INFO In dataset train: Loss is [0.2147 0.0019 0.0000 0.2128]
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   1 1810]]
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:47:03 main.py INFO In dataset test: Loss is [1.5847 1.4018 0.0000 0.1829]
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Acc is 0.8265, F1-micro is 0.8265
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		F1-macro is 0.8235, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Pre-macro is 0.8219, Rec_macro is 0.8353
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		For sarcasm, C_M is 
+[[375  98]
+ [ 38 273]]
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:47:03 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:47:03 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:47:11 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:47:11 main.py INFO Time of iter training 8.31 s
+Mon, 21 Jul 2025 13:47:11 main.py INFO On iter step 27.0:, global step 1728 Loss-step [1.2765 1.0278 1.0000 1.2420]
+Mon, 21 Jul 2025 13:47:13 main.py INFO In dataset train: Loss is [0.2151 0.0028 0.0000 0.2123]
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		Acc is 0.9994, F1-micro is 0.9994
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		F1-macro is 0.9994, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		Pre-macro is 0.9995, Rec_macro is 0.9994
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   2 1809]]
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:47:13 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:47:14 main.py INFO In dataset test: Loss is [1.5169 1.3310 0.0000 0.1858]
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		Acc is 0.8291, F1-micro is 0.8291
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		F1-macro is 0.8228, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		Pre-macro is 0.8208, Rec_macro is 0.8253
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		For sarcasm, C_M is 
+[[399  74]
+ [ 60 251]]
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:47:14 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:47:14 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:47:20 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:47:20 main.py INFO Time of iter training 6.76 s
+Mon, 21 Jul 2025 13:47:20 main.py INFO On iter step 28.0:, global step 1792 Loss-step [1.2800 1.0284 1.0000 1.2446]
+Mon, 21 Jul 2025 13:47:22 main.py INFO In dataset train: Loss is [0.2139 0.0015 0.0000 0.2123]
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:47:22 main.py INFO In dataset test: Loss is [1.7086 1.5242 0.0000 0.1843]
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Acc is 0.8393, F1-micro is 0.8393
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		F1-macro is 0.8343, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Pre-macro is 0.8313, Rec_macro is 0.8393
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		For sarcasm, C_M is 
+[[397  76]
+ [ 50 261]]
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:47:22 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:47:22 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:47:28 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:47:28 main.py INFO Time of iter training 6.15 s
+Mon, 21 Jul 2025 13:47:28 main.py INFO On iter step 29.0:, global step 1856 Loss-step [1.2614 1.0214 1.0000 1.2350]
+Mon, 21 Jul 2025 13:47:29 main.py INFO In dataset train: Loss is [0.2152 0.0029 0.0000 0.2123]
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:47:29 main.py INFO In dataset test: Loss is [1.6117 1.4263 0.0000 0.1853]
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Acc is 0.8138, F1-micro is 0.8138
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		F1-macro is 0.8118, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Pre-macro is 0.8140, Rec_macro is 0.8280
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		For sarcasm, C_M is 
+[[359 114]
+ [ 32 279]]
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:47:29 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:47:29 main.py INFO testacc: 0.8482
+Mon, 21 Jul 2025 13:47:36 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:47:36 main.py INFO Time of iter training 6.23 s
+Mon, 21 Jul 2025 13:47:36 main.py INFO On iter step 30.0:, global step 1920 Loss-step [1.2710 1.0297 1.0000 1.2343]
+Mon, 21 Jul 2025 13:47:37 main.py INFO In dataset train: Loss is [0.2151 0.0025 0.0000 0.2127]
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:47:37 main.py INFO In dataset test: Loss is [1.3807 1.1976 0.0000 0.1831]
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Acc is 0.8495, F1-micro is 0.8495
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		F1-macro is 0.8461, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Pre-macro is 0.8430, Rec_macro is 0.8554
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		For sarcasm, C_M is 
+[[391  82]
+ [ 36 275]]
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:47:37 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:47:37 main.py INFO testacc: 0.8495
+Mon, 21 Jul 2025 13:47:43 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:47:43 main.py INFO Time of iter training 6.32 s
+Mon, 21 Jul 2025 13:47:43 main.py INFO On iter step 31.0:, global step 1984 Loss-step [1.2668 1.0245 1.0000 1.2365]
+Mon, 21 Jul 2025 13:47:45 main.py INFO In dataset train: Loss is [0.2148 0.0019 0.0000 0.2129]
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:47:45 main.py INFO In dataset test: Loss is [1.8056 1.6230 0.0000 0.1826]
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Acc is 0.8508, F1-micro is 0.8508
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		F1-macro is 0.8475, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Pre-macro is 0.8444, Rec_macro is 0.8570
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		For sarcasm, C_M is 
+[[391  82]
+ [ 35 276]]
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:47:45 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:47:45 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:47:51 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:47:51 main.py INFO Time of iter training 6.30 s
+Mon, 21 Jul 2025 13:47:51 main.py INFO On iter step 32.0:, global step 2048 Loss-step [1.2538 1.0232 1.0000 1.2253]
+Mon, 21 Jul 2025 13:47:53 main.py INFO In dataset train: Loss is [0.2141 0.0014 0.0000 0.2127]
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:47:53 main.py INFO In dataset test: Loss is [1.9977 1.8146 0.0000 0.1831]
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Acc is 0.8163, F1-micro is 0.8163
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		F1-macro is 0.8135, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Pre-macro is 0.8128, Rec_macro is 0.8263
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		For sarcasm, C_M is 
+[[368 105]
+ [ 39 272]]
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:47:53 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:47:53 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:47:59 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:47:59 main.py INFO Time of iter training 6.36 s
+Mon, 21 Jul 2025 13:47:59 main.py INFO On iter step 33.0:, global step 2112 Loss-step [1.2630 1.0252 1.0000 1.2320]
+Mon, 21 Jul 2025 13:48:01 main.py INFO In dataset train: Loss is [0.2141 0.0018 0.0000 0.2123]
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		For sarcasm, C_M is 
+[[1822    1]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:48:01 main.py INFO In dataset test: Loss is [1.9470 1.7617 0.0000 0.1853]
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Acc is 0.8189, F1-micro is 0.8189
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		F1-macro is 0.8158, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Pre-macro is 0.8142, Rec_macro is 0.8273
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		For sarcasm, C_M is 
+[[372 101]
+ [ 41 270]]
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:48:01 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:48:01 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:48:08 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:48:08 main.py INFO Time of iter training 6.48 s
+Mon, 21 Jul 2025 13:48:08 main.py INFO On iter step 34.0:, global step 2176 Loss-step [1.2753 1.0294 1.0001 1.2389]
+Mon, 21 Jul 2025 13:48:09 main.py INFO In dataset train: Loss is [0.2151 0.0028 0.0000 0.2123]
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:48:09 main.py INFO In dataset test: Loss is [1.6118 1.4266 0.0000 0.1851]
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Acc is 0.8176, F1-micro is 0.8176
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		F1-macro is 0.8158, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Pre-macro is 0.8187, Rec_macro is 0.8329
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		For sarcasm, C_M is 
+[[359 114]
+ [ 29 282]]
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:48:09 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:48:09 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:48:16 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:48:16 main.py INFO Time of iter training 6.45 s
+Mon, 21 Jul 2025 13:48:16 main.py INFO On iter step 35.0:, global step 2240 Loss-step [1.2721 1.0262 1.0000 1.2396]
+Mon, 21 Jul 2025 13:48:17 main.py INFO In dataset train: Loss is [0.2141 0.0016 0.0000 0.2124]
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:48:17 main.py INFO In dataset test: Loss is [1.6835 1.4997 0.0000 0.1837]
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Acc is 0.8176, F1-micro is 0.8176
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		F1-macro is 0.8146, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Pre-macro is 0.8135, Rec_macro is 0.8268
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		For sarcasm, C_M is 
+[[370 103]
+ [ 40 271]]
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:48:17 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:48:17 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:48:24 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:48:24 main.py INFO Time of iter training 6.42 s
+Mon, 21 Jul 2025 13:48:24 main.py INFO On iter step 36.0:, global step 2304 Loss-step [1.2625 1.0235 1.0000 1.2335]
+Mon, 21 Jul 2025 13:48:25 main.py INFO In dataset train: Loss is [0.2134 0.0010 0.0000 0.2123]
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   1 1810]]
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:48:25 main.py INFO In dataset test: Loss is [1.6897 1.5039 0.0000 0.1859]
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Acc is 0.8457, F1-micro is 0.8457
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		F1-macro is 0.8412, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Pre-macro is 0.8380, Rec_macro is 0.8473
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		For sarcasm, C_M is 
+[[397  76]
+ [ 45 266]]
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:48:25 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:48:25 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:48:32 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:48:32 main.py INFO Time of iter training 6.48 s
+Mon, 21 Jul 2025 13:48:32 main.py INFO On iter step 37.0:, global step 2368 Loss-step [1.2625 1.0182 1.0000 1.2398]
+Mon, 21 Jul 2025 13:48:33 main.py INFO In dataset train: Loss is [0.2141 0.0010 0.0000 0.2131]
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:48:33 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:48:34 main.py INFO In dataset test: Loss is [1.7682 1.5792 0.0000 0.1890]
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		Acc is 0.8304, F1-micro is 0.8304
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		F1-macro is 0.8286, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		Pre-macro is 0.8309, Rec_macro is 0.8456
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		For sarcasm, C_M is 
+[[365 108]
+ [ 25 286]]
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:48:34 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:48:34 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:48:40 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:48:40 main.py INFO Time of iter training 6.43 s
+Mon, 21 Jul 2025 13:48:40 main.py INFO On iter step 38.0:, global step 2432 Loss-step [1.2521 1.0099 1.0000 1.2399]
+Mon, 21 Jul 2025 13:48:42 main.py INFO In dataset train: Loss is [0.2139 0.0016 0.0000 0.2123]
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		For sarcasm, C_M is 
+[[1822    1]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:48:42 main.py INFO In dataset test: Loss is [2.3018 2.1175 0.0000 0.1843]
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Acc is 0.8125, F1-micro is 0.8125
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		F1-macro is 0.8101, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Pre-macro is 0.8105, Rec_macro is 0.8242
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		For sarcasm, C_M is 
+[[363 110]
+ [ 37 274]]
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:48:42 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:48:42 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:48:50 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:48:50 main.py INFO Time of iter training 8.06 s
+Mon, 21 Jul 2025 13:48:50 main.py INFO On iter step 39.0:, global step 2496 Loss-step [1.2653 1.0232 1.0000 1.2365]
+Mon, 21 Jul 2025 13:48:52 main.py INFO In dataset train: Loss is [0.2137 0.0013 0.0001 0.2123]
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:48:52 main.py INFO In dataset test: Loss is [1.6741 1.4886 0.0001 0.1853]
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Acc is 0.8189, F1-micro is 0.8189
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		F1-macro is 0.8141, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Pre-macro is 0.8111, Rec_macro is 0.8207
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		For sarcasm, C_M is 
+[[384  89]
+ [ 53 258]]
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:48:52 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:48:52 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:48:59 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:48:59 main.py INFO Time of iter training 6.95 s
+Mon, 21 Jul 2025 13:48:59 main.py INFO On iter step 40.0:, global step 2560 Loss-step [1.2734 1.0247 1.0000 1.2427]
+Mon, 21 Jul 2025 13:49:00 main.py INFO In dataset train: Loss is [0.2146 0.0023 0.0000 0.2123]
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   1 1810]]
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:49:00 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:49:01 main.py INFO In dataset test: Loss is [1.4866 1.3021 0.0000 0.1844]
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		Acc is 0.8202, F1-micro is 0.8202
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		F1-macro is 0.8153, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		Pre-macro is 0.8123, Rec_macro is 0.8218
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		For sarcasm, C_M is 
+[[385  88]
+ [ 53 258]]
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:49:01 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:49:01 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:49:07 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:49:07 main.py INFO Time of iter training 6.18 s
+Mon, 21 Jul 2025 13:49:07 main.py INFO On iter step 41.0:, global step 2624 Loss-step [1.2539 1.0127 1.0000 1.2381]
+Mon, 21 Jul 2025 13:49:08 main.py INFO In dataset train: Loss is [0.2135 0.0012 0.0000 0.2123]
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		For sarcasm, C_M is 
+[[1822    1]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:49:08 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:49:09 main.py INFO In dataset test: Loss is [1.8348 1.6506 0.0000 0.1842]
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		Acc is 0.8176, F1-micro is 0.8176
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		F1-macro is 0.8141, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		Pre-macro is 0.8121, Rec_macro is 0.8246
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		For sarcasm, C_M is 
+[[374  99]
+ [ 44 267]]
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:49:09 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:49:09 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:49:15 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:49:15 main.py INFO Time of iter training 6.30 s
+Mon, 21 Jul 2025 13:49:15 main.py INFO On iter step 42.0:, global step 2688 Loss-step [1.2500 1.0119 1.0000 1.2353]
+Mon, 21 Jul 2025 13:49:16 main.py INFO In dataset train: Loss is [0.2133 0.0008 0.0000 0.2125]
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:49:16 main.py INFO In dataset test: Loss is [1.7985 1.6116 0.0000 0.1869]
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Acc is 0.8253, F1-micro is 0.8253
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		F1-macro is 0.8207, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Pre-macro is 0.8177, Rec_macro is 0.8276
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		For sarcasm, C_M is 
+[[386  87]
+ [ 50 261]]
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:49:16 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:49:16 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:49:23 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:49:23 main.py INFO Time of iter training 6.40 s
+Mon, 21 Jul 2025 13:49:23 main.py INFO On iter step 43.0:, global step 2752 Loss-step [1.2497 1.0163 1.0000 1.2297]
+Mon, 21 Jul 2025 13:49:24 main.py INFO In dataset train: Loss is [0.2151 0.0015 0.0000 0.2136]
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		For sarcasm, C_M is 
+[[1822    1]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:49:24 main.py INFO In dataset test: Loss is [1.6687 1.4867 0.0000 0.1820]
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Acc is 0.8125, F1-micro is 0.8125
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		F1-macro is 0.8076, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Pre-macro is 0.8047, Rec_macro is 0.8143
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		For sarcasm, C_M is 
+[[381  92]
+ [ 55 256]]
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:49:24 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:49:24 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:49:31 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:49:31 main.py INFO Time of iter training 6.36 s
+Mon, 21 Jul 2025 13:49:31 main.py INFO On iter step 44.0:, global step 2816 Loss-step [1.2567 1.0202 1.0000 1.2319]
+Mon, 21 Jul 2025 13:49:32 main.py INFO In dataset train: Loss is [0.2133 0.0008 0.0000 0.2125]
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:49:32 main.py INFO In dataset test: Loss is [1.6177 1.4340 0.0000 0.1836]
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Acc is 0.8099, F1-micro is 0.8099
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		F1-macro is 0.8061, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Pre-macro is 0.8038, Rec_macro is 0.8155
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		For sarcasm, C_M is 
+[[373 100]
+ [ 49 262]]
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:49:32 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:49:32 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:49:39 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:49:39 main.py INFO Time of iter training 6.44 s
+Mon, 21 Jul 2025 13:49:39 main.py INFO On iter step 45.0:, global step 2880 Loss-step [1.2522 1.0129 1.0000 1.2362]
+Mon, 21 Jul 2025 13:49:40 main.py INFO In dataset train: Loss is [0.2133 0.0008 0.0000 0.2126]
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   1 1810]]
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:49:40 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:49:41 main.py INFO In dataset test: Loss is [1.8583 1.6710 0.0000 0.1873]
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		Acc is 0.8406, F1-micro is 0.8406
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		F1-macro is 0.8369, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		Pre-macro is 0.8339, Rec_macro is 0.8458
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		For sarcasm, C_M is 
+[[388  85]
+ [ 40 271]]
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:49:41 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:49:41 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:49:47 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:49:47 main.py INFO Time of iter training 6.48 s
+Mon, 21 Jul 2025 13:49:47 main.py INFO On iter step 46.0:, global step 2944 Loss-step [1.2506 1.0099 1.0000 1.2383]
+Mon, 21 Jul 2025 13:49:48 main.py INFO In dataset train: Loss is [0.2128 0.0005 0.0000 0.2123]
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:49:48 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:49:49 main.py INFO In dataset test: Loss is [1.9359 1.7502 0.0000 0.1857]
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		Acc is 0.8202, F1-micro is 0.8202
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		F1-macro is 0.8156, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		Pre-macro is 0.8127, Rec_macro is 0.8229
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		For sarcasm, C_M is 
+[[383  90]
+ [ 51 260]]
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:49:49 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:49:49 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:49:55 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:49:55 main.py INFO Time of iter training 6.42 s
+Mon, 21 Jul 2025 13:49:55 main.py INFO On iter step 47.0:, global step 3008 Loss-step [1.2613 1.0220 1.0000 1.2341]
+Mon, 21 Jul 2025 13:49:57 main.py INFO In dataset train: Loss is [0.2140 0.0016 0.0000 0.2124]
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:49:57 main.py INFO In dataset test: Loss is [1.8964 1.7099 0.0000 0.1864]
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Acc is 0.8214, F1-micro is 0.8214
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		F1-macro is 0.8133, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Pre-macro is 0.8136, Rec_macro is 0.8129
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		For sarcasm, C_M is 
+[[404  69]
+ [ 71 240]]
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:49:57 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:49:57 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:50:03 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:50:03 main.py INFO Time of iter training 6.48 s
+Mon, 21 Jul 2025 13:50:03 main.py INFO On iter step 48.0:, global step 3072 Loss-step [1.2544 1.0142 1.0000 1.2368]
+Mon, 21 Jul 2025 13:50:05 main.py INFO In dataset train: Loss is [0.2134 0.0011 0.0000 0.2123]
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:50:05 main.py INFO In dataset test: Loss is [1.9417 1.7571 0.0000 0.1846]
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Acc is 0.8087, F1-micro is 0.8087
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		F1-macro is 0.8004, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Pre-macro is 0.8000, Rec_macro is 0.8007
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		For sarcasm, C_M is 
+[[397  76]
+ [ 74 237]]
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:50:05 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:50:05 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:50:12 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:50:12 main.py INFO Time of iter training 6.66 s
+Mon, 21 Jul 2025 13:50:12 main.py INFO On iter step 49.0:, global step 3136 Loss-step [1.2539 1.0120 1.0000 1.2391]
+Mon, 21 Jul 2025 13:50:13 main.py INFO In dataset train: Loss is [0.2132 0.0002 0.0000 0.2129]
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:50:13 main.py INFO In dataset test: Loss is [1.7879 1.6052 0.0000 0.1826]
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Acc is 0.8316, F1-micro is 0.8316
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		F1-macro is 0.8267, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Pre-macro is 0.8237, Rec_macro is 0.8324
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		For sarcasm, C_M is 
+[[392  81]
+ [ 51 260]]
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:50:13 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:50:13 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:50:20 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:50:20 main.py INFO Time of iter training 7.06 s
+Mon, 21 Jul 2025 13:50:20 main.py INFO On iter step 50.0:, global step 3200 Loss-step [1.2474 1.0083 1.0000 1.2372]
+Mon, 21 Jul 2025 13:50:22 main.py INFO In dataset train: Loss is [0.2129 0.0005 0.0000 0.2124]
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:50:22 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:50:23 main.py INFO In dataset test: Loss is [2.0851 1.9013 0.0000 0.1838]
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		Acc is 0.8125, F1-micro is 0.8125
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		F1-macro is 0.8092, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		Pre-macro is 0.8077, Rec_macro is 0.8204
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		For sarcasm, C_M is 
+[[370 103]
+ [ 44 267]]
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:50:23 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:50:23 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:50:31 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:50:31 main.py INFO Time of iter training 8.13 s
+Mon, 21 Jul 2025 13:50:31 main.py INFO On iter step 51.0:, global step 3264 Loss-step [1.2553 1.0101 1.0000 1.2427]
+Mon, 21 Jul 2025 13:50:32 main.py INFO In dataset train: Loss is [0.2132 0.0003 0.0000 0.2129]
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:50:32 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:50:33 main.py INFO In dataset test: Loss is [1.7909 1.6025 0.0000 0.1884]
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		Acc is 0.8214, F1-micro is 0.8214
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		F1-macro is 0.8146, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		Pre-macro is 0.8129, Rec_macro is 0.8168
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		For sarcasm, C_M is 
+[[397  76]
+ [ 64 247]]
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:50:33 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:50:33 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:50:39 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:50:39 main.py INFO Time of iter training 6.66 s
+Mon, 21 Jul 2025 13:50:39 main.py INFO On iter step 52.0:, global step 3328 Loss-step [1.2661 1.0168 1.0000 1.2452]
+Mon, 21 Jul 2025 13:50:41 main.py INFO In dataset train: Loss is [0.2128 0.0005 0.0000 0.2123]
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:50:41 main.py INFO In dataset test: Loss is [1.8690 1.6839 0.0000 0.1851]
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Acc is 0.7997, F1-micro is 0.7997
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		F1-macro is 0.7918, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Pre-macro is 0.7906, Rec_macro is 0.7933
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		For sarcasm, C_M is 
+[[390  83]
+ [ 74 237]]
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:50:41 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:50:41 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:50:47 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:50:47 main.py INFO Time of iter training 6.14 s
+Mon, 21 Jul 2025 13:50:47 main.py INFO On iter step 53.0:, global step 3392 Loss-step [1.2560 1.0098 1.0000 1.2437]
+Mon, 21 Jul 2025 13:50:48 main.py INFO In dataset train: Loss is [0.2127 0.0004 0.0000 0.2123]
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:50:48 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:50:49 main.py INFO In dataset test: Loss is [1.9063 1.7207 0.0000 0.1856]
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		Acc is 0.8099, F1-micro is 0.8099
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		F1-macro is 0.8032, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		Pre-macro is 0.8011, Rec_macro is 0.8062
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		For sarcasm, C_M is 
+[[390  83]
+ [ 66 245]]
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:50:49 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:50:49 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:50:55 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:50:55 main.py INFO Time of iter training 6.25 s
+Mon, 21 Jul 2025 13:50:55 main.py INFO On iter step 54.0:, global step 3456 Loss-step [1.2481 1.0076 1.0000 1.2387]
+Mon, 21 Jul 2025 13:50:56 main.py INFO In dataset train: Loss is [0.2125 0.0002 0.0000 0.2123]
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:50:56 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:50:57 main.py INFO In dataset test: Loss is [2.2955 2.1098 0.0000 0.1857]
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		Acc is 0.8036, F1-micro is 0.8036
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		F1-macro is 0.7971, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		Pre-macro is 0.7947, Rec_macro is 0.8009
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		For sarcasm, C_M is 
+[[385  88]
+ [ 66 245]]
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:50:57 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:50:57 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:51:03 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:51:03 main.py INFO Time of iter training 6.34 s
+Mon, 21 Jul 2025 13:51:03 main.py INFO On iter step 55.0:, global step 3520 Loss-step [1.2652 1.0207 1.0000 1.2396]
+Mon, 21 Jul 2025 13:51:04 main.py INFO In dataset train: Loss is [0.2126 0.0004 0.0000 0.2123]
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:51:04 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:51:05 main.py INFO In dataset test: Loss is [1.7802 1.5950 0.0000 0.1852]
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		Acc is 0.8061, F1-micro is 0.8061
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		F1-macro is 0.8008, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		Pre-macro is 0.7980, Rec_macro is 0.8068
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		For sarcasm, C_M is 
+[[380  93]
+ [ 59 252]]
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:51:05 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:51:05 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:51:11 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:51:11 main.py INFO Time of iter training 6.30 s
+Mon, 21 Jul 2025 13:51:11 main.py INFO On iter step 56.0:, global step 3584 Loss-step [1.2653 1.0164 1.0000 1.2448]
+Mon, 21 Jul 2025 13:51:12 main.py INFO In dataset train: Loss is [0.2144 0.0016 0.0000 0.2128]
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		Acc is 0.9997, F1-micro is 0.9997
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		F1-macro is 0.9997, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		Pre-macro is 0.9997, Rec_macro is 0.9997
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   1 1810]]
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:51:12 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:51:13 main.py INFO In dataset test: Loss is [2.1532 1.9651 0.0000 0.1882]
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		Acc is 0.7870, F1-micro is 0.7870
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		F1-macro is 0.7774, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		Pre-macro is 0.7775, Rec_macro is 0.7772
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		For sarcasm, C_M is 
+[[390  83]
+ [ 84 227]]
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:51:13 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:51:13 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:51:19 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:51:19 main.py INFO Time of iter training 6.50 s
+Mon, 21 Jul 2025 13:51:19 main.py INFO On iter step 57.0:, global step 3648 Loss-step [1.2471 1.0107 1.0000 1.2339]
+Mon, 21 Jul 2025 13:51:20 main.py INFO In dataset train: Loss is [0.2126 0.0003 0.0000 0.2123]
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:51:20 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:51:21 main.py INFO In dataset test: Loss is [2.0115 1.8261 0.0000 0.1854]
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		Acc is 0.8125, F1-micro is 0.8125
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		F1-macro is 0.8055, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		Pre-macro is 0.8037, Rec_macro is 0.8077
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		For sarcasm, C_M is 
+[[393  80]
+ [ 67 244]]
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:51:21 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:51:21 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:51:27 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:51:27 main.py INFO Time of iter training 6.48 s
+Mon, 21 Jul 2025 13:51:27 main.py INFO On iter step 58.0:, global step 3712 Loss-step [1.2372 1.0065 1.0000 1.2291]
+Mon, 21 Jul 2025 13:51:29 main.py INFO In dataset train: Loss is [0.2124 0.0001 0.0000 0.2123]
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:51:29 main.py INFO In dataset test: Loss is [2.2886 2.1030 0.0000 0.1856]
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Acc is 0.8125, F1-micro is 0.8125
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		F1-macro is 0.8088, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Pre-macro is 0.8067, Rec_macro is 0.8187
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		For sarcasm, C_M is 
+[[373 100]
+ [ 47 264]]
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:51:29 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:51:29 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:51:35 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:51:35 main.py INFO Time of iter training 6.48 s
+Mon, 21 Jul 2025 13:51:35 main.py INFO On iter step 59.0:, global step 3776 Loss-step [1.2464 1.0044 1.0000 1.2409]
+Mon, 21 Jul 2025 13:51:37 main.py INFO In dataset train: Loss is [0.2126 0.0001 0.0000 0.2125]
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:51:37 main.py INFO In dataset test: Loss is [2.2232 2.0363 0.0000 0.1869]
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Acc is 0.8342, F1-micro is 0.8342
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		F1-macro is 0.8289, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Pre-macro is 0.8261, Rec_macro is 0.8334
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		For sarcasm, C_M is 
+[[396  77]
+ [ 53 258]]
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:51:37 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:51:37 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:51:43 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:51:43 main.py INFO Time of iter training 6.23 s
+Mon, 21 Jul 2025 13:51:43 main.py INFO On iter step 60.0:, global step 3840 Loss-step [1.2337 1.0057 1.0000 1.2267]
+Mon, 21 Jul 2025 13:51:45 main.py INFO In dataset train: Loss is [0.2125 0.0000 0.0000 0.2124]
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:51:45 main.py INFO In dataset test: Loss is [2.5383 2.3546 0.0000 0.1837]
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Acc is 0.8329, F1-micro is 0.8329
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		F1-macro is 0.8297, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Pre-macro is 0.8275, Rec_macro is 0.8406
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		For sarcasm, C_M is 
+[[380  93]
+ [ 38 273]]
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:51:45 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:51:45 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:51:51 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:51:51 main.py INFO Time of iter training 6.24 s
+Mon, 21 Jul 2025 13:51:51 main.py INFO On iter step 61.0:, global step 3904 Loss-step [1.2419 1.0069 1.0000 1.2335]
+Mon, 21 Jul 2025 13:51:53 main.py INFO In dataset train: Loss is [0.2124 0.0001 0.0000 0.2123]
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:51:53 main.py INFO In dataset test: Loss is [2.1759 1.9908 0.0000 0.1851]
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Acc is 0.8393, F1-micro is 0.8393
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		F1-macro is 0.8354, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Pre-macro is 0.8323, Rec_macro is 0.8437
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		For sarcasm, C_M is 
+[[389  84]
+ [ 42 269]]
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:51:53 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:51:53 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:52:01 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:52:01 main.py INFO Time of iter training 7.80 s
+Mon, 21 Jul 2025 13:52:01 main.py INFO On iter step 62.0:, global step 3968 Loss-step [1.2522 1.0139 1.0000 1.2351]
+Mon, 21 Jul 2025 13:52:03 main.py INFO In dataset train: Loss is [0.2127 0.0002 0.0000 0.2124]
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:52:03 main.py INFO In dataset test: Loss is [2.3679 2.1812 0.0000 0.1867]
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Acc is 0.8189, F1-micro is 0.8189
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		F1-macro is 0.8163, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Pre-macro is 0.8162, Rec_macro is 0.8301
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		For sarcasm, C_M is 
+[[367 106]
+ [ 36 275]]
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:52:03 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:52:03 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:52:11 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:52:11 main.py INFO Time of iter training 7.59 s
+Mon, 21 Jul 2025 13:52:11 main.py INFO On iter step 63.0:, global step 4032 Loss-step [1.2362 1.0061 1.0000 1.2286]
+Mon, 21 Jul 2025 13:52:12 main.py INFO In dataset train: Loss is [0.2128 0.0005 0.0000 0.2123]
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:52:12 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:52:13 main.py INFO In dataset test: Loss is [2.0659 1.8808 0.0000 0.1852]
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		Acc is 0.8304, F1-micro is 0.8304
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		F1-macro is 0.8273, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		Pre-macro is 0.8253, Rec_macro is 0.8385
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		For sarcasm, C_M is 
+[[378  95]
+ [ 38 273]]
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:52:13 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:52:13 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:52:19 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:52:19 main.py INFO Time of iter training 6.31 s
+Mon, 21 Jul 2025 13:52:19 main.py INFO On iter step 64.0:, global step 4096 Loss-step [1.2410 1.0055 1.0000 1.2341]
+Mon, 21 Jul 2025 13:52:20 main.py INFO In dataset train: Loss is [0.2124 0.0001 0.0000 0.2123]
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:52:20 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:52:21 main.py INFO In dataset test: Loss is [2.5138 2.3283 0.0000 0.1855]
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		Acc is 0.8355, F1-micro is 0.8355
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		F1-macro is 0.8314, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		Pre-macro is 0.8283, Rec_macro is 0.8394
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		For sarcasm, C_M is 
+[[388  85]
+ [ 44 267]]
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:52:21 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:52:21 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:52:27 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:52:27 main.py INFO Time of iter training 6.32 s
+Mon, 21 Jul 2025 13:52:27 main.py INFO On iter step 65.0:, global step 4160 Loss-step [1.2470 1.0088 1.0000 1.2362]
+Mon, 21 Jul 2025 13:52:28 main.py INFO In dataset train: Loss is [0.2124 0.0001 0.0000 0.2123]
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:52:28 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:52:29 main.py INFO In dataset test: Loss is [2.5348 2.3494 0.0000 0.1854]
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		Acc is 0.8342, F1-micro is 0.8342
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		F1-macro is 0.8301, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		Pre-macro is 0.8270, Rec_macro is 0.8378
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		For sarcasm, C_M is 
+[[388  85]
+ [ 45 266]]
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:52:29 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:52:29 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:52:35 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:52:35 main.py INFO Time of iter training 6.58 s
+Mon, 21 Jul 2025 13:52:35 main.py INFO On iter step 66.0:, global step 4224 Loss-step [1.2383 1.0042 1.0000 1.2331]
+Mon, 21 Jul 2025 13:52:36 main.py INFO In dataset train: Loss is [0.2127 0.0003 0.0000 0.2124]
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:52:36 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:52:37 main.py INFO In dataset test: Loss is [2.3202 2.1340 0.0000 0.1862]
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		Acc is 0.8380, F1-micro is 0.8380
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		F1-macro is 0.8338, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		Pre-macro is 0.8306, Rec_macro is 0.8410
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		For sarcasm, C_M is 
+[[391  82]
+ [ 45 266]]
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:52:37 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:52:37 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:52:43 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:52:43 main.py INFO Time of iter training 6.34 s
+Mon, 21 Jul 2025 13:52:43 main.py INFO On iter step 67.0:, global step 4288 Loss-step [1.2500 1.0108 1.0000 1.2366]
+Mon, 21 Jul 2025 13:52:44 main.py INFO In dataset train: Loss is [0.2129 0.0004 0.0000 0.2124]
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:52:44 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:52:45 main.py INFO In dataset test: Loss is [1.9755 1.7889 0.0000 0.1866]
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		Acc is 0.7997, F1-micro is 0.7997
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		F1-macro is 0.7950, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		Pre-macro is 0.7925, Rec_macro is 0.8027
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		For sarcasm, C_M is 
+[[373 100]
+ [ 57 254]]
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:52:45 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:52:45 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:52:51 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:52:51 main.py INFO Time of iter training 6.35 s
+Mon, 21 Jul 2025 13:52:51 main.py INFO On iter step 68.0:, global step 4352 Loss-step [1.2507 1.0128 1.0000 1.2348]
+Mon, 21 Jul 2025 13:52:52 main.py INFO In dataset train: Loss is [0.2137 0.0014 0.0000 0.2123]
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:52:52 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:52:53 main.py INFO In dataset test: Loss is [2.4181 2.2336 0.0000 0.1845]
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		Acc is 0.8087, F1-micro is 0.8087
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		F1-macro is 0.8076, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		Pre-macro is 0.8158, Rec_macro is 0.8288
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		For sarcasm, C_M is 
+[[346 127]
+ [ 23 288]]
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:52:53 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:52:53 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:52:59 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:52:59 main.py INFO Time of iter training 6.48 s
+Mon, 21 Jul 2025 13:52:59 main.py INFO On iter step 69.0:, global step 4416 Loss-step [1.2545 1.0111 1.0000 1.2407]
+Mon, 21 Jul 2025 13:53:01 main.py INFO In dataset train: Loss is [0.2125 0.0001 0.0000 0.2124]
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:53:01 main.py INFO In dataset test: Loss is [2.1930 2.0091 0.0000 0.1839]
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Acc is 0.8482, F1-micro is 0.8482
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		F1-macro is 0.8452, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Pre-macro is 0.8426, Rec_macro is 0.8560
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		For sarcasm, C_M is 
+[[387  86]
+ [ 33 278]]
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:53:01 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:53:01 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:53:07 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:53:07 main.py INFO Time of iter training 6.33 s
+Mon, 21 Jul 2025 13:53:07 main.py INFO On iter step 70.0:, global step 4480 Loss-step [1.2492 1.0092 1.0000 1.2378]
+Mon, 21 Jul 2025 13:53:09 main.py INFO In dataset train: Loss is [0.2125 0.0002 0.0000 0.2123]
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:53:09 main.py INFO In dataset test: Loss is [2.6235 2.4393 0.0000 0.1841]
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Acc is 0.8342, F1-micro is 0.8342
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		F1-macro is 0.8287, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Pre-macro is 0.8260, Rec_macro is 0.8328
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		For sarcasm, C_M is 
+[[397  76]
+ [ 54 257]]
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:53:09 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:53:09 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:53:15 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:53:15 main.py INFO Time of iter training 6.36 s
+Mon, 21 Jul 2025 13:53:15 main.py INFO On iter step 71.0:, global step 4544 Loss-step [1.2370 1.0026 1.0000 1.2337]
+Mon, 21 Jul 2025 13:53:17 main.py INFO In dataset train: Loss is [0.2124 0.0001 0.0000 0.2123]
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:53:17 main.py INFO In dataset test: Loss is [2.7717 2.5872 0.0000 0.1845]
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Acc is 0.8495, F1-micro is 0.8495
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		F1-macro is 0.8429, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Pre-macro is 0.8426, Rec_macro is 0.8433
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		For sarcasm, C_M is 
+[[413  60]
+ [ 58 253]]
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:53:17 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:53:17 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:53:23 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:53:23 main.py INFO Time of iter training 6.44 s
+Mon, 21 Jul 2025 13:53:23 main.py INFO On iter step 72.0:, global step 4608 Loss-step [1.2480 1.0086 1.0000 1.2373]
+Mon, 21 Jul 2025 13:53:25 main.py INFO In dataset train: Loss is [0.2127 0.0004 0.0000 0.2123]
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:53:25 main.py INFO In dataset test: Loss is [2.5939 2.4078 0.0000 0.1861]
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Acc is 0.8074, F1-micro is 0.8074
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		F1-macro is 0.8039, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Pre-macro is 0.8022, Rec_macro is 0.8145
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		For sarcasm, C_M is 
+[[369 104]
+ [ 47 264]]
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:53:25 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:53:25 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:53:31 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:53:31 main.py INFO Time of iter training 6.30 s
+Mon, 21 Jul 2025 13:53:31 main.py INFO On iter step 73.0:, global step 4672 Loss-step [1.2553 1.0084 1.0000 1.2449]
+Mon, 21 Jul 2025 13:53:33 main.py INFO In dataset train: Loss is [0.2127 0.0003 0.0000 0.2124]
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:53:33 main.py INFO In dataset test: Loss is [2.2005 2.0142 0.0000 0.1863]
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Acc is 0.8125, F1-micro is 0.8125
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		F1-macro is 0.8091, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Pre-macro is 0.8073, Rec_macro is 0.8198
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		For sarcasm, C_M is 
+[[371 102]
+ [ 45 266]]
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:53:33 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:53:33 main.py INFO testacc: 0.8508
+Mon, 21 Jul 2025 13:53:41 main.py INFO --------------------------------------------------
+Mon, 21 Jul 2025 13:53:41 main.py INFO Time of iter training 8.26 s
+Mon, 21 Jul 2025 13:53:41 main.py INFO On iter step 74.0:, global step 4736 Loss-step [1.2560 1.0073 1.0000 1.2469]
+Mon, 21 Jul 2025 13:53:43 main.py INFO In dataset train: Loss is [0.2126 0.0003 0.0000 0.2124]
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		For sarcasm, C_M is 
+[[1823    0]
+ [   0 1811]]
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		For literal, C_M is 
+[[ 814    0]
+ [   0 2820]]
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		Acc is 0.8641, F1-micro is 0.8641
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		F1-macro is 0.8615, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		Pre-macro is 0.8931, Rec_macro is 0.8641
+Mon, 21 Jul 2025 13:53:43 main.py INFO 		For deep, C_M is 
+[[1323  494]
+ [   0 1817]]
+Mon, 21 Jul 2025 13:53:44 main.py INFO In dataset test: Loss is [2.5327 2.3464 0.0000 0.1863]
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		Acc is 0.8023, F1-micro is 0.8023
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		F1-macro is 0.7947, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		Pre-macro is 0.7932, Rec_macro is 0.7965
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		For sarcasm, C_M is 
+[[390  83]
+ [ 72 239]]
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		Acc is 1.0000, F1-micro is 1.0000
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		F1-macro is 1.0000, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		Pre-macro is 1.0000, Rec_macro is 1.0000
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		For literal, C_M is 
+[[185   0]
+ [  0 599]]
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		Acc is 0.8954, F1-micro is 0.8954
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		F1-macro is 0.8912, AUC is 0.5000
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		Pre-macro is 0.9196, Rec_macro is 0.8848
+Mon, 21 Jul 2025 13:53:44 main.py INFO 		For deep, C_M is 
+[[274  82]
+ [  0 428]]
+Mon, 21 Jul 2025 13:53:44 main.py INFO testacc: 0.8508
