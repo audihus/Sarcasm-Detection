@@ -1,0 +1,62 @@
+{
+  "builder_name": "csv",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "twitter_indonesia_sarcastic",
+  "dataset_size": 344001,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/w11wo/twitter_indonesia_sarcastic@c1713997ba26fec3541477346a20632628e8e6f2/data/train.csv": {
+      "num_bytes": 225784,
+      "checksum": null
+    },
+    "hf://datasets/w11wo/twitter_indonesia_sarcastic@c1713997ba26fec3541477346a20632628e8e6f2/data/validation.csv": {
+      "num_bytes": 32643,
+      "checksum": null
+    },
+    "hf://datasets/w11wo/twitter_indonesia_sarcastic@c1713997ba26fec3541477346a20632628e8e6f2/data/test.csv": {
+      "num_bytes": 61502,
+      "checksum": null
+    }
+  },
+  "download_size": 319929,
+  "features": {
+    "tweet": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "label": {
+      "dtype": "int64",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 663930,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 242646,
+      "num_examples": 1878,
+      "dataset_name": "twitter_indonesia_sarcastic"
+    },
+    "validation": {
+      "name": "validation",
+      "num_bytes": 35035,
+      "num_examples": 268,
+      "dataset_name": "twitter_indonesia_sarcastic"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 66320,
+      "num_examples": 538,
+      "dataset_name": "twitter_indonesia_sarcastic"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "builder_name": "json",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "reddit_indonesia_sarcastic",
+  "dataset_size": 4725643,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/w11wo/reddit_indonesia_sarcastic@fee478bfb08f8ef2f65ad3918150f820cb6c6f83/data/train.json": {
+      "num_bytes": 4285175,
+      "checksum": null
+    },
+    "hf://datasets/w11wo/reddit_indonesia_sarcastic@fee478bfb08f8ef2f65ad3918150f820cb6c6f83/data/validation.json": {
+      "num_bytes": 612424,
+      "checksum": null
+    },
+    "hf://datasets/w11wo/reddit_indonesia_sarcastic@fee478bfb08f8ef2f65ad3918150f820cb6c6f83/data/test.json": {
+      "num_bytes": 1233481,
+      "checksum": null
+    }
+  },
+  "download_size": 6131080,
+  "features": {
+    "body": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "label": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "permalink": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "subreddit": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "lang_fastText": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "created_utc": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "text": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "author": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "score": {
+      "dtype": "int64",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 10856723,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 3301491,
+      "num_examples": 9881,
+      "dataset_name": "reddit_indonesia_sarcastic"
+    },
+    "validation": {
+      "name": "validation",
+      "num_bytes": 472052,
+      "num_examples": 1411,
+      "dataset_name": "reddit_indonesia_sarcastic"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 952100,
+      "num_examples": 2824,
+      "dataset_name": "reddit_indonesia_sarcastic"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}
