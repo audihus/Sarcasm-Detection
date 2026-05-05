@@ -10,7 +10,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import optim
-from torch.cuda.amp import GradScaler, autocast
+from torch.cuda.amp import GradScaler
+from torch.amp import autocast
 from transformers import AutoTokenizer
 
 from basicModel import Lang
@@ -255,7 +256,7 @@ class bridgeModel(nn.Module):
         self.model.eval()
         b_data = self.gen_batch_data(batched_data)
 
-        autocast_ctx = autocast() if self.use_fp16 else nullcontext()
+        autocast_ctx = autocast('cuda') if self.use_fp16 else nullcontext()
 
         with torch.no_grad(), autocast_ctx:
             if self.t_sne:
@@ -293,7 +294,7 @@ class bridgeModel(nn.Module):
         b_data = self.gen_batch_data(batched_data)
 
         # autocast aktif kalau fp16 ON (training & inference) — match HF Trainer fp16
-        autocast_ctx = autocast() if self.use_fp16 else nullcontext()
+        autocast_ctx = autocast('cuda') if self.use_fp16 else nullcontext()
         # inference jalan dalam no_grad supaya hemat memori
         nograd_ctx   = torch.no_grad() if inference else nullcontext()
 
