@@ -167,6 +167,14 @@ class AblationDualModel(dualModel):
             if self.ablation_mode in ("dep_only", "gcn_dep_only"):
                 sentic = dep         # semua 6 GCN layer pakai dependency graph
             elif self.ablation_mode in ("sentic_only", "gcn_sentic_only"):
+                # Sentic graph has continuous float values [0, 2] (abs diff of
+                # InSet lexicon scores), unlike binary dep graph {0, 1}.  Using
+                # it for all 6 GCN layers without normalization causes larger
+                # gradients → fp16 overflow after epoch 1's weight update.
+                # Row-normalise (D⁻¹A) so each row sums to 1, matching the
+                # effective magnitude of the binary dep graph case.
+                row_sum = sentic.sum(dim=-1, keepdim=True).clamp(min=1e-6)
+                sentic = sentic / row_sum
                 dep = sentic         # semua 6 GCN layer pakai sentic graph
             # adgcn_only: dep dan sentic tetap keduanya (tidak diganti)
 
