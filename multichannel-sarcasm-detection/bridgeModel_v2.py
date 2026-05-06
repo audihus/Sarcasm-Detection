@@ -100,10 +100,14 @@ class bridgeModelV2(nn.Module):
         self.model = dualModelV2(FLAGS, len(vocab), embed)
         self.model.to(self.device)
 
-        use_focal = getattr(FLAGS, "use_focal", False)
+        use_focal  = getattr(FLAGS, "use_focal", False)
+        ce_vanilla = getattr(FLAGS, "ce_vanilla", False)
         if use_focal:
             self.criterion = FocalLoss(gamma=2.0, alpha=0.75, reduction="mean")
             loss_name = "FocalLoss(gamma=2, alpha=0.75)"
+        elif ce_vanilla:
+            self.criterion = nn.CrossEntropyLoss()
+            loss_name = "CrossEntropyLoss (vanilla)"
         else:
             cw     = float(getattr(FLAGS, "class_weight_sarcasm", 3.0))
             weight = torch.tensor([1.0, cw]).to(self.device)

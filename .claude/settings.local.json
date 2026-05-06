@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python -m py_compile multichannel-sarcasm-detection/bridgeModel_v2.py)"
+      "Bash(python -m py_compile multichannel-sarcasm-detection/bridgeModel_v2.py)",
+      "Bash(python -m py_compile train_pragmatic.py)"
     ]
   }
 }

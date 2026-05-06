@@ -316,8 +316,9 @@ def build_vocab_and_embed(train_dataset: SarcasmDataset_v2, args):
 # ── build_flags ───────────────────────────────────────────────────────────────
 
 def build_flags(args, device: torch.device) -> SimpleNamespace:
-    use_fp16  = (not getattr(args, "no_fp16", False)) and (device.type == "cuda")
-    use_focal = (args.loss_type == "focal")
+    use_fp16   = (not getattr(args, "no_fp16", False)) and (device.type == "cuda")
+    use_focal  = (args.loss_type == "focal")
+    ce_vanilla = (args.loss_type == "ce_vanilla")
     return SimpleNamespace(
         device               = device,
         max_length_sen       = MAX_LEN,
@@ -337,6 +338,7 @@ def build_flags(args, device: torch.device) -> SimpleNamespace:
         weight_decay         = args.weight_decay,
         use_fp16             = use_fp16,
         use_focal            = use_focal,
+        ce_vanilla           = ce_vanilla,
         class_weight_sarcasm = args.class_weight_sarcasm,
     )
 
@@ -658,8 +660,8 @@ def parse_args():
 
     # Loss
     parser.add_argument("--loss_type",             default="ce_weighted",
-                        choices=["ce_weighted", "focal"],
-                        help="ce_weighted: CrossEntropy+class_weights; focal: FocalLoss")
+                        choices=["ce_weighted", "ce_vanilla", "focal"],
+                        help="ce_weighted: CE+class_weights; ce_vanilla: CE tanpa weights; focal: FocalLoss")
     parser.add_argument("--class_weight_sarcasm",  type=float, default=3.0,
                         help="Weight for sarcasm class (class 1) in CE loss")
 
