@@ -110,7 +110,7 @@ class bridgeModel(nn.Module):
     """
     Bridge antara dataloader dan dualModel.
     Menangani:
-        - Tokenisasi IndoBERTlite (via AutoTokenizer)
+        - Tokenisasi IndoBERT (via AutoTokenizer)
         - Penyiapan tensor ADGCN
         - Training step dengan FocalLoss
     """
@@ -211,7 +211,7 @@ class bridgeModel(nn.Module):
         """
         dict_data = {}
 
-        # --- IndoBERTlite tokenization --------------------------------------- #
+        # --- IndoBERT tokenization --------------------------------------- #
         encoding = self.tokenizer(
             batched_data['sentences'],
             padding      = 'max_length',

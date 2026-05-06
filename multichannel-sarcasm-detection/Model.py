@@ -13,12 +13,12 @@ class dualModel(nn.Module):
     Multichannel Sarcasm Detection Model.
 
     Architecture:
-        - IndoBERTlite encoder  → CLS token vector (768-dim)
+        - IndoBERT encoder  → CLS token vector (768-dim)
         - ADGCN graph encoder   → graph-aware representation (dim_sen-dim)
         - Fusion: concat [bert_rep, adgcn_rep]  →  dense classifier (2 classes)
     """
 
-    # Dimensi output CLS IndoBERTlite (base variant → 768)
+    # Dimensi output CLS IndoBERT (base variant → 768)
     BERT_HIDDEN_DIM = 768
 
     def __init__(self, opt, n_vocab, embed_list):
@@ -75,7 +75,7 @@ class dualModel(nn.Module):
             prob       : FloatTensor [B, 2]  – probabilitas kelas (softmax)
         """
 
-        # --- IndoBERTlite encoding -------------------------------------------
+        # --- IndoBERT encoding -------------------------------------------
         bert_output = self.encoder(
             input_ids      = dict_inst['input_ids'],
             attention_mask = dict_inst['attention_mask']

@@ -2,7 +2,7 @@
 """
 train_multichannel.py
 =====================
-Standalone training script for the IndoBERTlite + ADGCN multichannel
+Standalone training script for the IndoBERT + ADGCN multichannel
 sarcasm detection model.
 
 Pipeline:
@@ -401,13 +401,13 @@ def build_flags(args, device: torch.device) -> SimpleNamespace:
 def freeze_encoder(model: PatchedBridgeModel) -> None:
     for param in model.model.encoder.parameters():
         param.requires_grad = False
-    print("[Freeze] IndoBERTlite encoder frozen.")
+    print("[Freeze] IndoBERT encoder frozen.")
 
 
 def unfreeze_encoder(model: PatchedBridgeModel) -> None:
     for param in model.model.encoder.parameters():
         param.requires_grad = True
-    print("[Unfreeze] IndoBERTlite encoder unfrozen.")
+    print("[Unfreeze] IndoBERT encoder unfrozen.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -697,7 +697,7 @@ def main(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Train multichannel sarcasm detection model (IndoBERTlite + ADGCN)"
+        description="Train multichannel sarcasm detection model (IndoBERT + ADGCN)"
     )
 
     # Required data paths
