@@ -186,7 +186,7 @@ class bridgeModelV2(nn.Module):
             result = self.model(b_data)
             prob, logits = result[0], result[1]
 
-        loss = self.criterion(logits, b_data["sarcasms"])
+        loss = self.criterion(logits.float(), b_data["sarcasms"])
 
         if train_mode:
             if self.use_fp16:
