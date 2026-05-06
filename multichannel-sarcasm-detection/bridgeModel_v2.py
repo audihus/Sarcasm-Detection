@@ -178,8 +178,12 @@ class bridgeModelV2(nn.Module):
         else:
             self.model.eval()
 
-        b_data   = self.gen_batch_data(batched_data)
-        amp_ctx  = autocast("cuda") if self.use_fp16 else nullcontext()
+        b_data = self.gen_batch_data(batched_data)
+
+        # fp16 autocast ONLY during training — eval always runs in fp32.
+        # This prevents fp16 overflow during inference (which would produce
+        # NaN probs even with healthy model weights).
+        amp_ctx  = autocast("cuda") if (self.use_fp16 and train_mode) else nullcontext()
         grad_ctx = torch.no_grad() if not train_mode else nullcontext()
 
         with grad_ctx:
@@ -190,25 +194,20 @@ class bridgeModelV2(nn.Module):
         loss = self.criterion(logits.float(), b_data["sarcasms"])
 
         if train_mode:
-            # Guard: skip backward when loss is NaN/inf (fp16 overflow).
-            # Calling scaler.update() still halves the scale factor so the
-            # next batch runs at a lower scale and avoids overflow.
-            if not torch.isfinite(loss):
-                if self.use_fp16:
-                    self.scaler.update()
-                self.optimizer.zero_grad()
-                return float("nan"), prob.detach().cpu().numpy()
-
             if self.use_fp16:
+                # GradScaler handles NaN/inf loss naturally:
+                # backward records non-finite grads → scaler.step() skips
+                # optimizer update → scaler.update() reduces scale factor.
                 self.scaler.scale(loss).backward()
                 self.scaler.unscale_(self.optimizer)
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
             else:
-                loss.backward()
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
-                self.optimizer.step()
+                if torch.isfinite(loss):
+                    loss.backward()
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+                    self.optimizer.step()
 
         return loss.item(), prob.detach().cpu().numpy()
 
