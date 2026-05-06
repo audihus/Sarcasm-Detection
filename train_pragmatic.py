@@ -370,8 +370,21 @@ def run_evaluation(model: PatchedBridgeModelV2, loader: DataLoader) -> dict:
                 print("[OOM] Skipping eval batch.")
                 continue
             raise
-        y_true.extend(batch["sarcasms"])
-        y_pred_probs.extend(prob_np.tolist())
+
+        # Filter samples whose probabilities are NaN (model overflow artefact)
+        finite_mask = np.isfinite(prob_np).all(axis=1)
+        if not finite_mask.any():
+            print("[WARN] Entire eval batch has NaN probs — skipping.")
+            continue
+        labels = batch["sarcasms"]
+        y_true.extend(lbl for lbl, ok in zip(labels, finite_mask) if ok)
+        y_pred_probs.extend(p for p, ok in zip(prob_np.tolist(), finite_mask) if ok)
+
+    if not y_pred_probs:
+        # All batches produced NaN: return dummy metrics so training can continue
+        print("[WARN] run_evaluation: all predictions are NaN; returning zero metrics.")
+        return {"acc": 0.0, "f1_binary": 0.0, "f1_macro": 0.0,
+                "f1_micro": 0.0, "pre_macro": 0.0, "rec_macro": 0.0, "auc": 0.5}
 
     return evaluateClassification(y_true, y_pred_probs)
 
@@ -399,8 +412,9 @@ def train_one_epoch(
             loss_val, _ = model.stepTrain(batch, inference=False)
             if scheduler is not None:
                 scheduler.step()
-            total_loss += loss_val
-            n_batches  += 1
+            if np.isfinite(loss_val):
+                total_loss += loss_val
+                n_batches  += 1
             pbar.set_postfix({"loss": f"{loss_val:.4f}"})
         except RuntimeError as e:
             if "out of memory" in str(e).lower():

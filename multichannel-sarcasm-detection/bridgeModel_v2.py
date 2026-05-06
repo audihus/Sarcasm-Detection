@@ -18,8 +18,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import optim
-from torch.cuda.amp import GradScaler
-from torch.amp import autocast
+from torch.amp import autocast, GradScaler
 from transformers import AutoTokenizer
 
 from basicModel import Lang
@@ -91,7 +90,7 @@ class bridgeModelV2(nn.Module):
             and torch.cuda.is_available()
             and self.device.type == "cuda"
         )
-        self.scaler = GradScaler() if self.use_fp16 else None
+        self.scaler = GradScaler("cuda") if self.use_fp16 else None
 
         self.lang      = Lang(vocab)
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -179,16 +178,27 @@ class bridgeModelV2(nn.Module):
         else:
             self.model.eval()
 
-        b_data  = self.gen_batch_data(batched_data)
-        amp_ctx = autocast("cuda") if self.use_fp16 else nullcontext()
+        b_data   = self.gen_batch_data(batched_data)
+        amp_ctx  = autocast("cuda") if self.use_fp16 else nullcontext()
+        grad_ctx = torch.no_grad() if not train_mode else nullcontext()
 
-        with amp_ctx:
-            result = self.model(b_data)
-            prob, logits = result[0], result[1]
+        with grad_ctx:
+            with amp_ctx:
+                result = self.model(b_data)
+                prob, logits = result[0], result[1]
 
         loss = self.criterion(logits.float(), b_data["sarcasms"])
 
         if train_mode:
+            # Guard: skip backward when loss is NaN/inf (fp16 overflow).
+            # Calling scaler.update() still halves the scale factor so the
+            # next batch runs at a lower scale and avoids overflow.
+            if not torch.isfinite(loss):
+                if self.use_fp16:
+                    self.scaler.update()
+                self.optimizer.zero_grad()
+                return float("nan"), prob.detach().cpu().numpy()
+
             if self.use_fp16:
                 self.scaler.scale(loss).backward()
                 self.scaler.unscale_(self.optimizer)
