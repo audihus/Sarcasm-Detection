@@ -94,7 +94,7 @@ class bridgeModelV2(nn.Module):
 
         self.lang      = Lang(vocab)
         self.tokenizer = AutoTokenizer.from_pretrained(
-            "indobenchmark/indobert-base-p1"
+            "indolem/indobertweet-base-uncased"
         )
 
         self.model = dualModelV2(FLAGS, len(vocab), embed)

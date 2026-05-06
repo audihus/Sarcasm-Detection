@@ -39,7 +39,7 @@ class dualModelV2(nn.Module):
 
         # IndoBERT-base encoder
         self.encoder = AutoModel.from_pretrained(
-            "indobenchmark/indobert-base-p1"
+            "indolem/indobertweet-base-uncased"
         )
 
         # ADGCN: dep-only (dependency_graph passed to both adj slots, sentic dropped)
