@@ -542,9 +542,9 @@ def main(args):
     patience_counter = 0
 
     for epoch in range(start_epoch, args.epochs + 1):
-        if epoch <= 2:
+        if epoch <= args.freeze_epochs:
             freeze_encoder(bridge_model)
-        else:
+        elif epoch == args.freeze_epochs + 1:
             unfreeze_encoder(bridge_model)
 
         avg_loss    = train_one_epoch(bridge_model, train_loader, epoch, args.drop_rate, scheduler)
@@ -696,6 +696,8 @@ def parse_args():
     parser.add_argument("--seed",         type=int, default=42)
     parser.add_argument("--no_scheduler", action="store_true")
     parser.add_argument("--no_fp16",      action="store_true")
+    parser.add_argument("--freeze_epochs", type=int, default=2,
+                        help="Freeze IndoBERT encoder for first N epochs (default: 2)")
 
     return parser.parse_args()
 

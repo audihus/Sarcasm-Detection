@@ -137,6 +137,15 @@ class bridgeModelV2(nn.Module):
             f"fp16={self.use_fp16}"
         )
 
+    def set_encoder_frozen(self, frozen: bool):
+        """Freeze/unfreeze BERT encoder parameters and adjust optimizer LR."""
+        for param in self.model.encoder.parameters():
+            param.requires_grad = not frozen
+        # Also zero-out encoder LR in optimizer when frozen to prevent stale updates
+        enc_lr = 0.0 if frozen else 1e-5
+        for group in self.optimizer.param_groups[:2]:  # groups 0,1 are encoder
+            group["lr"] = enc_lr
+
     def gen_batch_data(self, batched_data: dict) -> dict:
         dict_data = {}
 
