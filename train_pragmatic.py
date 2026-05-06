@@ -88,12 +88,22 @@ def _load_word_vec(path: str, word2idx: dict) -> dict:
 
 
 def build_embedding_matrix(word2idx: dict, embed_dim: int,
-                            dataset_type: str, data_dir: str) -> np.ndarray:
+                           dataset_type: str, data_dir: str) -> np.ndarray:
     cache_path = os.path.join(data_dir, f"{embed_dim}_{dataset_type}_v2_embedding_matrix.pkl")
+    
     if os.path.exists(cache_path):
         print(f"[Embed] Loading cached matrix: {cache_path}")
         with open(cache_path, "rb") as f:
-            return pickle.load(f)
+            cached_matrix = pickle.load(f)
+            # Tambahkan validasi shape di sini
+            if cached_matrix.shape[0] == len(word2idx):
+                return cached_matrix
+            else:
+                print(f"[Embed] Mismatch! Cache size ({cached_matrix.shape[0]}) vs Vocab ({len(word2idx)}). Rebuilding...")
+                # Lanjut ke bawah untuk membuat ulang matriks
+
+    print(f"[Embed] Building embedding matrix (size={len(word2idx)}, dim={embed_dim})...")
+    # ... (sisa kode di bawahnya tetap sama) ...
 
     print(f"[Embed] Building embedding matrix (size={len(word2idx)}, dim={embed_dim})...")
     matrix = np.zeros((len(word2idx), embed_dim), dtype=np.float64)
