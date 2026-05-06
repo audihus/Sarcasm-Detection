@@ -18,7 +18,7 @@ python scripts/run_classification.py \
     --output_dir outputs/indobertweet-base-uncased-reddit-indonesia-sarcastic \
     --overwrite_output_dir \
     --save_strategy epoch \
-    --evaluation_strategy epoch \
+    --eval_strategy epoch \
     --logging_strategy epoch \
     --load_best_model_at_end \
     --metric_for_best_model f1 \
