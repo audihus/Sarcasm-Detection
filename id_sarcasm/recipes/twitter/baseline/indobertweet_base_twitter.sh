@@ -16,7 +16,6 @@ python scripts/run_classification.py \
     --num_train_epochs 100 \
     --do_train --do_eval --do_predict \
     --output_dir outputs/indobertweet-base-uncased-twitter-indonesia-sarcastic \
-    --overwrite_output_dir \
     --save_strategy epoch \
     --eval_strategy epoch \
     --logging_strategy epoch \
