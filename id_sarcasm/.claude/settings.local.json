@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"E:\\\\Luaran Kelulusan\\\\Sarcasm Detection\\\\Code\\\\multi_channel_method\\\\id_sarcasm\" -Recurse -Force)",
+      "Bash(Select-Object FullName, Length)",
+      "Bash(Sort-Object FullName)",
+      "Bash(python scripts/sanity_check.py --dataset reddit --n_samples 100 --project_root .)",
+      "PowerShell(python -c \"import datasets; import emoji; print\\('OK'\\)\" 2>&1)"
+    ]
+  }
+}

@@ -21,6 +21,7 @@ python scripts/run_classification.py \
     --logging_strategy epoch \
     --load_best_model_at_end \
     --metric_for_best_model f1 \
+    --save_total_limit 1 \
     --seed 42 \
     --report_to none \
     --fp16

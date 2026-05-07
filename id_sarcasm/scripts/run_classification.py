@@ -29,7 +29,7 @@ import torch.nn as nn
 import datasets
 import evaluate
 import numpy as np
-from datasets import Value, load_dataset, concatenate_datasets
+from datasets import Value, load_dataset, load_from_disk, concatenate_datasets
 from sklearn.utils.class_weight import compute_class_weight
 
 import transformers
@@ -361,14 +361,17 @@ def main():
     # In distributed training, the load_dataset function guarantee that only one local process can concurrently
     # download the dataset.
     if data_args.dataset_name is not None:
-        # Downloading and loading a dataset from the hub.
-        raw_datasets = load_dataset(
-            data_args.dataset_name,
-            data_args.dataset_config_name,
-            cache_dir=model_args.cache_dir,
-            token=model_args.token,
-        )
-        # Try print some info about the dataset
+        if os.path.isdir(data_args.dataset_name):
+            # Local DatasetDict saved via save_to_disk()
+            raw_datasets = load_from_disk(data_args.dataset_name)
+        else:
+            # HuggingFace Hub name
+            raw_datasets = load_dataset(
+                data_args.dataset_name,
+                data_args.dataset_config_name,
+                cache_dir=model_args.cache_dir,
+                token=model_args.token,
+            )
         logger.info(f"Dataset loaded: {raw_datasets}")
         logger.info(raw_datasets)
     else:
