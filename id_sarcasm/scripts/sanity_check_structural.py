@@ -16,6 +16,9 @@ import csv
 import sys
 from pathlib import Path
 
+_SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(_SCRIPT_DIR.parent))
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -89,7 +92,6 @@ def print_stats(stats):
 def main():
     args = parse_args()
     project_root = Path(args.project_root).resolve()
-    sys.path.insert(0, str(project_root))
 
     from preprocessing.augment_pipeline import add_structural_markers
 

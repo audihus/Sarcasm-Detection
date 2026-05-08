@@ -16,6 +16,12 @@ import argparse
 import sys
 from pathlib import Path
 
+# Project root = parent of the scripts/ directory, regardless of cwd.
+# This makes the script location-independent on Kaggle, Colab, and local.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_DEFAULT_PROJECT_ROOT = _SCRIPT_DIR.parent
+sys.path.insert(0, str(_DEFAULT_PROJECT_ROOT))
+
 
 # ---------------------------------------------------------------------------
 # Config
@@ -67,7 +73,6 @@ def main():
     args = parser.parse_args()
 
     project_root = Path(args.project_root).resolve()
-    sys.path.insert(0, str(project_root))
 
     from datasets import load_dataset
     from preprocessing.augment_pipeline import add_structural_markers
