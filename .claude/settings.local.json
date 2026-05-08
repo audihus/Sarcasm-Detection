@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(python -m py_compile multichannel-sarcasm-detection/bridgeModel_v2.py)",
-      "Bash(python -m py_compile train_pragmatic.py)"
+      "Bash(python -m py_compile train_pragmatic.py)",
+      "Bash(Get-ChildItem -Path \"E:\\\\Luaran Kelulusan\\\\Sarcasm Detection\\\\Code\\\\multi_channel_method\\\\id_sarcasm\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"E:\\\\Luaran Kelulusan\\\\Sarcasm Detection\\\\Code\\\\multi_channel_method\\\\id_sarcasm\\\\preprocessing\" -File | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem -Path \"E:\\\\Luaran Kelulusan\\\\Sarcasm Detection\\\\Code\\\\multi_channel_method\\\\id_sarcasm\\\\scripts\" -File | ForEach-Object { $_.Name })",
+      "PowerShell(Head *)",
+      "Bash(dir /s /b \"E:\\\\Luaran Kelulusan\\\\Sarcasm Detection\\\\Code\\\\multi_channel_method\\\\id_sarcasm\\\\real_data\")"
     ]
   }
 }

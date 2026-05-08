@@ -544,3 +544,55 @@ class AugmentPipeline:
         augmented_texts = [r[0] for r in results]
         debug_infos = [r[1] for r in results]
         return augmented_texts, debug_infos
+
+
+# ===========================================================================
+# SECTION 5: STRUCTURAL MARKERS (EDA-VALIDATED)
+# ===========================================================================
+
+# Kata hiperbola yang menjadi signal sarkasme di Twitter (lift 2.11x)
+HYPERBOLE_WORDS: FrozenSet[str] = frozenset([
+    "banget", "sekali", "sangat", "paling", "amat",
+    "sungguh", "benar-benar", "beneran", "literally",
+])
+
+
+def add_structural_markers(text: str, dataset_name: str) -> str:
+    """
+    Prepend structural sarcasm markers berdasarkan signal EDA per-platform.
+
+    Reddit  : [SHORT] jika word_count <= 8 (lift 1.54x, Cohen's d=-0.481)
+    Twitter : [QUES]  jika ada '?' di teks (lift 1.84x)
+              [HYPER] jika ada kata hiperbola di teks (lift 2.11x)
+              Kedua marker independent dan additive.
+
+    Teks asli TIDAK diubah — hanya marker yang di-prepend.
+    Jika tidak ada marker yang aktif, kembalikan teks asli tanpa perubahan.
+
+    Args:
+        text: teks asli
+        dataset_name: "reddit" atau "twitter"
+
+    Returns:
+        teks dengan marker di-prepend, atau teks asli jika tidak ada marker
+    """
+    if not text or not isinstance(text, str):
+        return text
+
+    if dataset_name == "reddit":
+        if len(text.split()) <= 8:
+            return "[SHORT] " + text
+        return text
+
+    elif dataset_name == "twitter":
+        markers = []
+        if "?" in text:
+            markers.append("[QUES]")
+        text_lower = text.lower()
+        if any(hw in text_lower for hw in HYPERBOLE_WORDS):
+            markers.append("[HYPER]")
+        if markers:
+            return " ".join(markers) + " " + text
+        return text
+
+    return text
