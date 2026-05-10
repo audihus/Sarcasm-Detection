@@ -219,70 +219,65 @@ def extract_emojis(text: str) -> list[str]:
 def load_inset_lexicon(
     positive_path: str,
     negative_path: str,
-    min_abs_score: float = 0.0,
 ) -> Tuple[frozenset, frozenset]:
     """
-    Load InSet lexicon dari file TSV.
+    Load InSet lexicon dari file TSV dengan filter skor dan stopword PySastrawi.
 
-    Format yang didukung:
-      - Satu kata per baris: "kata\n"
-      - Kata + skor: "kata\tskor\n"  (header row dilewati otomatis)
-
-    Args:
-        positive_path: path ke positive.tsv
-        negative_path: path ke negative.tsv
-        min_abs_score: hanya load kata dengan |skor| >= nilai ini (0.0 = load semua)
-
-    Returns:
-        (positive_words, negative_words) sebagai frozenset lowercase
+    Positif: skor >= 3; Negatif: skor <= -3.
+    Header baris pertama dilewati; ValueError tiap baris di-skip.
+    Tokenizer: re.findall(r'[a-zA-Z]+', kata.lower()) — multi-word entries di-split.
     """
-    def load_words(path: str) -> frozenset:
-        words = set()
-        path_obj = Path(path)
-        if not path_obj.exists():
+    try:
+        from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
+    except ImportError:
+        import subprocess
+        subprocess.run(["pip", "install", "PySastrawi"], check=True)
+        from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
+
+    factory = StopWordRemoverFactory()
+    STOPWORDS = set(factory.get_stop_words())
+    print(f"Stopwords PySastrawi: {len(STOPWORDS)} kata")
+
+    def _load_words(path: str, *, min_score: Optional[float], max_score: Optional[float]) -> set:
+        words: set = set()
+        p = Path(path)
+        if not p.exists():
             raise FileNotFoundError(f"InSet lexicon tidak ditemukan: {path}")
+        with open(p, encoding="utf-8") as f:
+            lines = f.readlines()
+        for line in lines[1:]:  # skip header
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split("\t")
+            if len(parts) < 2:
+                continue
+            entry = parts[0].lower().strip()
+            try:
+                score = float(parts[1])
+            except ValueError:
+                continue
+            if min_score is not None and score < min_score:
+                continue
+            if max_score is not None and score > max_score:
+                continue
+            for token in re.findall(r'[a-zA-Z]+', entry):
+                if token and token not in STOPWORDS:
+                    words.add(token)
+        return words
 
-        with open(path_obj, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                parts = line.split("\t")
-                word = parts[0].lower().strip()
-                if not word:
-                    continue
-                if min_abs_score > 0.0 and len(parts) >= 2:
-                    try:
-                        score = float(parts[1])
-                        if abs(score) < min_abs_score:
-                            continue
-                    except ValueError:
-                        continue  # header row atau non-numerik, skip
-                if word:
-                    words.add(word)
+    pos_fixed = _load_words(positive_path, min_score=3.0, max_score=None)
+    neg_fixed = _load_words(negative_path, min_score=None, max_score=-3.0)
 
-        return frozenset(words)
+    print(f"Kata positif setelah filter: {len(pos_fixed)}")
+    print(f"Kata negatif setelah filter: {len(neg_fixed)}")
 
-    positive_words = load_words(positive_path)
-    negative_words = load_words(negative_path)
-    return positive_words, negative_words
+    return frozenset(pos_fixed), frozenset(neg_fixed)
 
 
 def _simple_tokenize(text: str) -> list[str]:
-    """
-    Tokenizer sederhana untuk InSet lookup.
-    Strip tanda baca, lowercase, split by whitespace.
-    Tidak hapus karakter - hanya untuk keperluan lookup.
-    """
-    # Lowercase
-    text = text.lower()
-    # Pisahkan tanda baca dari kata (tapi jangan hapus kata)
-    text = re.sub(r"([^\w\s])", r" \1 ", text)
-    # Split dan filter token kosong
-    tokens = [t.strip() for t in text.split() if t.strip()]
-    # Filter: ambil token yang hanya terdiri dari huruf (untuk InSet lookup)
-    word_tokens = [t for t in tokens if re.match(r"^[a-zA-Z]+$", t)]
-    return word_tokens
+    """Tokenizer untuk InSet lookup: ekstrak token alphabetik lowercase."""
+    return re.findall(r'[a-zA-Z]+', text.lower())
 
 
 def detect_polarity_clash(
@@ -461,7 +456,6 @@ class AugmentPipeline:
         use_clash: bool = True,
         use_emo_conflict: bool = True,
         use_emoji_expand: bool = True,
-        min_abs_score: float = 3.0,
     ):
         """
         Args:
@@ -470,10 +464,9 @@ class AugmentPipeline:
             use_clash: aktifkan [CLASH] marker
             use_emo_conflict: aktifkan [EMO_CONFLICT] marker
             use_emoji_expand: aktifkan emoji expansion
-            min_abs_score: filter InSet, hanya kata dengan |skor| >= nilai ini
         """
         self.positive_words, self.negative_words = load_inset_lexicon(
-            positive_path, negative_path, min_abs_score=min_abs_score
+            positive_path, negative_path
         )
         self.use_clash = use_clash
         self.use_emo_conflict = use_emo_conflict
@@ -481,8 +474,7 @@ class AugmentPipeline:
 
         print(f"[AugmentPipeline] InSet loaded: "
               f"{len(self.positive_words)} pos words, "
-              f"{len(self.negative_words)} neg words "
-              f"(min_abs_score={min_abs_score})")
+              f"{len(self.negative_words)} neg words")
         print(f"[AugmentPipeline] Config: clash={use_clash}, "
               f"emo_conflict={use_emo_conflict}, "
               f"emoji_expand={use_emoji_expand}")
@@ -556,15 +548,34 @@ HYPERBOLE_WORDS: FrozenSet[str] = frozenset([
     "sungguh", "benar-benar", "beneran", "literally",
 ])
 
+# Lazy-loaded InSet untuk Twitter [CLASH] detection
+_MODULE_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = _MODULE_DIR.parent
+_TWITTER_POS_WORDS: Optional[frozenset] = None
+_TWITTER_NEG_WORDS: Optional[frozenset] = None
+
+
+def _get_twitter_inset() -> Tuple[frozenset, frozenset]:
+    """Lazy-load InSet Twitter untuk [CLASH] detection."""
+    global _TWITTER_POS_WORDS, _TWITTER_NEG_WORDS
+    if _TWITTER_POS_WORDS is None:
+        pos_path = _PROJECT_ROOT / "real_data" / "twitter" / "positive.tsv"
+        neg_path = _PROJECT_ROOT / "real_data" / "twitter" / "negative.tsv"
+        _TWITTER_POS_WORDS, _TWITTER_NEG_WORDS = load_inset_lexicon(
+            str(pos_path), str(neg_path)
+        )
+    return _TWITTER_POS_WORDS, _TWITTER_NEG_WORDS
+
 
 def add_structural_markers(text: str, dataset_name: str) -> str:
     """
     Prepend structural sarcasm markers berdasarkan signal EDA per-platform.
 
-    Reddit  : [SHORT] jika word_count <= 8 (lift 1.54x, Cohen's d=-0.481)
-    Twitter : [QUES]  jika ada '?' di teks (lift 1.84x)
+    Reddit  : [SHORT] jika word_count <= 8 (lift 1.73x)
+    Twitter : [CLASH] jika ada clash positif-negatif InSet (lift 1.75x)
+              [QUES]  jika ada '?' di teks (lift 1.84x)
               [HYPER] jika ada kata hiperbola di teks (lift 2.11x)
-              Kedua marker independent dan additive.
+              Urutan prepend: [CLASH] [QUES] [HYPER] — semua additive.
 
     Teks asli TIDAK diubah — hanya marker yang di-prepend.
     Jika tidak ada marker yang aktif, kembalikan teks asli tanpa perubahan.
@@ -585,7 +596,11 @@ def add_structural_markers(text: str, dataset_name: str) -> str:
         return text
 
     elif dataset_name == "twitter":
+        pos_words, neg_words = _get_twitter_inset()
         markers = []
+        is_clash, _ = detect_polarity_clash(text, pos_words, neg_words)
+        if is_clash:
+            markers.append("[CLASH]")
         if "?" in text:
             markers.append("[QUES]")
         text_lower = text.lower()
