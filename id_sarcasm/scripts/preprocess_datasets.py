@@ -55,6 +55,10 @@ def _build_variant_config(add_structural_markers_fn):
             "applies_to": "twitter",
             "fn": lambda text: add_structural_markers_fn(text, "twitter"),
         },
+        "structural_reddit_twitter_style": {
+            "applies_to": "reddit",
+            "fn": lambda text: add_structural_markers_fn(text, "twitter"),
+        },
     }
 
 

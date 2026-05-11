@@ -8,7 +8,8 @@
       "PowerShell(python -c \"import datasets; import emoji; print\\('OK'\\)\" 2>&1)",
       "Bash(dir \"E:\\\\Folder audi\\\\Code\\\\Sarcasm-Detection\\\\id_sarcasm\\\\real_data\")",
       "Bash(python scripts/sanity_check_structural.py --dataset reddit --project_root .)",
-      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\farih\" -Directory | Where-Object {$_.Name -match \"conda|python|miniforge|miniconda|anaconda\"} | Select-Object FullName 2>&1; Get-ChildItem \"C:\\\\\" -Directory -ErrorAction SilentlyContinue | Where-Object {$_.Name -match \"conda|python\"} | Select-Object FullName 2>&1)"
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\farih\" -Directory | Where-Object {$_.Name -match \"conda|python|miniforge|miniconda|anaconda\"} | Select-Object FullName 2>&1; Get-ChildItem \"C:\\\\\" -Directory -ErrorAction SilentlyContinue | Where-Object {$_.Name -match \"conda|python\"} | Select-Object FullName 2>&1)",
+      "Bash(python scripts/preprocess_datasets.py --dataset reddit --variant structural_reddit_twitter_style --project_root .)"
     ]
   }
 }
