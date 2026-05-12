@@ -1,0 +1,14 @@
+python scripts/run_classification_fusion.py \
+    --dataset_name twitter \
+    --model_name indolem/indobertweet-base-uncased \
+    --output_dir outputs/indobertweet-base-uncased-twitter-indonesia-sarcastic-fusion \
+    --num_epochs 100 \
+    --batch_size 32 \
+    --learning_rate 1e-5 \
+    --weight_decay 0.03 \
+    --lr_scheduler_type cosine \
+    --shuffle_train_dataset \
+    --seed 42 \
+    --fp16 \
+    --inset_pos_path real_data/twitter/positive.tsv \
+    --inset_neg_path real_data/twitter/negative.tsv

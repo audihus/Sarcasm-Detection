@@ -1,0 +1,15 @@
+python scripts/run_classification_fusion.py \
+    --dataset_name reddit \
+    --model_name bert-base-multilingual-cased \
+    --output_dir outputs/bert-base-multilingual-cased-reddit-indonesia-sarcastic-fusion \
+    --max_seq_length 128 \
+    --metric_name f1 \
+    --metric_for_best_model f1 \
+    --num_epochs 100 \
+    --batch_size 32 \
+    --learning_rate 1e-5 \
+    --weight_decay 0.03 \
+    --lr_scheduler_type cosine \
+    --shuffle_train_dataset \
+    --seed 42 \
+    --fp16

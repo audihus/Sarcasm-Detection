@@ -18,20 +18,23 @@ Kaggle commands
 SEL 1 — Install:
     !pip install datasets transformers scikit-learn PySastrawi -q
 
-SEL 2 — Reddit late fusion (fitur: word_count, sentence_count, avg_sentence_length):
+SEL 2 — Reddit late fusion (identik hyperparameter dengan baseline recipes):
     !python scripts/run_classification_fusion.py \
         --dataset_name reddit \
         --model_name indobenchmark/indobert-base-p1 \
-        --output_dir /kaggle/working/results/fusion_reddit_indobert_base \
-        --num_epochs 10 --batch_size 32 --learning_rate 2e-5 --seed 42
+        --output_dir /kaggle/working/outputs/indobert-base-p1-reddit-indonesia-sarcastic-fusion \
+        --num_epochs 100 --batch_size 32 --learning_rate 1e-5 \
+        --weight_decay 0.03 --lr_scheduler_type cosine \
+        --shuffle_train_dataset --seed 42 --fp16
 
-SEL 3 — Twitter late fusion (fitur: is_clash, question_count, has_hyperbole)
-         (sesuaikan slug dataset Kaggle untuk path InSet):
+SEL 3 — Twitter late fusion (sesuaikan slug dataset Kaggle untuk path InSet):
     !python scripts/run_classification_fusion.py \
         --dataset_name twitter \
         --model_name indobenchmark/indobert-base-p1 \
-        --output_dir /kaggle/working/results/fusion_twitter_indobert_base \
-        --num_epochs 10 --batch_size 32 --learning_rate 2e-5 --seed 42 \
+        --output_dir /kaggle/working/outputs/indobert-base-p1-twitter-indonesia-sarcastic-fusion \
+        --num_epochs 100 --batch_size 32 --learning_rate 1e-5 \
+        --weight_decay 0.03 --lr_scheduler_type cosine \
+        --shuffle_train_dataset --seed 42 --fp16 \
         --inset_pos_path /kaggle/input/id-sarcasm-data/real_data/twitter/positive.tsv \
         --inset_neg_path /kaggle/input/id-sarcasm-data/real_data/twitter/negative.tsv
 """
@@ -52,6 +55,8 @@ import torch
 import torch.nn as nn
 from datasets import load_dataset, load_from_disk
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from torch.cuda.amp import GradScaler, autocast
+from torch.optim.lr_scheduler import CosineAnnealingLR
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoModel, AutoTokenizer, set_seed
 
@@ -291,12 +296,29 @@ def parse_args() -> argparse.Namespace:
                         help="HuggingFace model ID untuk encoder")
     parser.add_argument("--output_dir", required=True,
                         help="Direktori untuk menyimpan output")
-    parser.add_argument("--num_epochs", type=int, default=10,
-                        help="Jumlah epoch maksimal (default: 10)")
+    parser.add_argument("--max_seq_length", type=int, default=128,
+                        help="Panjang token maksimal (default: 128)")
+    parser.add_argument("--metric_name", default="f1",
+                        choices=["f1", "accuracy"],
+                        help="Metrik evaluasi utama (default: f1)")
+    parser.add_argument("--metric_for_best_model", default="f1",
+                        choices=["f1", "accuracy"],
+                        help="Metrik untuk memilih best model (default: f1)")
+    parser.add_argument("--num_epochs", type=int, default=100,
+                        help="Jumlah epoch maksimal (default: 100)")
     parser.add_argument("--batch_size", type=int, default=32,
                         help="Batch size training (default: 32)")
-    parser.add_argument("--learning_rate", type=float, default=2e-5,
-                        help="AdamW learning rate (default: 2e-5)")
+    parser.add_argument("--learning_rate", type=float, default=1e-5,
+                        help="AdamW learning rate (default: 1e-5)")
+    parser.add_argument("--weight_decay", type=float, default=0.03,
+                        help="AdamW weight decay (default: 0.03)")
+    parser.add_argument("--lr_scheduler_type", default="cosine",
+                        choices=["cosine", "linear", "constant"],
+                        help="Tipe LR scheduler (default: cosine)")
+    parser.add_argument("--shuffle_train_dataset", action="store_true",
+                        help="Shuffle dataset training setiap epoch")
+    parser.add_argument("--fp16", action="store_true",
+                        help="Mixed precision training (fp16)")
     parser.add_argument("--seed", type=int, default=42,
                         help="Random seed (default: 42)")
     parser.add_argument("--inset_pos_path", default=None,
@@ -396,7 +418,7 @@ def main() -> None:
         return tokenizer(
             texts,
             padding="max_length",
-            max_length=128,
+            max_length=args.max_seq_length,
             truncation=True,
             return_tensors="pt",
         )
@@ -414,9 +436,12 @@ def main() -> None:
 
     g = torch.Generator()
     g.manual_seed(args.seed)
-    train_loader = DataLoader(train_ds, batch_size=args.batch_size,     shuffle=True,  generator=g)
-    val_loader   = DataLoader(val_ds,   batch_size=args.batch_size * 2, shuffle=False)
-    test_loader  = DataLoader(test_ds,  batch_size=args.batch_size * 2, shuffle=False)
+    train_loader = DataLoader(
+        train_ds, batch_size=args.batch_size,
+        shuffle=args.shuffle_train_dataset, generator=g,
+    )
+    val_loader  = DataLoader(val_ds,  batch_size=args.batch_size * 2, shuffle=False)
+    test_loader = DataLoader(test_ds, batch_size=args.batch_size * 2, shuffle=False)
 
     # ------------------------------------------------------------------
     # 6. Model, optimizer, training
@@ -432,8 +457,22 @@ def main() -> None:
     print(f"  Classification head     : {head_params:,} "
           f"(vs baseline {_BASELINE_HEAD_PARAMS} → +{head_params - _BASELINE_HEAD_PARAMS})")
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
+    optimizer = torch.optim.AdamW(
+        model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
+    )
     criterion = nn.CrossEntropyLoss()
+
+    # Cosine LR scheduler — steps per batch, matching HF Trainer behaviour
+    total_steps = args.num_epochs * len(train_loader)
+    if args.lr_scheduler_type == "cosine":
+        scheduler = CosineAnnealingLR(optimizer, T_max=total_steps)
+    else:
+        scheduler = None
+
+    use_fp16 = args.fp16 and torch.cuda.is_available()
+    scaler = GradScaler() if use_fp16 else None
+    if use_fp16:
+        print("  fp16 mixed precision enabled")
 
     best_model_path = output_dir / "best_model.pt"
     best_f1 = 0.0
@@ -444,24 +483,44 @@ def main() -> None:
         model.train()
         total_loss = 0.0
         for batch in train_loader:
-            logits = model(
-                batch["input_ids"].to(device),
-                batch["attention_mask"].to(device),
-                batch["features"].to(device),
-            )
-            loss = criterion(logits, batch["labels"].to(device))
-            loss.backward()
-            nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-            optimizer.step()
+            ids  = batch["input_ids"].to(device)
+            mask = batch["attention_mask"].to(device)
+            feat = batch["features"].to(device)
+            lbl  = batch["labels"].to(device)
+
+            if scaler:
+                with autocast():
+                    logits = model(ids, mask, feat)
+                    loss = criterion(logits, lbl)
+                scaler.scale(loss).backward()
+                scaler.unscale_(optimizer)
+                nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                logits = model(ids, mask, feat)
+                loss = criterion(logits, lbl)
+                loss.backward()
+                nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                optimizer.step()
+
             optimizer.zero_grad()
+            if scheduler:
+                scheduler.step()
             total_loss += loss.item()
 
         avg_loss = total_loss / len(train_loader)
-        val_f1, _, _ = run_eval(model, val_loader, device)
-        print(f"  Epoch {epoch:2d}/{args.num_epochs} | loss={avg_loss:.4f} | val_f1={val_f1:.4f}", end="")
+        val_f1, val_preds, val_true = run_eval(model, val_loader, device)
+        val_acc = accuracy_score(val_true, val_preds)
+        val_metric = val_f1 if args.metric_for_best_model == "f1" else val_acc
+        print(
+            f"  Epoch {epoch:2d}/{args.num_epochs} | loss={avg_loss:.4f} "
+            f"| val_{args.metric_name}={val_metric:.4f}",
+            end="",
+        )
 
-        if val_f1 > best_f1:
-            best_f1 = val_f1
+        if val_metric > best_f1:
+            best_f1 = val_metric
             torch.save(model.state_dict(), best_model_path)
             patience_counter = 0
             print(" [best]")
@@ -475,7 +534,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Evaluate best model on test set
     # ------------------------------------------------------------------
-    print(f"\nLoading best checkpoint (val_f1={best_f1:.4f})...")
+    print(f"\nLoading best checkpoint (val_{args.metric_for_best_model}={best_f1:.4f})...")
     model.load_state_dict(torch.load(best_model_path, map_location=device))
 
     test_f1, test_preds, test_true = run_eval(model, test_loader, device)
