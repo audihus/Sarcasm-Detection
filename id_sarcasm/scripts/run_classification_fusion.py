@@ -106,14 +106,26 @@ def seed_everything(seed: int) -> None:
 # ---------------------------------------------------------------------------
 
 class SarcasmModelWithFeatures(nn.Module):
-    """IndoBERT encoder + numeric feature concatenation + linear classification head."""
+    """IndoBERT encoder + numeric feature concatenation + MLP classification head."""
 
-    def __init__(self, model_name: str, feature_dim: int) -> None:
+    def __init__(self, model_name: str, feature_dim: int, hidden_dim: int = 256, dropout_rate: float = 0.3) -> None:
         super().__init__()
         self.bert = AutoModel.from_pretrained(model_name)
-        self.classifier = nn.Linear(768 + feature_dim, 2)
-        nn.init.xavier_uniform_(self.classifier.weight)
-        nn.init.zeros_(self.classifier.bias)
+        
+        # MLP Head untuk Late Fusion yang lebih robust (Anti-Overfit)
+        self.classifier = nn.Sequential(
+            nn.Linear(768 + feature_dim, hidden_dim),
+            nn.BatchNorm1d(hidden_dim), # Stabilisasi distribusi fitur
+            nn.ReLU(),                  # Fungsi aktivasi non-linear
+            nn.Dropout(dropout_rate),   # Regularisasi anti-overfit
+            nn.Linear(hidden_dim, 2)
+        )
+        
+        # Inisialisasi bobot khusus untuk layer Linear di dalam MLP
+        for module in self.classifier:
+            if isinstance(module, nn.Linear):
+                nn.init.xavier_uniform_(module.weight)
+                nn.init.zeros_(module.bias)
 
     def forward(
         self,
@@ -124,8 +136,12 @@ class SarcasmModelWithFeatures(nn.Module):
         # Raw CLS token from the last hidden state, shape (B, 768)
         bert_out = self.bert(input_ids=input_ids, attention_mask=attention_mask)
         cls_emb = bert_out.last_hidden_state[:, 0, :]
+        
+        # Gabungkan text embedding dengan fitur leksikal
         combined = torch.cat([cls_emb, features], dim=1)  # (B, 768 + feature_dim)
-        return self.classifier(combined)                   # (B, 2)
+        
+        # Lewatkan ke MLP head
+        return self.classifier(combined)                  # (B, 2)
 
 
 # ---------------------------------------------------------------------------
