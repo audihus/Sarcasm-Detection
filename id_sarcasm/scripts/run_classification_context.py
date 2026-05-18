@@ -562,6 +562,9 @@ def main():
         trust_remote_code=model_args.trust_remote_code,
         ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,
     )
+    special_tokens = ["[CTX]", "[TGT]"]
+    tokenizer.add_special_tokens({"additional_special_tokens": special_tokens})
+    model.resize_token_embeddings(len(tokenizer))
 
     # Padding strategy
     if data_args.pad_to_max_length:
