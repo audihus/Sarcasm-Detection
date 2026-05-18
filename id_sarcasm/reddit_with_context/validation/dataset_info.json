@@ -2,12 +2,48 @@
   "citation": "",
   "description": "",
   "features": {
-    "text": {
-      "dtype": "large_string",
+    "body": {
+      "dtype": "string",
       "_type": "Value"
     },
     "label": {
+      "dtype": "int32",
+      "_type": "Value"
+    },
+    "permalink": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "subreddit": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "lang_fastText": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "created_utc": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "text": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "author": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "score": {
       "dtype": "int64",
+      "_type": "Value"
+    },
+    "parent_text": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "scrape_status": {
+      "dtype": "string",
       "_type": "Value"
     }
   },
