@@ -85,10 +85,9 @@ class IndoBertInteractionForSequenceClassification(BertPreTrainedModel):
         H = config.hidden_size  # 768
 
         self.classifier = nn.Sequential(
-            nn.Linear(H * 4, H),
-            nn.Tanh(),
+            nn.LayerNorm(H * 4),       # NEW: normalize interaction features
             nn.Dropout(p=0.1),
-            nn.Linear(H, config.num_labels),
+            nn.Linear(H * 4, config.num_labels),  # 3072 -> 2 langsung
         )
 
         # Token IDs for span extraction; stamped onto config before from_pretrained
