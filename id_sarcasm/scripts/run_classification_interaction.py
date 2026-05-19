@@ -85,9 +85,9 @@ class IndoBertInteractionForSequenceClassification(BertPreTrainedModel):
         H = config.hidden_size  # 768
 
         self.classifier = nn.Sequential(
-            nn.LayerNorm(H * 4),       # NEW: normalize interaction features
+            nn.LayerNorm(H * 5),          # was H * 4
             nn.Dropout(p=0.1),
-            nn.Linear(H * 4, config.num_labels),  # 3072 -> 2 langsung
+            nn.Linear(H * 5, config.num_labels),   # was H * 4
         )
 
         # Token IDs for span extraction; stamped onto config before from_pretrained
@@ -155,12 +155,13 @@ class IndoBertInteractionForSequenceClassification(BertPreTrainedModel):
             h_parents.append(h_p)
             h_comments.append(h_c)
 
-        hp = torch.stack(h_parents)   # (B, H)
-        hc = torch.stack(h_comments)  # (B, H)
+        hp = torch.stack(h_parents)
+        hc = torch.stack(h_comments)
+        h_cls = hidden[:, 0, :]   # NEW: CLS token, shape (B, H)
 
-        # InferSent-style features: [u, v, |u-v|, u*v]
-        v = torch.cat([hp, hc, hp - hc, hp * hc], dim=-1)  # (B, 4H)
-        logits = self.classifier(v)                          # (B, num_labels)
+        # InferSent-style features + CLS: [cls, u, v, |u-v|, u*v]
+        v = torch.cat([h_cls, hp, hc, hp - hc, hp * hc], dim=-1)  # (B, 5H)
+        logits = self.classifier(v)
 
         loss = None
         if labels is not None:
