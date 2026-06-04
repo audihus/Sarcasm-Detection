@@ -130,6 +130,16 @@ def main() -> None:
         print(f"      {no_signal_fn/n:.1%}  ({no_signal_fn}/{n})")
         print(f"\n  Cek: {clash_fn}+{surface_fn}+{no_signal_fn} = {clash_fn+surface_fn+no_signal_fn}/{n}")
 
+    if len(fp) > 0:
+        n_fp = len(fp)
+        clash_fp    = int(fp["has_clash"].sum())
+        no_clash_fp = n_fp - clash_fp
+        print(f"\n--- False Positive breakdown (n={n_fp}) ---")
+        print(f"\n  [1] has_clash=True (clash terdeteksi tapi gold tidak sarkas):")
+        print(f"      {clash_fp/n_fp:.1%}  ({clash_fp}/{n_fp})")
+        print(f"\n  [2] has_clash=False:")
+        print(f"      {no_clash_fp/n_fp:.1%}  ({no_clash_fp}/{n_fp})")
+
     print("\n" + "=" * 57)
     print("\nIsi kolom 'kategori_manual' di CSV:")
     print("  clash              → ada kata positif DAN negatif di teks")
