@@ -346,6 +346,7 @@ def train_one_seed(
     val_ds: SarcasmDataset,
     test_ds: SarcasmDataset,
     val_texts: List[str],
+    test_texts: List[str],
     feature_dim: int,
     device: torch.device,
     seed_output_dir: Path,
@@ -469,7 +470,9 @@ def train_one_seed(
         json.dump(val_pred_data, f, ensure_ascii=False, indent=2)
 
     # Test set evaluation.
-    test_f1, test_preds, test_true = run_eval(model, test_loader, device)
+    test_f1, test_preds, test_true, test_probs_best = run_eval(
+        model, test_loader, device, return_probs=True
+    )
     test_acc = accuracy_score(test_true, test_preds)
     test_pre = precision_score(test_true, test_preds, average="binary")
     test_rec = recall_score(test_true, test_preds, average="binary")
@@ -488,6 +491,16 @@ def train_one_seed(
 
     with open(seed_output_dir / "eval_results.json", "w") as f:
         json.dump(result, f, indent=2)
+
+    # Save test probabilities — format identik val_predictions.json.
+    test_pred_data = {
+        "texts":  test_texts,
+        "preds":  test_preds,
+        "labels": test_true,
+        "probs":  [round(p, 6) for p in test_probs_best],
+    }
+    with open(seed_output_dir / "test_predictions.json", "w", encoding="utf-8") as f:
+        json.dump(test_pred_data, f, ensure_ascii=False, indent=2)
 
     with open(seed_output_dir / "predict_results.txt", "w") as f:
         f.write("index\tprediction\n")
@@ -697,6 +710,7 @@ def main() -> None:
             val_ds=val_ds,
             test_ds=test_ds,
             val_texts=val_texts,
+            test_texts=test_texts,
             feature_dim=feature_dim,
             device=device,
             seed_output_dir=seed_dir,
