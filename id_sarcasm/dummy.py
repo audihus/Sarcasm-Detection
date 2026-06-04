@@ -1,51 +1,42 @@
-from transformers import AutoTokenizer
-import torch
+import re, sys
+sys.path.insert(0, "scripts")
 
-# Pakai base tokenizer + register special tokens manual
-tokenizer = AutoTokenizer.from_pretrained("indobenchmark/indobert-base-p1")
-tokenizer.add_special_tokens({"additional_special_tokens": ["[HAS_CTX]", "[NO_CTX]", "[CTX]", "[TGT]"]})
+_DELETED_RE = re.compile(r"\[(deleted|removed)[^\]]*\]", re.IGNORECASE)
 
-ctx_id = tokenizer.convert_tokens_to_ids("[CTX]")
-tgt_id = tokenizer.convert_tokens_to_ids("[TGT]")
-sep_id = tokenizer.sep_token_id
+def clean_parent(text) -> str:
+    if text is None:
+        return ""
+    s = str(text).strip()
+    if s.lower() == "none":
+        return ""
+    s = _DELETED_RE.sub("", s).strip()
+    return s
 
-# ===== Test sampel has-parent =====
-text_has = "[HAS_CTX] [CTX] saya suka hujan [TGT] iya bagus sekali"
-ids_has = tokenizer.encode(text_has, return_tensors="pt")
-print("=" * 60)
-print("HAS_CTX sample:")
-print("  Text:", text_has)
-print("  Tokens:", tokenizer.convert_ids_to_tokens(ids_has[0].tolist()))
-print("  IDs:", ids_has[0].tolist())
+# Test cleaning
+cases = [
+    "Hello world",
+    "[deleted]",
+    "[deleted by user]",
+    "[removed]",
+    "[DELETED]",
+    "some text [deleted] more text",
+    "None",
+    None,
+    "",
+    "  ",
+]
+for c in cases:
+    result = clean_parent(c)
+    print(f"  {repr(c)!s:<40} -> {repr(result)}")
 
-ctx_pos = (ids_has[0] == ctx_id).nonzero(as_tuple=True)[0]
-tgt_pos = (ids_has[0] == tgt_id).nonzero(as_tuple=True)[0]
-sep_pos = (ids_has[0] == sep_id).nonzero(as_tuple=True)[0]
-print(f"  ctx_pos={ctx_pos.tolist()}, tgt_pos={tgt_pos.tolist()}, sep_pos={sep_pos.tolist()}")
+# Test dataset columns
+from datasets import load_from_disk
+ds = load_from_disk("reddit_with_context")
+train = ds["train"]
+print(f"\nTrain size: {len(train)}")
+print(f"Columns: {train.column_names}")
 
-idx_ctx = ctx_pos[0].item()
-idx_tgt = tgt_pos[0].item()
-idx_sep = sep_pos[0].item()
-parent_tokens = tokenizer.convert_ids_to_tokens(ids_has[0][idx_ctx+1:idx_tgt].tolist())
-comment_tokens = tokenizer.convert_ids_to_tokens(ids_has[0][idx_tgt+1:idx_sep].tolist())
-print(f"  Parent span ({idx_ctx+1}:{idx_tgt}): {parent_tokens}")
-print(f"  Comment span ({idx_tgt+1}:{idx_sep}): {comment_tokens}")
-
-# ===== Test sampel no-parent =====
-print("=" * 60)
-text_no = "[NO_CTX] [TGT] iya bagus sekali"
-ids_no = tokenizer.encode(text_no, return_tensors="pt")
-print("NO_CTX sample:")
-print("  Text:", text_no)
-print("  Tokens:", tokenizer.convert_ids_to_tokens(ids_no[0].tolist()))
-
-ctx_pos_no = (ids_no[0] == ctx_id).nonzero(as_tuple=True)[0]
-tgt_pos_no = (ids_no[0] == tgt_id).nonzero(as_tuple=True)[0]
-sep_pos_no = (ids_no[0] == sep_id).nonzero(as_tuple=True)[0]
-print(f"  ctx_pos (harus empty): {ctx_pos_no.tolist()}")
-print(f"  tgt_pos={tgt_pos_no.tolist()}, sep_pos={sep_pos_no.tolist()}")
-
-idx_tgt_no = tgt_pos_no[0].item()
-idx_sep_no = sep_pos_no[0].item()
-comment_tokens_no = tokenizer.convert_ids_to_tokens(ids_no[0][idx_tgt_no+1:idx_sep_no].tolist())
-print(f"  Comment span ({idx_tgt_no+1}:{idx_sep_no}): {comment_tokens_no}")
+# Count parent coverage
+no_parent = sum(1 for r in train if clean_parent(r["parent_text"]) == "")
+print(f"Rows without parent (after clean): {no_parent} / {len(train)}")
+print(f"Rows with parent   (after clean): {len(train) - no_parent} / {len(train)}")

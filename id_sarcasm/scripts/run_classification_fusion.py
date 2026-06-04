@@ -282,11 +282,13 @@ def run_eval(
     model: nn.Module,
     loader: DataLoader,
     device: torch.device,
-) -> Tuple[float, List[int], List[int]]:
-    """Returns (f1_binary, predictions, true_labels)."""
+    return_probs: bool = False,
+) -> Tuple:
+    """Returns (f1_binary, predictions, true_labels[, probs_class1])."""
     model.eval()
     all_preds: List[int] = []
     all_labels: List[int] = []
+    all_probs: List[float] = []
     with torch.no_grad():
         for batch in loader:
             logits = model(
@@ -296,7 +298,12 @@ def run_eval(
             )
             all_preds.extend(logits.argmax(dim=-1).cpu().tolist())
             all_labels.extend(batch["labels"].tolist())
+            if return_probs:
+                probs = torch.softmax(logits, dim=-1)[:, 1]
+                all_probs.extend(probs.cpu().tolist())
     f1 = f1_score(all_labels, all_preds, average="binary")
+    if return_probs:
+        return f1, all_preds, all_labels, all_probs
     return f1, all_preds, all_labels
 
 
@@ -552,6 +559,20 @@ def main() -> None:
     # ------------------------------------------------------------------
     print(f"\nLoading best checkpoint (val_{args.metric_for_best_model}={best_f1:.4f})...")
     model.load_state_dict(torch.load(best_model_path, map_location=device))
+
+    # Save validation predictions for offline error analysis
+    _, val_preds_best, val_true_best, val_probs_best = run_eval(
+        model, val_loader, device, return_probs=True
+    )
+    val_pred_data = {
+        "texts":  val_texts,
+        "preds":  val_preds_best,
+        "labels": val_true_best,
+        "probs":  [round(p, 6) for p in val_probs_best],
+    }
+    with open(output_dir / "val_predictions.json", "w", encoding="utf-8") as f:
+        json.dump(val_pred_data, f, ensure_ascii=False, indent=2)
+    print(f"  Validation predictions saved → val_predictions.json")
 
     test_f1, test_preds, test_true = run_eval(model, test_loader, device)
     test_acc = accuracy_score(test_true, test_preds)

@@ -11,7 +11,15 @@
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\farih\" -Directory | Where-Object {$_.Name -match \"conda|python|miniforge|miniconda|anaconda\"} | Select-Object FullName 2>&1; Get-ChildItem \"C:\\\\\" -Directory -ErrorAction SilentlyContinue | Where-Object {$_.Name -match \"conda|python\"} | Select-Object FullName 2>&1)",
       "Bash(python scripts/preprocess_datasets.py --dataset reddit --variant structural_reddit_twitter_style --project_root .)",
       "Bash(Get-ChildItem -Path \"E:\\\\Folder audi\\\\Code\\\\Sarcasm-Detection\\\\id_sarcasm\" -Recurse -Directory)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "PowerShell(Get-ChildItem *)",
+      "Bash(conda run *)",
+      "Bash(where python *)"
     ]
+  },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
   }
 }
