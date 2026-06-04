@@ -12,6 +12,8 @@ Reddit  features (D=3): [word_count, sentence_count, avg_sentence_length]
                          z-score      z-score          z-score
 Twitter features (D=3): [is_clash, question_count, has_hyperbole]
                          binary     z-score norm    binary
+Twitter features (D=4, --use_contrastive_feature):
+                        [is_clash, question_count, has_hyperbole, has_contrastive_conj]
 
 Kaggle commands
 ---------------
@@ -35,6 +37,18 @@ SEL 3 — Twitter late fusion (sesuaikan slug dataset Kaggle untuk path InSet):
         --num_epochs 100 --batch_size 32 --learning_rate 1e-5 \
         --weight_decay 0.03 --lr_scheduler_type cosine \
         --shuffle_train_dataset --seed 42 --fp16 \
+        --inset_pos_path /kaggle/input/id-sarcasm-data/real_data/twitter/positive.tsv \
+        --inset_neg_path /kaggle/input/id-sarcasm-data/real_data/twitter/negative.tsv
+
+SEL 4 — Multi-seed Twitter + fitur konjungsi:
+    !python scripts/run_classification_fusion.py \
+        --dataset_name twitter \
+        --model_name indobenchmark/indobert-base-p1 \
+        --output_dir /kaggle/working/outputs/twitter-contrastive-multiseed \
+        --num_epochs 100 --batch_size 32 --learning_rate 1e-5 \
+        --weight_decay 0.03 --lr_scheduler_type cosine \
+        --shuffle_train_dataset --fp16 \
+        --seeds "42,1,2,3,4" --use_contrastive_feature \
         --inset_pos_path /kaggle/input/id-sarcasm-data/real_data/twitter/positive.tsv \
         --inset_neg_path /kaggle/input/id-sarcasm-data/real_data/twitter/negative.tsv
 """
@@ -76,16 +90,22 @@ DATASET_CONFIG: Dict[str, Dict] = {
     "reddit": {
         "hub_name": "w11wo/reddit_indonesia_sarcastic",
         "text_col": "text",
-        "feature_dim": 3,
     },
     "twitter": {
         "hub_name": "w11wo/twitter_indonesia_sarcastic",
         "text_col": "tweet",
-        "feature_dim": 3,
     },
 }
 
 _BASELINE_HEAD_PARAMS = 768 * 2 + 2  # Linear(768, 2)
+
+# Word-boundary regex untuk konjungsi pertentangan/konsesif bahasa Indonesia.
+# Clash + konjungsi ini cenderung rekonsiliasi tulus, bukan sarkasme → fitur menurunkan
+# kepercayaan head pada clash untuk kasus tersebut.
+_CONTRASTIVE_CONJ_RE = re.compile(
+    r"\b(tapi|tetapi|namun|walau|walaupun|meski|meskipun|kendati|padahal|sekalipun|biarpun)\b",
+    re.IGNORECASE,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -111,7 +131,7 @@ class SarcasmModelWithFeatures(nn.Module):
     def __init__(self, model_name: str, feature_dim: int, hidden_dim: int = 256, dropout_rate: float = 0.3) -> None:
         super().__init__()
         self.bert = AutoModel.from_pretrained(model_name)
-        
+
         # MLP Head untuk Late Fusion yang lebih robust (Anti-Overfit)
         self.classifier = nn.Sequential(
             nn.Linear(768 + feature_dim, hidden_dim),
@@ -120,7 +140,7 @@ class SarcasmModelWithFeatures(nn.Module):
             nn.Dropout(dropout_rate),   # Regularisasi anti-overfit
             nn.Linear(hidden_dim, 2)
         )
-        
+
         # Inisialisasi bobot khusus untuk layer Linear di dalam MLP
         for module in self.classifier:
             if isinstance(module, nn.Linear):
@@ -136,10 +156,10 @@ class SarcasmModelWithFeatures(nn.Module):
         # Raw CLS token from the last hidden state, shape (B, 768)
         bert_out = self.bert(input_ids=input_ids, attention_mask=attention_mask)
         cls_emb = bert_out.last_hidden_state[:, 0, :]
-        
+
         # Gabungkan text embedding dengan fitur leksikal
         combined = torch.cat([cls_emb, features], dim=1)  # (B, 768 + feature_dim)
-        
+
         # Lewatkan ke MLP head
         return self.classifier(combined)                  # (B, 2)
 
@@ -184,6 +204,7 @@ def extract_features(
     inset_neg: Optional[frozenset] = None,
     feature_stats: Optional[dict] = None,
     is_train: bool = False,
+    use_contrastive_feature: bool = False,
 ) -> Tuple[np.ndarray, Optional[dict]]:
     """
     Build numeric feature matrix.
@@ -191,7 +212,8 @@ def extract_features(
     Reddit  -> shape (N, 3): [word_count, sentence_count, avg_sentence_length]
                               all z-score normalized
     Twitter -> shape (N, 3): [is_clash, question_count_zscore, has_hyperbole]
-                              binary     z-score norm             binary
+               or (N, 4) with --use_contrastive_feature:
+                             [is_clash, question_count_zscore, has_hyperbole, has_contrastive_conj]
 
     When is_train=True, mean/std are computed from `texts` and returned in
     feature_stats. For val/test, pass the stats computed on the training set.
@@ -260,14 +282,20 @@ def extract_features(
             std = feature_stats["question_count_std"]
         q_normalized = (q_arr - mean) / (std + 1e-8)
 
-        features = np.stack(
-            [
-                np.array(is_clash_list, dtype=float),
-                q_normalized,
-                np.array(has_hyperbole_list, dtype=float),
-            ],
-            axis=1,
-        )
+        cols = [
+            np.array(is_clash_list, dtype=float),
+            q_normalized,
+            np.array(has_hyperbole_list, dtype=float),
+        ]
+
+        if use_contrastive_feature:
+            conj_flags = np.array(
+                [1.0 if _CONTRASTIVE_CONJ_RE.search(t) else 0.0 for t in texts],
+                dtype=float,
+            )
+            cols.append(conj_flags)
+
+        features = np.stack(cols, axis=1)
         return features, feature_stats
 
     else:
@@ -308,168 +336,38 @@ def run_eval(
 
 
 # ---------------------------------------------------------------------------
-# Argument parser
+# Per-seed training
 # ---------------------------------------------------------------------------
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Late fusion sarcasm detection")
-    parser.add_argument("--dataset_name", required=True, choices=["reddit", "twitter"],
-                        help="'reddit' atau 'twitter'")
-    parser.add_argument("--model_name", default="indobenchmark/indobert-base-p1",
-                        help="HuggingFace model ID untuk encoder")
-    parser.add_argument("--output_dir", required=True,
-                        help="Direktori untuk menyimpan output")
-    parser.add_argument("--max_seq_length", type=int, default=128,
-                        help="Panjang token maksimal (default: 128)")
-    parser.add_argument("--metric_name", default="f1",
-                        choices=["f1", "accuracy"],
-                        help="Metrik evaluasi utama (default: f1)")
-    parser.add_argument("--metric_for_best_model", default="f1",
-                        choices=["f1", "accuracy"],
-                        help="Metrik untuk memilih best model (default: f1)")
-    parser.add_argument("--num_epochs", type=int, default=100,
-                        help="Jumlah epoch maksimal (default: 100)")
-    parser.add_argument("--batch_size", type=int, default=32,
-                        help="Batch size training (default: 32)")
-    parser.add_argument("--learning_rate", type=float, default=1e-5,
-                        help="AdamW learning rate (default: 1e-5)")
-    parser.add_argument("--weight_decay", type=float, default=0.03,
-                        help="AdamW weight decay (default: 0.03)")
-    parser.add_argument("--lr_scheduler_type", default="cosine",
-                        choices=["cosine", "linear", "constant"],
-                        help="Tipe LR scheduler (default: cosine)")
-    parser.add_argument("--shuffle_train_dataset", action="store_true",
-                        help="Shuffle dataset training setiap epoch")
-    parser.add_argument("--fp16", action="store_true",
-                        help="Mixed precision training (fp16)")
-    parser.add_argument("--seed", type=int, default=42,
-                        help="Random seed (default: 42)")
-    parser.add_argument("--inset_pos_path", default=None,
-                        help="Path ke positive.tsv InSet (wajib untuk Twitter)")
-    parser.add_argument("--inset_neg_path", default=None,
-                        help="Path ke negative.tsv InSet (wajib untuk Twitter)")
-    return parser.parse_args()
+def train_one_seed(
+    seed: int,
+    args: argparse.Namespace,
+    train_ds: SarcasmDataset,
+    val_ds: SarcasmDataset,
+    test_ds: SarcasmDataset,
+    val_texts: List[str],
+    feature_dim: int,
+    device: torch.device,
+    seed_output_dir: Path,
+) -> dict:
+    """Full training + evaluation for one seed. Returns result dict with F1/P/R/FP/FN."""
+    # Reset ALL RNG sources at the top of every seed iteration.
+    seed_everything(seed)
+    seed_output_dir.mkdir(parents=True, exist_ok=True)
 
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
-def main() -> None:
-    args = parse_args()
-    seed_everything(args.seed)
-
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Device: {device}")
-
-    cfg = DATASET_CONFIG[args.dataset_name]
-    text_col: str = cfg["text_col"]
-    feature_dim: int = cfg["feature_dim"]
-
-    # ------------------------------------------------------------------
-    # 1. Load dataset
-    # ------------------------------------------------------------------
-    print(f"\n[1/6] Loading dataset: {args.dataset_name}")
-    hub_name = cfg["hub_name"]
-    if os.path.isdir(hub_name):
-        raw = load_from_disk(hub_name)
-    else:
-        raw = load_dataset(hub_name)
-
-    def get_texts(split: str) -> List[str]:
-        return [str(x) for x in raw[split][text_col]]
-
-    def get_labels(split: str) -> List[int]:
-        col = "label" if "label" in raw[split].column_names else raw[split].column_names[-1]
-        return [int(x) for x in raw[split][col]]
-
-    train_texts = get_texts("train");      train_labels = get_labels("train")
-    val_texts   = get_texts("validation"); val_labels   = get_labels("validation")
-    test_texts  = get_texts("test");       test_labels  = get_labels("test")
-
-    print(f"  Train: {len(train_texts):,}  Val: {len(val_texts):,}  Test: {len(test_texts):,}")
-
-    # ------------------------------------------------------------------
-    # 2. Load InSet lexicon (Twitter only)
-    # ------------------------------------------------------------------
-    inset_pos: Optional[frozenset] = None
-    inset_neg: Optional[frozenset] = None
-    if args.dataset_name == "twitter":
-        if not args.inset_pos_path or not args.inset_neg_path:
-            raise ValueError(
-                "Twitter membutuhkan --inset_pos_path dan --inset_neg_path"
-            )
-        print("\n[2/6] Loading InSet lexicon...")
-        inset_pos, inset_neg = load_inset_lexicon(args.inset_pos_path, args.inset_neg_path)
-    else:
-        print("\n[2/6] InSet tidak diperlukan untuk Reddit, dilewati.")
-
-    # ------------------------------------------------------------------
-    # 3. Feature extraction
-    # ------------------------------------------------------------------
-    print("\n[3/6] Extracting features...")
-    train_features, feature_stats = extract_features(
-        train_texts, args.dataset_name,
-        inset_pos=inset_pos, inset_neg=inset_neg,
-        is_train=True,
-    )
-    val_features, _ = extract_features(
-        val_texts, args.dataset_name,
-        inset_pos=inset_pos, inset_neg=inset_neg,
-        feature_stats=feature_stats,
-    )
-    test_features, _ = extract_features(
-        test_texts, args.dataset_name,
-        inset_pos=inset_pos, inset_neg=inset_neg,
-        feature_stats=feature_stats,
-    )
-    print(f"  Feature stats: {feature_stats}")
-    print(f"  Train features shape: {train_features.shape}")
-
-    with open(output_dir / "feature_stats.json", "w") as f:
-        json.dump(feature_stats, f, indent=2)
-
-    # ------------------------------------------------------------------
-    # 4. Tokenization
-    # ------------------------------------------------------------------
-    print(f"\n[4/6] Tokenizing with {args.model_name}...")
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
-
-    def tokenize(texts: List[str]) -> Dict:
-        return tokenizer(
-            texts,
-            padding="max_length",
-            max_length=args.max_seq_length,
-            truncation=True,
-            return_tensors="pt",
-        )
-
-    train_enc = tokenize(train_texts)
-    val_enc   = tokenize(val_texts)
-    test_enc  = tokenize(test_texts)
-
-    # ------------------------------------------------------------------
-    # 5. DataLoader
-    # ------------------------------------------------------------------
-    train_ds = SarcasmDataset(train_enc["input_ids"], train_enc["attention_mask"], train_features, train_labels)
-    val_ds   = SarcasmDataset(val_enc["input_ids"],   val_enc["attention_mask"],   val_features,   val_labels)
-    test_ds  = SarcasmDataset(test_enc["input_ids"],  test_enc["attention_mask"],  test_features,  test_labels)
-
+    # Recreate train_loader with a freshly seeded generator.
     g = torch.Generator()
-    g.manual_seed(args.seed)
+    g.manual_seed(seed)
     train_loader = DataLoader(
-        train_ds, batch_size=args.batch_size,
-        shuffle=args.shuffle_train_dataset, generator=g,
+        train_ds,
+        batch_size=args.batch_size,
+        shuffle=args.shuffle_train_dataset,
+        generator=g,
+        drop_last=True,  # prevents BatchNorm crash on single-sample last batch
     )
     val_loader  = DataLoader(val_ds,  batch_size=args.batch_size * 2, shuffle=False)
     test_loader = DataLoader(test_ds, batch_size=args.batch_size * 2, shuffle=False)
 
-    # ------------------------------------------------------------------
-    # 6. Model, optimizer, training
-    # ------------------------------------------------------------------
-    print(f"\n[5/6] Initializing model (feature_dim={feature_dim})...")
     model = SarcasmModelWithFeatures(args.model_name, feature_dim).to(device)
 
     total_params = sum(p.numel() for p in model.parameters())
@@ -485,7 +383,6 @@ def main() -> None:
     )
     criterion = nn.CrossEntropyLoss()
 
-    # Cosine LR scheduler — steps per batch, matching HF Trainer behaviour
     total_steps = args.num_epochs * len(train_loader)
     if args.lr_scheduler_type == "cosine":
         scheduler = CosineAnnealingLR(optimizer, T_max=total_steps)
@@ -497,11 +394,11 @@ def main() -> None:
     if use_fp16:
         print("  fp16 mixed precision enabled")
 
-    best_model_path = output_dir / "best_model.pt"
+    best_model_path = seed_output_dir / "best_model.pt"
     best_f1 = 0.0
     patience_counter = 0
 
-    print(f"\n[6/6] Training for up to {args.num_epochs} epochs (patience=3)...")
+    print(f"  Training for up to {args.num_epochs} epochs (patience=3)...")
     for epoch in range(1, args.num_epochs + 1):
         model.train()
         total_loss = 0.0
@@ -554,13 +451,11 @@ def main() -> None:
                 print(f"  Early stopping triggered at epoch {epoch}.")
                 break
 
-    # ------------------------------------------------------------------
-    # Evaluate best model on test set
-    # ------------------------------------------------------------------
-    print(f"\nLoading best checkpoint (val_{args.metric_for_best_model}={best_f1:.4f})...")
+    # Load best checkpoint for final evaluation.
+    print(f"  Loading best checkpoint (val_{args.metric_for_best_model}={best_f1:.4f})...")
     model.load_state_dict(torch.load(best_model_path, map_location=device))
 
-    # Save validation predictions for offline error analysis
+    # Save validation predictions for offline error analysis.
     _, val_preds_best, val_true_best, val_probs_best = run_eval(
         model, val_loader, device, return_probs=True
     )
@@ -570,34 +465,288 @@ def main() -> None:
         "labels": val_true_best,
         "probs":  [round(p, 6) for p in val_probs_best],
     }
-    with open(output_dir / "val_predictions.json", "w", encoding="utf-8") as f:
+    with open(seed_output_dir / "val_predictions.json", "w", encoding="utf-8") as f:
         json.dump(val_pred_data, f, ensure_ascii=False, indent=2)
-    print(f"  Validation predictions saved → val_predictions.json")
 
+    # Test set evaluation.
     test_f1, test_preds, test_true = run_eval(model, test_loader, device)
     test_acc = accuracy_score(test_true, test_preds)
     test_pre = precision_score(test_true, test_preds, average="binary")
     test_rec = recall_score(test_true, test_preds, average="binary")
+    fp = sum(1 for p, l in zip(test_preds, test_true) if p == 1 and l == 0)
+    fn = sum(1 for p, l in zip(test_preds, test_true) if p == 0 and l == 1)
 
-    eval_results = {
-        "f1": test_f1,
-        "accuracy": test_acc,
+    result = {
+        "seed":      seed,
+        "f1":        test_f1,
+        "accuracy":  test_acc,
         "precision": test_pre,
-        "recall": test_rec,
+        "recall":    test_rec,
+        "fp":        fp,
+        "fn":        fn,
     }
-    print(f"\nTest results: {eval_results}")
 
-    with open(output_dir / "eval_results.json", "w") as f:
-        json.dump(eval_results, f, indent=2)
+    with open(seed_output_dir / "eval_results.json", "w") as f:
+        json.dump(result, f, indent=2)
 
-    # predict_results.txt — format identik dengan run_classification.py
-    with open(output_dir / "predict_results.txt", "w") as f:
+    with open(seed_output_dir / "predict_results.txt", "w") as f:
         f.write("index\tprediction\n")
         for idx, pred in enumerate(test_preds):
             f.write(f"{idx}\t{pred}\n")
 
-    print(f"\nOutput saved to {output_dir}/")
-    print("  best_model.pt  eval_results.json  feature_stats.json  predict_results.txt")
+    print(
+        f"  [seed={seed}] Test F1={test_f1:.4f} | P={test_pre:.4f} "
+        f"| R={test_rec:.4f} | FP={fp} | FN={fn}"
+    )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Argument parser
+# ---------------------------------------------------------------------------
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Late fusion sarcasm detection")
+    parser.add_argument("--dataset_name", required=True, choices=["reddit", "twitter"],
+                        help="'reddit' atau 'twitter'")
+    parser.add_argument("--model_name", default="indobenchmark/indobert-base-p1",
+                        help="HuggingFace model ID untuk encoder")
+    parser.add_argument("--output_dir", required=True,
+                        help="Direktori untuk menyimpan output")
+    parser.add_argument("--max_seq_length", type=int, default=128,
+                        help="Panjang token maksimal (default: 128)")
+    parser.add_argument("--metric_name", default="f1",
+                        choices=["f1", "accuracy"],
+                        help="Metrik evaluasi utama (default: f1)")
+    parser.add_argument("--metric_for_best_model", default="f1",
+                        choices=["f1", "accuracy"],
+                        help="Metrik untuk memilih best model (default: f1)")
+    parser.add_argument("--num_epochs", type=int, default=100,
+                        help="Jumlah epoch maksimal (default: 100)")
+    parser.add_argument("--batch_size", type=int, default=32,
+                        help="Batch size training (default: 32)")
+    parser.add_argument("--learning_rate", type=float, default=1e-5,
+                        help="AdamW learning rate (default: 1e-5)")
+    parser.add_argument("--weight_decay", type=float, default=0.03,
+                        help="AdamW weight decay (default: 0.03)")
+    parser.add_argument("--lr_scheduler_type", default="cosine",
+                        choices=["cosine", "linear", "constant"],
+                        help="Tipe LR scheduler (default: cosine)")
+    parser.add_argument("--shuffle_train_dataset", action="store_true",
+                        help="Shuffle dataset training setiap epoch")
+    parser.add_argument("--fp16", action="store_true",
+                        help="Mixed precision training (fp16)")
+    parser.add_argument("--seed", type=int, default=42,
+                        help="Random seed untuk single run (default: 42); diabaikan jika --seeds diisi")
+    parser.add_argument("--seeds", type=str, default=None,
+                        help="Comma-separated seeds untuk multi-seed run, mis. '42,1,2,3,4'. "
+                             "Jika diisi, --seed diabaikan.")
+    parser.add_argument("--inset_pos_path", default=None,
+                        help="Path ke positive.tsv InSet (wajib untuk Twitter)")
+    parser.add_argument("--inset_neg_path", default=None,
+                        help="Path ke negative.tsv InSet (wajib untuk Twitter)")
+    parser.add_argument("--use_contrastive_feature", action="store_true",
+                        help="Tambah fitur biner konjungsi pertentangan (Twitter only). "
+                             "Saat aktif, feature_dim Twitter naik dari 3 → 4.")
+    return parser.parse_args()
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+def main() -> None:
+    args = parse_args()
+
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Device: {device}")
+
+    # Determine seeds list. --seeds overrides --seed.
+    if args.seeds is not None:
+        seeds_list = [int(s.strip()) for s in args.seeds.split(",")]
+    else:
+        seeds_list = [args.seed]
+    print(f"Seeds: {seeds_list}")
+
+    cfg = DATASET_CONFIG[args.dataset_name]
+    text_col: str = cfg["text_col"]
+
+    # ------------------------------------------------------------------
+    # 1. Load dataset  (once, shared across all seeds)
+    # ------------------------------------------------------------------
+    print(f"\n[1/6] Loading dataset: {args.dataset_name}")
+    hub_name = cfg["hub_name"]
+    if os.path.isdir(hub_name):
+        raw = load_from_disk(hub_name)
+    else:
+        raw = load_dataset(hub_name)
+
+    def get_texts(split: str) -> List[str]:
+        return [str(x) for x in raw[split][text_col]]
+
+    def get_labels(split: str) -> List[int]:
+        col = "label" if "label" in raw[split].column_names else raw[split].column_names[-1]
+        return [int(x) for x in raw[split][col]]
+
+    train_texts = get_texts("train");      train_labels = get_labels("train")
+    val_texts   = get_texts("validation"); val_labels   = get_labels("validation")
+    test_texts  = get_texts("test");       test_labels  = get_labels("test")
+
+    print(f"  Train: {len(train_texts):,}  Val: {len(val_texts):,}  Test: {len(test_texts):,}")
+
+    # ------------------------------------------------------------------
+    # 2. Load InSet lexicon (Twitter only, once)
+    # ------------------------------------------------------------------
+    inset_pos: Optional[frozenset] = None
+    inset_neg: Optional[frozenset] = None
+    if args.dataset_name == "twitter":
+        if not args.inset_pos_path or not args.inset_neg_path:
+            raise ValueError(
+                "Twitter membutuhkan --inset_pos_path dan --inset_neg_path"
+            )
+        print("\n[2/6] Loading InSet lexicon...")
+        inset_pos, inset_neg = load_inset_lexicon(args.inset_pos_path, args.inset_neg_path)
+    else:
+        print("\n[2/6] InSet tidak diperlukan untuk Reddit, dilewati.")
+
+    # ------------------------------------------------------------------
+    # 3. Feature extraction (once; feature_dim derived dynamically)
+    # ------------------------------------------------------------------
+    print("\n[3/6] Extracting features...")
+    train_features, feature_stats = extract_features(
+        train_texts, args.dataset_name,
+        inset_pos=inset_pos, inset_neg=inset_neg,
+        is_train=True,
+        use_contrastive_feature=args.use_contrastive_feature,
+    )
+    val_features, _ = extract_features(
+        val_texts, args.dataset_name,
+        inset_pos=inset_pos, inset_neg=inset_neg,
+        feature_stats=feature_stats,
+        use_contrastive_feature=args.use_contrastive_feature,
+    )
+    test_features, _ = extract_features(
+        test_texts, args.dataset_name,
+        inset_pos=inset_pos, inset_neg=inset_neg,
+        feature_stats=feature_stats,
+        use_contrastive_feature=args.use_contrastive_feature,
+    )
+
+    # Dynamic feature_dim: read from actual data shape, not DATASET_CONFIG.
+    feature_dim: int = train_features.shape[1]
+    print(f"  Feature stats: {feature_stats}")
+    print(f"  Train features shape: {train_features.shape}  (feature_dim={feature_dim})")
+
+    with open(output_dir / "feature_stats.json", "w") as f:
+        json.dump(feature_stats, f, indent=2)
+
+    # ------------------------------------------------------------------
+    # 4. Tokenization (once)
+    # ------------------------------------------------------------------
+    print(f"\n[4/6] Tokenizing with {args.model_name}...")
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+
+    def tokenize(texts: List[str]) -> Dict:
+        return tokenizer(
+            texts,
+            padding="max_length",
+            max_length=args.max_seq_length,
+            truncation=True,
+            return_tensors="pt",
+        )
+
+    train_enc = tokenize(train_texts)
+    val_enc   = tokenize(val_texts)
+    test_enc  = tokenize(test_texts)
+
+    # ------------------------------------------------------------------
+    # 5. Build Dataset objects (once; DataLoaders re-created per seed)
+    # ------------------------------------------------------------------
+    train_ds = SarcasmDataset(train_enc["input_ids"], train_enc["attention_mask"], train_features, train_labels)
+    val_ds   = SarcasmDataset(val_enc["input_ids"],   val_enc["attention_mask"],   val_features,   val_labels)
+    test_ds  = SarcasmDataset(test_enc["input_ids"],  test_enc["attention_mask"],  test_features,  test_labels)
+
+    # ------------------------------------------------------------------
+    # 6. Train one run per seed
+    # ------------------------------------------------------------------
+    multi_seed = len(seeds_list) > 1
+    all_results: List[dict] = []
+
+    for seed in seeds_list:
+        print(f"\n{'='*60}")
+        print(f"[5/6] Initializing model — seed={seed}  feature_dim={feature_dim}")
+        print(f"{'='*60}")
+
+        seed_dir = output_dir / f"seed_{seed}" if multi_seed else output_dir
+        result = train_one_seed(
+            seed=seed,
+            args=args,
+            train_ds=train_ds,
+            val_ds=val_ds,
+            test_ds=test_ds,
+            val_texts=val_texts,
+            feature_dim=feature_dim,
+            device=device,
+            seed_output_dir=seed_dir,
+        )
+        all_results.append(result)
+
+    # ------------------------------------------------------------------
+    # 7. Summary
+    # ------------------------------------------------------------------
+    if multi_seed:
+        f1s   = [r["f1"]        for r in all_results]
+        precs = [r["precision"] for r in all_results]
+        recs  = [r["recall"]    for r in all_results]
+        fps   = [r["fp"]        for r in all_results]
+        fns   = [r["fn"]        for r in all_results]
+
+        summary = {
+            "seeds":    seeds_list,
+            "per_seed": all_results,
+            "summary": {
+                "f1_mean":        float(np.mean(f1s)),
+                "f1_std":         float(np.std(f1s)),
+                "precision_mean": float(np.mean(precs)),
+                "precision_std":  float(np.std(precs)),
+                "recall_mean":    float(np.mean(recs)),
+                "recall_std":     float(np.std(recs)),
+                "fp_mean":        float(np.mean(fps)),
+                "fn_mean":        float(np.mean(fns)),
+            },
+        }
+
+        s = summary["summary"]
+        print(f"\n{'='*60}")
+        print(f"Multi-seed summary ({len(seeds_list)} seeds: {seeds_list})")
+        print(f"{'='*60}")
+        print(f"  F1:        {s['f1_mean']:.4f} ± {s['f1_std']:.4f}")
+        print(f"  Precision: {s['precision_mean']:.4f} ± {s['precision_std']:.4f}")
+        print(f"  Recall:    {s['recall_mean']:.4f} ± {s['recall_std']:.4f}")
+        print(f"  FP (mean): {s['fp_mean']:.1f}")
+        print(f"  FN (mean): {s['fn_mean']:.1f}")
+        print(f"{'='*60}")
+
+        summary_path = output_dir / "multiseed_summary.json"
+        with open(summary_path, "w") as f:
+            json.dump(summary, f, indent=2)
+        print(f"\nSummary saved → {summary_path}")
+        print(f"Per-seed outputs → {output_dir}/seed_*/")
+
+    else:
+        # Single-seed: legacy output format in output_dir directly.
+        result = all_results[0]
+        eval_results = {
+            "f1":        result["f1"],
+            "accuracy":  result["accuracy"],
+            "precision": result["precision"],
+            "recall":    result["recall"],
+        }
+        print(f"\nTest results: {eval_results}")
+        print(f"\nOutput saved to {output_dir}/")
+        print("  best_model.pt  eval_results.json  feature_stats.json  predict_results.txt  val_predictions.json")
 
 
 if __name__ == "__main__":
