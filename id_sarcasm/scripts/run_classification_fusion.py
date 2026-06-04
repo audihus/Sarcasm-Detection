@@ -548,6 +548,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--use_contrastive_feature", action="store_true",
                         help="Tambah fitur biner konjungsi pertentangan (Twitter only). "
                              "Saat aktif, feature_dim Twitter naik dari 3 → 4.")
+    parser.add_argument("--no_features", action="store_true",
+                        help="Jalankan plain IndoBERT tanpa fitur leksikal (feature_dim=0). "
+                             "InSet tidak diperlukan. Digunakan sebagai baseline tandingan.")
     return parser.parse_args()
 
 
@@ -601,7 +604,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     inset_pos: Optional[frozenset] = None
     inset_neg: Optional[frozenset] = None
-    if args.dataset_name == "twitter":
+    if args.dataset_name == "twitter" and not args.no_features:
         if not args.inset_pos_path or not args.inset_neg_path:
             raise ValueError(
                 "Twitter membutuhkan --inset_pos_path dan --inset_neg_path"
@@ -609,30 +612,37 @@ def main() -> None:
         print("\n[2/6] Loading InSet lexicon...")
         inset_pos, inset_neg = load_inset_lexicon(args.inset_pos_path, args.inset_neg_path)
     else:
-        print("\n[2/6] InSet tidak diperlukan untuk Reddit, dilewati.")
+        print("\n[2/6] InSet tidak diperlukan, dilewati.")
 
     # ------------------------------------------------------------------
     # 3. Feature extraction (once; feature_dim derived dynamically)
     # ------------------------------------------------------------------
-    print("\n[3/6] Extracting features...")
-    train_features, feature_stats = extract_features(
-        train_texts, args.dataset_name,
-        inset_pos=inset_pos, inset_neg=inset_neg,
-        is_train=True,
-        use_contrastive_feature=args.use_contrastive_feature,
-    )
-    val_features, _ = extract_features(
-        val_texts, args.dataset_name,
-        inset_pos=inset_pos, inset_neg=inset_neg,
-        feature_stats=feature_stats,
-        use_contrastive_feature=args.use_contrastive_feature,
-    )
-    test_features, _ = extract_features(
-        test_texts, args.dataset_name,
-        inset_pos=inset_pos, inset_neg=inset_neg,
-        feature_stats=feature_stats,
-        use_contrastive_feature=args.use_contrastive_feature,
-    )
+    if args.no_features:
+        print("\n[3/6] --no_features aktif: melewati ekstraksi fitur (feature_dim=0).")
+        train_features = np.zeros((len(train_texts), 0), dtype=float)
+        val_features   = np.zeros((len(val_texts),   0), dtype=float)
+        test_features  = np.zeros((len(test_texts),  0), dtype=float)
+        feature_stats: dict = {}
+    else:
+        print("\n[3/6] Extracting features...")
+        train_features, feature_stats = extract_features(
+            train_texts, args.dataset_name,
+            inset_pos=inset_pos, inset_neg=inset_neg,
+            is_train=True,
+            use_contrastive_feature=args.use_contrastive_feature,
+        )
+        val_features, _ = extract_features(
+            val_texts, args.dataset_name,
+            inset_pos=inset_pos, inset_neg=inset_neg,
+            feature_stats=feature_stats,
+            use_contrastive_feature=args.use_contrastive_feature,
+        )
+        test_features, _ = extract_features(
+            test_texts, args.dataset_name,
+            inset_pos=inset_pos, inset_neg=inset_neg,
+            feature_stats=feature_stats,
+            use_contrastive_feature=args.use_contrastive_feature,
+        )
 
     # Dynamic feature_dim: read from actual data shape, not DATASET_CONFIG.
     feature_dim: int = train_features.shape[1]
