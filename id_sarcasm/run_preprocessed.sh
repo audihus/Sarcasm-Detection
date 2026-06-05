@@ -1,0 +1,28 @@
+python scripts/run_classification.py \
+    --model_name_or_path indobenchmark/indobert-base-p1 \
+    --train_file preprocessed_data/twitter_ready/train.csv \
+    --validation_file preprocessed_data/twitter_ready/validation.csv \
+    --test_file preprocessed_data/twitter_ready/test.csv \
+    --text_column_names content \
+    --label_column_name label \
+    --shuffle_train_dataset \
+    --metric_name f1 \
+    --max_seq_length 128 \
+    --per_device_train_batch_size 32 \
+    --per_device_eval_batch_size 64 \
+    --learning_rate 1e-5 \
+    --lr_scheduler_type cosine \
+    --weight_decay 0.03 \
+    --label_smoothing_factor 0.0 \
+    --num_train_epochs 100 \
+    --do_train --do_eval --do_predict \
+    --output_dir outputs/indobert-base-p1-twitter-sarcastic-preprocessed \
+    --overwrite_output_dir \
+    --save_strategy epoch \
+    --evaluation_strategy epoch \
+    --logging_strategy epoch \
+    --load_best_model_at_end \
+    --metric_for_best_model f1 \
+    --seed 42 \
+    --report_to none \
+    --fp16
