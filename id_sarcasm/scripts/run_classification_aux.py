@@ -380,7 +380,7 @@ def main():
     if data_args.lambda_aux > 0:
         if not data_args.inset_pos_path or not data_args.inset_neg_path:
             raise ValueError("--inset_pos_path dan --inset_neg_path wajib jika --lambda_aux > 0")
-        from incongruity import load_inset
+        from framework.incongruity import load_inset
         inset_obj, inset_maxlen = load_inset(data_args.inset_pos_path, data_args.inset_neg_path)
         logger.info(f"InSet: {len(inset_obj)} entri, frasa terpanjang {inset_maxlen} kata")
 
@@ -405,8 +405,8 @@ def main():
                 result["label"] = [(label_to_id[str(l)] if l != -1 else -1) for l in examples["label"]]
         # label clash dihitung dari kolom teks MENTAH (bukan teks ber-marker).
         if data_args.lambda_aux > 0 and data_args.incongruity_source_column in examples:
-            from sarcasm_preprocess import to_lexicon_tokens
-            from incongruity import incongruity_label
+            from framework.sarcasm_preprocess import to_lexicon_tokens
+            from framework.incongruity import incongruity_label
             result["clash"] = [
                 incongruity_label(to_lexicon_tokens(str(t)), inset_obj, inset_maxlen)[0]
                 for t in examples[data_args.incongruity_source_column]
