@@ -174,8 +174,9 @@ def run_one_seed(args, seed: int, inset, max_len_inset: int, class_weights: np.n
 
     train_clash = None
     if args.lam_aux > 0:
-        print(f"[seed={seed}] Menghitung incongruity untuk {len(train_texts)} train...")
-        train_clash = compute_incongruity(train_texts, inset, max_len_inset)
+        train_raw = pd.read_csv(args.train_file)["content"].astype(str).tolist()
+        print(f"[seed={seed}] Menghitung incongruity untuk {len(train_raw)} train...")
+        train_clash = compute_incongruity(train_raw, inset, max_len_inset)
         clash_rate  = sum(train_clash) / len(train_clash)
         print(f"[seed={seed}] Clash rate train: {clash_rate:.1%}")
 
@@ -295,7 +296,7 @@ def main():
     parser.add_argument("--num_epochs",               type=int,   default=100)
     parser.add_argument("--patience",                 type=int,   default=3)
     parser.add_argument("--early_stopping_threshold", type=float, default=0.01)
-    parser.add_argument("--shuffle_train",            action="store_true")
+    parser.add_argument("--shuffle_train", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--fp16",                     action="store_true")
     args = parser.parse_args()
 

@@ -22,8 +22,8 @@ CONTRAST_SET = {"tapi", "tetapi", "namun", "padahal", "walau", "walaupun",
                 "meski", "meskipun"}
 
 # --- knob yang bisa di-tuning (sweep sambil lihat clash rate + phi) --------
-STRONG = 2.5          # |skor| minimum agar dihitung "kuat"; coba 2 / 3 / 4
-WINDOW = 5          # jarak maks antara unit positif & negatif agar dihitung clash;
+STRONG = 2        # |skor| minimum agar dihitung "kuat"; coba 2 / 3 / 4
+WINDOW = None          # jarak maks antara unit positif & negatif agar dihitung clash;
                     # None = nonaktif (positif & negatif di mana pun); coba 3 / 5 / None
 NEG_WINDOW = 3      # negator menjangkau berapa token ke depan
 
