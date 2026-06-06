@@ -183,7 +183,7 @@ def run_one_seed(args, seed: int, inset, max_len_inset: int, class_weights: np.n
     val_ds   = SarcasmDataset(val_texts,   val_labels,   tok, args.max_seq_len)
     test_ds  = SarcasmDataset(test_texts,  test_labels,  tok, args.max_seq_len)
 
-    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True,  num_workers=0)
+    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=args.shuffle_train, num_workers=0)
     val_loader   = DataLoader(val_ds,   batch_size=args.batch_size, shuffle=False, num_workers=0)
     test_loader  = DataLoader(test_ds,  batch_size=args.batch_size, shuffle=False, num_workers=0)
 
@@ -235,7 +235,7 @@ def run_one_seed(args, seed: int, inset, max_len_inset: int, class_weights: np.n
         avg_loss = total_loss / len(train_loader)
         print(f"[seed={seed}] epoch {epoch:3d} | loss {avg_loss:.4f} | val F1 {val_f1:.4f}")
 
-        if val_f1 > best_val_f1 + 1e-4:
+        if val_f1 > best_val_f1 + args.early_stopping_threshold:
             best_val_f1   = val_f1
             patience_count = 0
             best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
@@ -287,14 +287,16 @@ def main():
     parser.add_argument("--lam_aux",        type=float, default=0.0)
     parser.add_argument("--use_raw_input",  action="store_true",
                         help="Pakai content mentah, tanpa to_encoder_text (ablation row 1).")
-    parser.add_argument("--seeds",          default="42,1,2")
-    parser.add_argument("--max_seq_len",    type=int,   default=128)
-    parser.add_argument("--batch_size",     type=int,   default=16)
-    parser.add_argument("--lr",             type=float, default=2e-5)
-    parser.add_argument("--weight_decay",   type=float, default=0.01)
-    parser.add_argument("--num_epochs",     type=int,   default=5)
-    parser.add_argument("--patience",       type=int,   default=2)
-    parser.add_argument("--fp16",           action="store_true")
+    parser.add_argument("--seeds",                    default="42,1,2")
+    parser.add_argument("--max_seq_len",              type=int,   default=128)
+    parser.add_argument("--batch_size",               type=int,   default=32)
+    parser.add_argument("--lr",                       type=float, default=1e-5)
+    parser.add_argument("--weight_decay",             type=float, default=0.03)
+    parser.add_argument("--num_epochs",               type=int,   default=100)
+    parser.add_argument("--patience",                 type=int,   default=3)
+    parser.add_argument("--early_stopping_threshold", type=float, default=0.01)
+    parser.add_argument("--shuffle_train",            action="store_true")
+    parser.add_argument("--fp16",                     action="store_true")
     args = parser.parse_args()
 
     seeds = [int(s.strip()) for s in args.seeds.split(",")]

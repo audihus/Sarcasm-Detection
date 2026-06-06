@@ -14,7 +14,7 @@ SEEDS="42,1,2"
 
 BASE="python scripts/run_sarcasm_marker_aux.py \
     --train_file $TRAIN --val_file $VAL --test_file $TEST \
-    --seeds $SEEDS --fp16"
+    --seeds $SEEDS --shuffle_train --fp16"
 
 echo "=== Row 1: Vanilla baseline (mentah, CLS, lambda=0) ==="
 $BASE \
