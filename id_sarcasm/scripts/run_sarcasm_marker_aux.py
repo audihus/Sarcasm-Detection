@@ -39,7 +39,7 @@ import torch
 import torch.nn as nn
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.utils.class_weight import compute_class_weight
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer, get_cosine_schedule_with_warmup, set_seed
 
@@ -141,7 +141,7 @@ def evaluate(model, loader, device, fp16: bool):
         for batch in loader:
             ids  = batch["input_ids"].to(device)
             mask = batch["attention_mask"].to(device)
-            with autocast(enabled=fp16):
+            with autocast("cuda", enabled=fp16):
                 main_logits, _ = model(ids, mask)
             probs = torch.softmax(main_logits, dim=-1)[:, 1].cpu().tolist()
             preds = torch.argmax(main_logits, dim=-1).cpu().tolist()
@@ -200,7 +200,7 @@ def run_one_seed(args, seed: int, inset, max_len_inset: int, class_weights: np.n
     w = torch.tensor(class_weights, dtype=torch.float, device=device)
     main_loss_fn = nn.CrossEntropyLoss(weight=w)
     aux_loss_fn  = nn.CrossEntropyLoss()
-    scaler = GradScaler(enabled=args.fp16)
+    scaler = GradScaler("cuda", enabled=args.fp16)
 
     # ----- Training -----
     best_val_f1   = -1.0
@@ -216,7 +216,7 @@ def run_one_seed(args, seed: int, inset, max_len_inset: int, class_weights: np.n
             mask = batch["attention_mask"].to(device)
             labs = batch["labels"].to(device)
 
-            with autocast(enabled=args.fp16):
+            with autocast("cuda", enabled=args.fp16):
                 main_logits, aux_logits = model(ids, mask)
                 loss = main_loss_fn(main_logits, labs)
                 if args.lam_aux > 0 and "clash" in batch:
