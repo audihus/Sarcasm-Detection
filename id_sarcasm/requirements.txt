@@ -5,3 +5,7 @@ transformers
 accelerate
 bitsandbytes
 evaluate
+evaluate                                                                                                              
+ftfy                                                                                                                  
+emoji                                                                                                                 
+pandas  
