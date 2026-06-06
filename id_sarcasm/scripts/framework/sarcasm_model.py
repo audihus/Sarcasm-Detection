@@ -23,6 +23,7 @@ class SarcasmModel(nn.Module):
         self.enc = AutoModel.from_pretrained(name)
         self.enc.resize_token_embeddings(n_tokens)
         h = self.enc.config.hidden_size       # 768 untuk indobert-base
+        self.dropout = nn.Dropout(self.enc.config.hidden_dropout_prob)
         self.main = nn.Linear(h, 2)
         self.aux  = nn.Linear(h, 2)
 
@@ -38,4 +39,5 @@ class SarcasmModel(nn.Module):
             # mean-pool atas token yang bukan padding
             mask = attention_mask.unsqueeze(-1).float()       # (B, L, 1)
             pooled = (out.last_hidden_state * mask).sum(1) / mask.sum(1).clamp(min=1e-9)
+        pooled = self.dropout(pooled)
         return self.main(pooled), self.aux(pooled)
