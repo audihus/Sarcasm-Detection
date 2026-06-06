@@ -14,7 +14,10 @@
       "Bash(Select-Object FullName)",
       "PowerShell(Get-ChildItem *)",
       "Bash(conda run *)",
-      "Bash(where python *)"
+      "Bash(where python *)",
+      "Bash(python -m py_compile scripts/framework/sarcasm_model.py)",
+      "Bash(python -m py_compile scripts/run_sarcasm_marker_aux.py)",
+      "Bash(python scripts/run_sarcasm_marker_aux.py --train_file real_data/twitter/train.csv --val_file real_data/twitter/validation.csv --test_file real_data/twitter/test.csv --pooling cls --lam_aux 0 --seeds \"42\" --num_epochs 1 --batch_size 16 --output_dir outputs/smoke-test-row2)"
     ]
   },
   "enabledPlugins": {
