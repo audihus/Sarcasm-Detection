@@ -452,6 +452,7 @@ def main():
         if "test" not in raw_datasets:
             raise ValueError("--do_predict requires a test dataset")
         predict_dataset = raw_datasets["test"]
+        thr_test_labels = list(predict_dataset["label"]) if "label" in predict_dataset.column_names else None
         if data_args.max_predict_samples is not None:
             max_predict_samples = min(len(predict_dataset), data_args.max_predict_samples)
             predict_dataset = predict_dataset.select(range(max_predict_samples))
@@ -572,6 +573,37 @@ def main():
                         item = label_list[item]
                         writer.write(f"{index}\t{item}\n")
         logger.info("Predict results saved at {}".format(output_predict_file))
+
+    # ===== Threshold tuning: pilih threshold F1-optimal di VALIDATION, terapkan ke TEST =====
+    if training_args.do_eval and training_args.do_predict and thr_test_labels is not None:
+        from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
+
+        def _pos_probs(ds):
+            logits = trainer.predict(ds, metric_key_prefix="thr").predictions
+            logits = logits[0] if isinstance(logits, tuple) else logits
+            e = np.exp(logits - logits.max(axis=1, keepdims=True))
+            return (e / e.sum(axis=1, keepdims=True))[:, 1]
+
+        val_p = _pos_probs(eval_dataset)
+        val_y = np.array(eval_dataset["label"])
+        best_t, best_f1 = 0.5, -1.0
+        for t in np.arange(0.05, 0.96, 0.01):
+            f = f1_score(val_y, (val_p >= t).astype(int), zero_division=0)
+            if f > best_f1:
+                best_f1, best_t = f, float(t)
+
+        test_p = _pos_probs(predict_dataset)
+        test_y = np.array(thr_test_labels)
+        for name, t in [("0.50 default", 0.5), (f"{best_t:.2f} tuned@val", best_t)]:
+            pred = (test_p >= t).astype(int)
+            logger.info(
+                f"[thr {name}] test F1={f1_score(test_y, pred, zero_division=0):.4f} "
+                f"P={precision_score(test_y, pred, zero_division=0):.4f} "
+                f"R={recall_score(test_y, pred, zero_division=0):.4f} "
+                f"Acc={accuracy_score(test_y, pred):.4f}"
+            )
+        logger.info(f"[thr] best val threshold={best_t:.2f} (val F1={best_f1:.4f})")
+
     kwargs = {"finetuned_from": model_args.model_name_or_path, "tasks": "text-classification"}
 
     if training_args.push_to_hub:
