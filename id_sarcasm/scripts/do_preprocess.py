@@ -3,11 +3,12 @@ import csv
 import sys
 
 # Tambahkan path agar bisa mengimpor sarcasm_preprocess
-sys.path.append(os.path.join(os.path.dirname(__file__), 'scripts', 'framework'))
-from sarcasm_preprocess import to_encoder_text
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # id_sarcasm/
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'framework'))
+from sarcasm_preprocess_dua import to_encoder_text
 
-input_dir = os.path.join('real_data', 'twitter')
-output_dir = os.path.join('preprocessed_data', 'twitter_ready')
+input_dir = os.path.join(ROOT, 'real_data', 'twitter')
+output_dir = os.path.join(ROOT, 'preprocessed_data', 'twitter_ready_v2')
 os.makedirs(output_dir, exist_ok=True)
 
 splits = ['train', 'validation', 'test']
