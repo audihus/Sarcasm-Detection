@@ -671,11 +671,12 @@ def main():
     def compute_metrics(p: EvalPrediction):
         preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
         preds = np.argmax(preds, axis=1)
+        avg = "binary" if num_labels == 2 else "macro"
         return {
             "accuracy": accuracy.compute(predictions=preds, references=p.label_ids)["accuracy"],
-            "f1": f1.compute(predictions=preds, references=p.label_ids)["f1"],
-            "precision": precision.compute(predictions=preds, references=p.label_ids)["precision"],
-            "recall": recall.compute(predictions=preds, references=p.label_ids)["recall"],
+            "f1": f1.compute(predictions=preds, references=p.label_ids, average=avg)["f1"],
+            "precision": precision.compute(predictions=preds, references=p.label_ids, average=avg)["precision"],
+            "recall": recall.compute(predictions=preds, references=p.label_ids, average=avg)["recall"],
         }
 
     # Data collator will default to DataCollatorWithPadding when the tokenizer is passed to Trainer, so we change it if
