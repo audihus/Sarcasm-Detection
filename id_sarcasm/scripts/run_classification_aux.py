@@ -14,6 +14,7 @@ from typing import List, Optional
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import datasets
 import evaluate
 import numpy as np
@@ -107,6 +108,11 @@ class DataTrainingArguments:
     do_augment: bool = field(default=False, metadata={"help": "Whether to augment with iSarcasm dataset."})
     do_weighted_loss: bool = field(default=False, metadata={"help": "Whether to use weighted cross-entropy loss."})
     weight_multiplier: float = field(default=1.0, metadata={"help": "Weighted loss multiplier factor."})
+    loss_type: str = field(default="ce", metadata={"help": "Loss kelas utama: ce | focal | dice."})
+    pos_weight: float = field(default=0.0, metadata={"help": "Binary only. >0 -> class weight [1.0, pos_weight], override --do_weighted_loss."})
+    focal_gamma: float = field(default=2.0, metadata={"help": "Focusing parameter focal (gamma=0 -> CE)."})
+    dice_alpha: float = field(default=0.0, metadata={"help": "0 = soft-dice/soft-F1; >0 = self-adjusting (Li et al.)."})
+    dice_smooth: float = field(default=1.0, metadata={"help": "Smoothing constant dice."})
 
     # --- tambahan auxiliary incongruity ---
     lambda_aux: float = field(default=0.0, metadata={"help": "Bobot auxiliary incongruity loss. 0 = baseline tanpa aux."})
@@ -115,6 +121,8 @@ class DataTrainingArguments:
     inset_neg_path: Optional[str] = field(default=None, metadata={"help": "Path negative.tsv InSet (wajib jika lambda_aux>0)."})
 
     def __post_init__(self):
+        if self.loss_type not in ("ce", "focal", "dice"):
+            raise ValueError(f"--loss_type harus ce|focal|dice, dapat {self.loss_type}")
         if self.dataset_name is None:
             if self.train_file is None or self.validation_file is None:
                 raise ValueError(" training/validation file or a dataset name.")
@@ -492,18 +500,44 @@ def main():
     )
 
     class AuxWeightedTrainer(Trainer):
+        def _main_loss(self, logits, labels):
+            num_labels = self.model.config.num_labels
+            if data_args.pos_weight and data_args.pos_weight > 0 and num_labels == 2:
+                w = torch.tensor([1.0, data_args.pos_weight], device=logits.device, dtype=torch.float)
+            elif data_args.do_weighted_loss:
+                w = torch.tensor(weights, device=logits.device, dtype=torch.float)
+            else:
+                w = None
+
+            lt = data_args.loss_type
+            if lt == "ce":
+                return nn.CrossEntropyLoss(weight=w)(logits.view(-1, num_labels), labels.view(-1))
+            if lt == "focal":
+                logp = F.log_softmax(logits, dim=-1)
+                pt = logp.exp().gather(1, labels.view(-1, 1)).squeeze(1)
+                logpt = logp.gather(1, labels.view(-1, 1)).squeeze(1)
+                loss = -((1.0 - pt) ** data_args.focal_gamma) * logpt
+                if w is not None:
+                    loss = w.gather(0, labels.view(-1)) * loss
+                return loss.mean()
+            if lt == "dice":
+                if num_labels != 2:
+                    raise ValueError("loss_type=dice hanya untuk binary.")
+                p = F.softmax(logits, dim=-1)[:, 1]
+                y = (labels.view(-1) == 1).float()
+                fac = (1.0 - p) ** data_args.dice_alpha
+                num = 2.0 * (fac * p * y).sum() + data_args.dice_smooth
+                den = (fac * p).sum() + y.sum() + data_args.dice_smooth
+                return 1.0 - num / den
+            raise ValueError(f"loss_type tak dikenal: {lt}")
+
         # `num_items_in_batch` ditambahkan di transformers >= 4.46 -> tampung via **kwargs.
         def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
             labels = inputs.pop("labels")
             clash = inputs.pop("clash", None)
             outputs = model(**inputs)
             logits = outputs["logits"]
-            loss_fct = nn.CrossEntropyLoss(
-                weight=torch.tensor(weights, device=logits.device, dtype=torch.float)
-                if data_args.do_weighted_loss
-                else None
-            )
-            loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+            loss = self._main_loss(logits, labels)
             if data_args.lambda_aux > 0 and clash is not None and "cls" in outputs:
                 aux_fct = nn.CrossEntropyLoss()
                 aux_logits = self.model.aux_head(self.model.aux_dropout(outputs["cls"]))
