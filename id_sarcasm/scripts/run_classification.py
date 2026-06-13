@@ -47,8 +47,14 @@ from transformers import (
     set_seed,
 )
 from transformers.trainer_utils import get_last_checkpoint
-from transformers.utils import check_min_version, send_example_telemetry
+from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
+
+try:
+    from transformers.utils import send_example_telemetry
+except ImportError:
+    def send_example_telemetry(*args, **kwargs):
+        return None
 
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
@@ -679,14 +685,14 @@ def main():
     early_stopping = EarlyStoppingCallback(early_stopping_patience=3, early_stopping_threshold=0.01)
 
     # get all label classes
-    classes = sorted([int(l) for l in label_list])
+    classes = np.array(sorted([int(l) for l in label_list]))
     weights = (
         compute_class_weight(class_weight="balanced", classes=classes, y=train_dataset["label"])
         * data_args.weight_multiplier
     )
 
     class WeightedTrainer(Trainer):
-        def compute_loss(self, model, inputs, return_outputs=False):
+        def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
             labels = inputs.pop("labels")
             outputs = model(**inputs)
             logits = outputs.get("logits")
@@ -705,7 +711,7 @@ def main():
         train_dataset=train_dataset if training_args.do_train else None,
         eval_dataset=eval_dataset if training_args.do_eval else None,
         compute_metrics=compute_metrics,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=data_collator,
         callbacks=[early_stopping],
     )
