@@ -29,7 +29,7 @@ import torch.nn as nn
 import datasets
 import evaluate
 import numpy as np
-from datasets import Value, load_dataset, concatenate_datasets
+from datasets import Value, load_dataset, load_from_disk, concatenate_datasets
 from sklearn.utils.class_weight import compute_class_weight
 
 import transformers
@@ -47,8 +47,16 @@ from transformers import (
     set_seed,
 )
 from transformers.trainer_utils import get_last_checkpoint
-from transformers.utils import check_min_version, send_example_telemetry
+from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
+
+# `send_example_telemetry` dihapus di transformers >= 4.51.
+# Buat stub no-op supaya kompatibel dengan versi baru maupun lama.
+try:
+    from transformers.utils import send_example_telemetry
+except ImportError:
+    def send_example_telemetry(*args, **kwargs):
+        return None
 
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
@@ -330,7 +338,7 @@ def main():
 
     # Detecting last checkpoint.
     last_checkpoint = None
-    if os.path.isdir(training_args.output_dir) and training_args.do_train and not training_args.overwrite_output_dir:
+    if os.path.isdir(training_args.output_dir) and training_args.do_train and not getattr(training_args, "overwrite_output_dir", False):
         last_checkpoint = get_last_checkpoint(training_args.output_dir)
         if last_checkpoint is None and len(os.listdir(training_args.output_dir)) > 0:
             raise ValueError(
@@ -353,14 +361,17 @@ def main():
     # In distributed training, the load_dataset function guarantee that only one local process can concurrently
     # download the dataset.
     if data_args.dataset_name is not None:
-        # Downloading and loading a dataset from the hub.
-        raw_datasets = load_dataset(
-            data_args.dataset_name,
-            data_args.dataset_config_name,
-            cache_dir=model_args.cache_dir,
-            token=model_args.token,
-        )
-        # Try print some info about the dataset
+        if os.path.isdir(data_args.dataset_name):
+            # Local DatasetDict saved via save_to_disk()
+            raw_datasets = load_from_disk(data_args.dataset_name)
+        else:
+            # HuggingFace Hub name
+            raw_datasets = load_dataset(
+                data_args.dataset_name,
+                data_args.dataset_config_name,
+                cache_dir=model_args.cache_dir,
+                token=model_args.token,
+            )
         logger.info(f"Dataset loaded: {raw_datasets}")
         logger.info(raw_datasets)
     else:
@@ -660,11 +671,12 @@ def main():
     def compute_metrics(p: EvalPrediction):
         preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
         preds = np.argmax(preds, axis=1)
+        avg = "binary" if num_labels == 2 else "macro"
         return {
             "accuracy": accuracy.compute(predictions=preds, references=p.label_ids)["accuracy"],
-            "f1": f1.compute(predictions=preds, references=p.label_ids)["f1"],
-            "precision": precision.compute(predictions=preds, references=p.label_ids)["precision"],
-            "recall": recall.compute(predictions=preds, references=p.label_ids)["recall"],
+            "f1": f1.compute(predictions=preds, references=p.label_ids, average=avg)["f1"],
+            "precision": precision.compute(predictions=preds, references=p.label_ids, average=avg)["precision"],
+            "recall": recall.compute(predictions=preds, references=p.label_ids, average=avg)["recall"],
         }
 
     # Data collator will default to DataCollatorWithPadding when the tokenizer is passed to Trainer, so we change it if
@@ -679,14 +691,17 @@ def main():
     early_stopping = EarlyStoppingCallback(early_stopping_patience=3, early_stopping_threshold=0.01)
 
     # get all label classes
-    classes = sorted([int(l) for l in label_list])
+    # sklearn >= 1.5 mewajibkan `classes` berupa numpy.ndarray, bukan list.
+    classes = np.array(sorted([int(l) for l in label_list]))
     weights = (
         compute_class_weight(class_weight="balanced", classes=classes, y=train_dataset["label"])
         * data_args.weight_multiplier
     )
 
     class WeightedTrainer(Trainer):
-        def compute_loss(self, model, inputs, return_outputs=False):
+        # `num_items_in_batch` ditambahkan di transformers >= 4.46.
+        # Tampung lewat **kwargs supaya kompatibel forward & backward.
+        def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
             labels = inputs.pop("labels")
             outputs = model(**inputs)
             logits = outputs.get("logits")
@@ -705,7 +720,7 @@ def main():
         train_dataset=train_dataset if training_args.do_train else None,
         eval_dataset=eval_dataset if training_args.do_eval else None,
         compute_metrics=compute_metrics,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=data_collator,
         callbacks=[early_stopping],
     )
