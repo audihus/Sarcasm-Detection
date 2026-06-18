@@ -535,6 +535,14 @@ def main():
         config.problem_type = "single_label_classification"
         logger.info("setting problem type to single label classification")
 
+    # XLM-R/RoBERTa: paksa eager attention agar numerik mendekati era paper.
+    # transformers >=4.42 default ke SDPA untuk RoBERTa; paper (~4.41) memakai eager,
+    # dan XLM-R sangat sensitif ke perbedaan numerik ini. Dibatasi ke roberta-family
+    # supaya model BERT (IndoBERT/mBERT/NusaBERT, yang sudah cocok dgn paper) tak berubah.
+    if getattr(config, "model_type", "") in ("xlm-roberta", "roberta"):
+        config._attn_implementation = "eager"
+        logger.info("Forcing eager attention for model_type=%s (reproducibility)", config.model_type)
+
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
         cache_dir=model_args.cache_dir,
