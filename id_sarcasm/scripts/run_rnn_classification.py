@@ -77,6 +77,9 @@ def parse_args():
                    help="Path cc.id.300.bin (subword OOV) atau cc.id.300.vec (OOV=nol).")
     p.add_argument("--embedding_dim", type=int, default=300,
                    help="Dim embedding utk --embedding random; fasttext mengikuti dim file.")
+    p.add_argument("--freeze_embedding", action="store_true",
+                   help="Bekukan embedding layer (gradien tidak mengalir ke embedding weight). "
+                        "Efektif untuk fastText pretrained: turunkan overfit, kurangi trainable params.")
     p.add_argument("--hidden_size", type=int, default=128, help="Hidden size per arah (output Bi = 2x).")
     p.add_argument("--num_layers", type=int, default=1)
     p.add_argument("--dropout", type=float, default=0.3)
@@ -277,13 +280,15 @@ class SelfAttention(nn.Module):
 # ---------------------------------------------------------------------------
 class RNNClassifier(nn.Module):
     def __init__(self, vocab_size, embed_dim, hidden_size, num_layers, num_classes,
-                 model_type, dropout, pretrained=None):
+                 model_type, dropout, pretrained=None, freeze_embedding=False):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=PAD_IDX)
         if pretrained is not None:
             self.embedding.weight.data.copy_(torch.from_numpy(pretrained))
             with torch.no_grad():
                 self.embedding.weight[PAD_IDX].zero_()
+        if freeze_embedding:
+            self.embedding.weight.requires_grad = False
 
         rnn_cls = nn.LSTM if model_type == "bilstm" else nn.GRU
         self.rnn = rnn_cls(
@@ -398,7 +403,8 @@ def run_single_seed(args, seed, vocab, pretrained, embed_dim, datasets_raw, devi
     model = RNNClassifier(
         vocab_size=len(vocab), embed_dim=embed_dim, hidden_size=args.hidden_size,
         num_layers=args.num_layers, num_classes=2, model_type=args.model_type,
-        dropout=args.dropout, pretrained=pretrained
+        dropout=args.dropout, pretrained=pretrained,
+        freeze_embedding=args.freeze_embedding,
     ).to(device)
 
     # Inisialisasi bobot kelas jika diminta
@@ -590,7 +596,7 @@ def main():
             "embedding_dim": embed_dim, "max_seq_length": args.max_seq_length,
             "vocab_size": len(vocab), "learning_rate": args.learning_rate,
             "batch_size": args.batch_size, "class_weight": args.class_weight,
-            "do_lower_case": args.do_lower_case,
+            "do_lower_case": args.do_lower_case, "freeze_embedding": args.freeze_embedding,
         },
         "per_seed": [
             {"seed": r["seed"], "best_val_metric": r["best_val_metric"],
