@@ -80,6 +80,7 @@ def parse_args():
     p.add_argument("--hidden_size", type=int, default=128, help="Hidden size per arah (output Bi = 2x).")
     p.add_argument("--num_layers", type=int, default=1)
     p.add_argument("--dropout", type=float, default=0.3)
+    p.add_argument("--gamma", type=float, default=2.0, help="Gamma parameter untuk Focal Loss.")
 
     # --- optimisasi ---
     p.add_argument("--learning_rate", type=float, default=1e-3)
@@ -408,8 +409,8 @@ def run_single_seed(args, seed, vocab, pretrained, embed_dim, datasets_raw, devi
         weight = torch.tensor(w, dtype=torch.float, device=device)
         logger.info("[seed %d] class weights (balanced): %s", seed, w.tolist())
         
-    # Menggunakan Focal Loss yang sudah dibuat
-    loss_fct = FocalLoss(alpha=weight, gamma=2.0)
+    # Ganti angka 2.0 yang hardcoded dengan args.gamma
+    loss_fct = FocalLoss(alpha=weight, gamma=args.gamma)
 
     optimizer = torch.optim.Adam(
         [p for p in model.parameters() if p.requires_grad],
