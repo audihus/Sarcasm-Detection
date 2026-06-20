@@ -95,6 +95,9 @@ def parse_args():
     p.add_argument("--max_grad_norm", type=float, default=1.0)
     p.add_argument("--class_weight", action="store_true",
                    help="Class-weighted utk menangani imbalance.")
+    p.add_argument("--augment_file", type=str, default=None,
+                   help="Path ke CSV tambahan (kolom teks & label sama dgn --text/label_column_name) "
+                        "yang di-append ke training set. Contoh: real_data/reddit/train.csv")
     p.add_argument("--fp16", action="store_true", help="Mixed precision (hanya efektif di CUDA).")
 
     # --- protokol ---
@@ -529,6 +532,22 @@ def main():
                 device, args.model_type, args.embedding)
 
     datasets_raw = load_splits(args)
+
+    if args.augment_file:
+        import pandas as pd
+        aug_df = pd.read_csv(args.augment_file)
+        aug_texts = [str(t) for t in aug_df[args.text_column_name].tolist()]
+        aug_labels = [int(l) for l in aug_df[args.label_column_name].tolist()]
+        orig_texts, orig_labels = datasets_raw["train"]
+        datasets_raw["train"] = (orig_texts + aug_texts, orig_labels + aug_labels)
+        n_total = len(orig_labels) + len(aug_labels)
+        n_pos = sum(orig_labels) + sum(aug_labels)
+        logger.info(
+            "Augmentasi dari %s: +%d sampel -> train=%d (neg %d / pos %d, %.1f%% positif)",
+            args.augment_file, len(aug_labels), n_total, n_total - n_pos, n_pos,
+            100.0 * n_pos / n_total,
+        )
+
     seeds = [int(s) for s in str(args.seeds).split(",") if s.strip() != ""]
 
     vocab = build_vocab(datasets_raw["train"][0], args.do_lower_case, args.min_freq, args.vocab_size)
@@ -597,6 +616,7 @@ def main():
             "vocab_size": len(vocab), "learning_rate": args.learning_rate,
             "batch_size": args.batch_size, "class_weight": args.class_weight,
             "do_lower_case": args.do_lower_case, "freeze_embedding": args.freeze_embedding,
+            "augment_file": args.augment_file,
         },
         "per_seed": [
             {"seed": r["seed"], "best_val_metric": r["best_val_metric"],
