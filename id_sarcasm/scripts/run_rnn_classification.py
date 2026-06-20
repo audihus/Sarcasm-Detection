@@ -1,66 +1,8 @@
 #!/usr/bin/env python
 # coding=utf-8
-# Baseline RNN (Bi-LSTM / Bi-GRU) ringan untuk deteksi sarkasme Indonesia (Twitter IdSarcasm).
-# Dievaluasi APPLE-TO-APPLE dengan baseline transformer di scripts/run_classification.py.
 """
 Baseline RNN low-parameter untuk deteksi sarkasme Indonesia (dataset Twitter IdSarcasm).
-
-================================================================================
-APPLE-TO-APPLE dengan scripts/run_classification.py (HF Trainer)
-================================================================================
-Yang DIBUAT IDENTIK dengan protokol paper / baseline transformer:
-  * Dataset + split persis sama (train 1878 / val 268 / test 538).
-  * max_seq_length = 128, truncation di sisi kanan.
-  * Metrik = F1 BINARY KELAS POSITIF (label 1 = sarkas), + accuracy / precision /
-    recall. Identik dgn evaluate.load("f1") default (average="binary", pos_label=1).
-  * Pemilihan model = F1 VALIDASI terbaik (mirror load_best_model_at_end +
-    metric_for_best_model="f1"); eval setiap epoch.
-  * Early stopping: patience 3, threshold 0.01 (mirror EarlyStoppingCallback).
-  * Budget epoch: cap 100 + early stop.
-  * TEST dievaluasi SEKALI di akhir dengan model val-terbaik (mirror
-    trainer.evaluate(predict_dataset)). Semua keputusan tuning di valid.
-  * Seed default 42; multi-seed -> laporkan mean +/- std.
-  * Output eval_results.json memakai KUNCI SAMA: eval_accuracy, eval_f1,
-    eval_precision, eval_recall (+ predict_results.txt).
-
-================================================================================
-DEVIASI YANG DISENGAJA (RNN dilatih FROM SCRATCH, bukan fine-tuning transformer)
-================================================================================
-Ini variabel bebas model — TIDAK boleh menyalin LR transformer mentah-mentah:
-  * Optimizer Adam, learning_rate = 1e-3 (BUKAN 1e-5 yang untuk fine-tuning
-    transformer; RNN acak butuh LR jauh lebih besar agar konvergen).
-  * lr_scheduler = none (konstan) secara default; transformer pakai cosine.
-  * Tanpa fp16 secara default (CPU/baseline ringan; flag --fp16 tersedia utk GPU).
-  * Tokenisasi: WHITESPACE split (bukan WordPiece transformer / nltk word_tokenize).
-    Alasan: data sudah ber-marker (`<username>` `<link>` `<hashtag>` ...); split
-    spasi menjaga marker tetap UTUH sebagai satu token (word_tokenize akan memecah
-    `<username>` -> `<`,`username`,`>`). Lowercase default ON (konsisten antar varian).
-  * Loss default = CrossEntropy TANPA bobot (sama dgn baseline transformer default);
-    flag --class_weight menyalakan class-weighted CE (balanced) utk imbalance ~75/25.
-
-================================================================================
-ABLATION EMBEDDING (flag --embedding)
-================================================================================
-  1. random   : nn.Embedding init acak, TRAINABLE dari nol. Vocab dibangun dari
-                train set. Baseline "paling murni low-resource".
-  2. fasttext : init dari pretrained fastText Indonesia cc.id.300 (300-dim).
-                  - File .bin  -> setiap kata (termasuk OOV) dapat vektor via
-                    subword n-gram (butuh `pip install fasttext`). Handle OOV penuh
-                    (penting utk slang/typo Twitter).
-                  - File .vec  -> hanya kata yang ada di file yang terisi; OOV =
-                    VEKTOR NOL (lebih ringan, tanpa subword). OOV nol tetap bisa
-                    belajar bila embedding tidak di-freeze.
-                --freeze_embedding membekukan matrix embedding (default: fine-tune).
-
-Contoh:
-  python scripts/run_rnn_classification.py \
-      --model_type bilstm --embedding random \
-      --train_file real_data/twitter/train.csv \
-      --validation_file real_data/twitter/validation.csv \
-      --test_file real_data/twitter/test.csv \
-      --text_column_name content --label_column_name label \
-      --output_dir outputs/rnn-bilstm-random-twitter \
-      --seeds 42,1,2
+Terintegrasi dengan Self-Attention, Focal Loss, dan LR Scheduler.
 """
 
 import argparse
@@ -75,6 +17,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from sklearn.metrics import (
@@ -84,6 +27,9 @@ from sklearn.metrics import (
     recall_score,
 )
 from sklearn.utils.class_weight import compute_class_weight
+
+# Pastikan module OS sudah diimport dan bisa dipakai untuk setup env
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
@@ -129,25 +75,22 @@ def parse_args():
     p.add_argument("--embedding", type=str, default="random", choices=["random", "fasttext"])
     p.add_argument("--fasttext_path", type=str, default=None,
                    help="Path cc.id.300.bin (subword OOV) atau cc.id.300.vec (OOV=nol).")
-    p.add_argument("--freeze_embedding", action="store_true", help="Bekukan matrix embedding.")
     p.add_argument("--embedding_dim", type=int, default=300,
                    help="Dim embedding utk --embedding random; fasttext mengikuti dim file.")
     p.add_argument("--hidden_size", type=int, default=128, help="Hidden size per arah (output Bi = 2x).")
     p.add_argument("--num_layers", type=int, default=1)
-    p.add_argument("--pooling", type=str, default="max", choices=["last", "max", "mean", "maxmean"],
-                   help="maxmean = concat max+mean (2x lebar head; sering naikin precision).")
     p.add_argument("--dropout", type=float, default=0.3)
 
-    # --- optimisasi (DEVIASI dari transformer: Adam lr 1e-3) ---
+    # --- optimisasi ---
     p.add_argument("--learning_rate", type=float, default=1e-3)
     p.add_argument("--weight_decay", type=float, default=0.0)
     p.add_argument("--batch_size", type=int, default=32)
     p.add_argument("--num_train_epochs", type=int, default=100)
-    p.add_argument("--early_stopping_patience", type=int, default=3)
+    p.add_argument("--early_stopping_patience", type=int, default=20) # Default udah di-set 20 nih!
     p.add_argument("--early_stopping_threshold", type=float, default=0.01)
     p.add_argument("--max_grad_norm", type=float, default=1.0)
     p.add_argument("--class_weight", action="store_true",
-                   help="Class-weighted CE (balanced) utk menangani imbalance.")
+                   help="Class-weighted utk menangani imbalance.")
     p.add_argument("--fp16", action="store_true", help="Mixed precision (hanya efektif di CUDA).")
 
     # --- protokol ---
@@ -163,7 +106,6 @@ def parse_args():
 # Data loading & tokenisasi
 # ---------------------------------------------------------------------------
 def load_splits(args) -> Dict[str, Tuple[List[str], List[int]]]:
-    """Kembalikan {'train':(texts,labels), 'validation':..., 'test':...}."""
     splits = {}
     if args.use_hf_dataset:
         from datasets import load_dataset
@@ -190,7 +132,6 @@ def load_splits(args) -> Dict[str, Tuple[List[str], List[int]]]:
 
 
 def tokenize(text: str, do_lower: bool) -> List[str]:
-    """Whitespace tokenisasi (menjaga marker `<username>` dst. tetap utuh)."""
     if do_lower:
         text = text.lower()
     return text.split()
@@ -202,7 +143,6 @@ def build_vocab(train_texts: List[str], do_lower: bool, min_freq: int, max_size:
     for t in train_texts:
         counter.update(tokenize(t, do_lower))
     vocab = {PAD_TOKEN: PAD_IDX, UNK_TOKEN: UNK_IDX}
-    # urut by freq desc lalu alfabet (stabil & reproducible)
     for word, freq in sorted(counter.items(), key=lambda kv: (-kv[1], kv[0])):
         if freq < min_freq:
             continue
@@ -217,7 +157,7 @@ def build_vocab(train_texts: List[str], do_lower: bool, min_freq: int, max_size:
 
 def encode(text: str, vocab: Dict[str, int], do_lower: bool, max_len: int) -> List[int]:
     ids = [vocab.get(tok, UNK_IDX) for tok in tokenize(text, do_lower)][:max_len]
-    if not ids:  # teks kosong -> satu token UNK agar panjang >= 1
+    if not ids:
         ids = [UNK_IDX]
     return ids
 
@@ -235,7 +175,6 @@ class SarcasmDataset(Dataset):
 
 
 def collate_batch(batch):
-    """Pad dinamis ke panjang maks dalam batch (pad_idx=0)."""
     seqs, lengths, labels = zip(*batch)
     max_len = max(lengths)
     padded = torch.full((len(seqs), max_len), PAD_IDX, dtype=torch.long)
@@ -248,12 +187,6 @@ def collate_batch(batch):
 # Pretrained embedding (fastText)
 # ---------------------------------------------------------------------------
 def load_fasttext_matrix(vocab: Dict[str, int], path: str, default_dim: int) -> Tuple[np.ndarray, int]:
-    """
-    Bangun embedding matrix dari fastText cc.id.300.
-      * .bin -> subword OOV (semua kata dapat vektor); butuh lib `fasttext`.
-      * .vec -> hanya kata di file yang terisi; OOV tetap VEKTOR NOL.
-    Baris PAD_IDX selalu nol.
-    """
     if not os.path.isfile(path):
         raise FileNotFoundError(f"fastText file tidak ditemukan: {path}")
 
@@ -263,10 +196,7 @@ def load_fasttext_matrix(vocab: Dict[str, int], path: str, default_dim: int) -> 
         try:
             import fasttext  # type: ignore
         except ImportError as e:
-            raise ImportError(
-                "Memuat .bin butuh `pip install fasttext`. Alternatif: pakai file .vec "
-                "(OOV jadi vektor nol)."
-            ) from e
+            raise ImportError("Memuat .bin butuh `pip install fasttext`.") from e
         ft = fasttext.load_model(path)
         dim = ft.get_dimension()
         matrix = np.zeros((len(vocab), dim), dtype=np.float32)
@@ -275,22 +205,21 @@ def load_fasttext_matrix(vocab: Dict[str, int], path: str, default_dim: int) -> 
             if idx == PAD_IDX:
                 continue
             word = inv_vocab[idx]
-            matrix[idx] = ft.get_word_vector(word)  # subword -> tak ada OOV
+            matrix[idx] = ft.get_word_vector(word)
             covered += 1
         logger.info("fastText(.bin) dim=%d: %d/%d token diisi via subword (OOV-free).",
                     dim, covered, len(vocab) - 1)
         return matrix, dim
 
-    # ---- format teks .vec / .txt ----
     dim = default_dim
     matrix = None
     found = 0
     want = set(vocab.keys())
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         first = f.readline().rstrip().split(" ")
-        if len(first) == 2:  # header "count dim"
+        if len(first) == 2:
             dim = int(first[1])
-        else:  # tak ada header: baris pertama adalah vektor
+        else:
             dim = len(first) - 1
             f.seek(0)
         matrix = np.zeros((len(vocab), dim), dtype=np.float32)
@@ -309,20 +238,51 @@ def load_fasttext_matrix(vocab: Dict[str, int], path: str, default_dim: int) -> 
 
 
 # ---------------------------------------------------------------------------
+# Custom Modules (Focal Loss & Self Attention)
+# ---------------------------------------------------------------------------
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=None, gamma=2.0):
+        super().__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+
+    def forward(self, logits, targets):
+        ce_loss = F.cross_entropy(logits, targets, reduction='none', weight=self.alpha)
+        pt = torch.exp(-ce_loss)
+        focal_loss = ((1 - pt) ** self.gamma) * ce_loss
+        return focal_loss.mean()
+
+class SelfAttention(nn.Module):
+    def __init__(self, hidden_size):
+        super().__init__()
+        self.W = nn.Linear(hidden_size, hidden_size)
+        self.u = nn.Linear(hidden_size, 1, bias=False)
+
+    def forward(self, hidden_states, mask):
+        u_t = torch.tanh(self.W(hidden_states))
+        attn_weights = self.u(u_t).squeeze(-1)
+        
+        # Masking: abaikan token padding
+        attn_weights = attn_weights.masked_fill(~mask, float('-inf'))
+        attn_weights = torch.softmax(attn_weights, dim=1)
+        
+        # Context vector via weighted sum
+        context_vector = torch.bmm(attn_weights.unsqueeze(1), hidden_states).squeeze(1)
+        return context_vector
+
+
+# ---------------------------------------------------------------------------
 # Model
 # ---------------------------------------------------------------------------
 class RNNClassifier(nn.Module):
     def __init__(self, vocab_size, embed_dim, hidden_size, num_layers, num_classes,
-                 model_type, pooling, dropout, pretrained=None, freeze=False):
+                 model_type, dropout, pretrained=None):
         super().__init__()
-        self.pooling = pooling
         self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=PAD_IDX)
         if pretrained is not None:
             self.embedding.weight.data.copy_(torch.from_numpy(pretrained))
             with torch.no_grad():
                 self.embedding.weight[PAD_IDX].zero_()
-        if freeze:
-            self.embedding.weight.requires_grad = False
 
         rnn_cls = nn.LSTM if model_type == "bilstm" else nn.GRU
         self.rnn = rnn_cls(
@@ -331,30 +291,21 @@ class RNNClassifier(nn.Module):
             dropout=dropout if num_layers > 1 else 0.0,
         )
         self.dropout = nn.Dropout(dropout)
-        pool_mult = 2 if pooling == "maxmean" else 1   # maxmean -> concat 2 representasi
-        self.fc = nn.Linear(hidden_size * 2 * pool_mult, num_classes)
+        
+        rnn_out_dim = hidden_size * 2
+        self.attention = SelfAttention(rnn_out_dim)
+        self.fc = nn.Linear(rnn_out_dim, num_classes)
 
     def forward(self, input_ids, lengths):
-        emb = self.dropout(self.embedding(input_ids))            # (B, L, E)
+        emb = self.dropout(self.embedding(input_ids))
         packed = pack_padded_sequence(emb, lengths.cpu(), batch_first=True, enforce_sorted=False)
-        out_packed, hidden = self.rnn(packed)
+        out_packed, _ = self.rnn(packed)
 
-        if self.pooling == "last":
-            h_n = hidden[0] if isinstance(hidden, tuple) else hidden   # (num_layers*2, B, H)
-            pooled = torch.cat([h_n[-2], h_n[-1]], dim=1)              # last layer fwd+bwd -> (B, 2H)
-        else:
-            out, _ = pad_packed_sequence(out_packed, batch_first=True)  # (B, L, 2H)
-            mask = (input_ids != PAD_IDX).unsqueeze(-1)                 # (B, L, 1)
-            parts = []
-            if self.pooling in ("max", "maxmean"):
-                parts.append(out.masked_fill(~mask, float("-inf")).max(dim=1).values)
-            if self.pooling in ("mean", "maxmean"):
-                summed = (out * mask).sum(dim=1)
-                parts.append(summed / lengths.to(summed.device).unsqueeze(1).clamp(min=1).to(summed.dtype))
-                # parts.append(summed / lengths.unsqueeze(1).clamp(min=1).to(summed.dtype))
-            pooled = torch.cat(parts, dim=1) if len(parts) > 1 else parts[0]
-
-        return self.fc(self.dropout(pooled))
+        out, _ = pad_packed_sequence(out_packed, batch_first=True)  # (B, L, 2H)
+        mask = (input_ids != PAD_IDX)  # Mask untuk Self Attention
+        
+        context_vector = self.attention(out, mask)
+        return self.fc(self.dropout(context_vector))
 
 
 # ---------------------------------------------------------------------------
@@ -395,7 +346,6 @@ def evaluate(model, loader, device, loss_fct) -> Tuple[Dict[str, float], np.ndar
 
 @torch.no_grad()
 def predict_probs(model, loader, device) -> Tuple[np.ndarray, np.ndarray]:
-    """Probabilitas kelas positif (softmax[:,1]) + label, utk tuning threshold."""
     model.eval()
     probs, labels = [], []
     for input_ids, lengths, y in loader:
@@ -417,7 +367,6 @@ def metrics_at(probs: np.ndarray, labels: np.ndarray, threshold: float) -> Dict[
 
 
 def best_threshold_on_val(val_probs: np.ndarray, val_labels: np.ndarray) -> Tuple[float, float]:
-    """Threshold F1-optimal di VALIDATION (sweep 0.05..0.95). Mengembalikan (t, f1_val)."""
     best_t, best_f1 = 0.5, -1.0
     for t in np.arange(0.05, 0.96, 0.01):
         f = f1_score(val_labels, (val_probs >= t).astype(int),
@@ -448,27 +397,34 @@ def run_single_seed(args, seed, vocab, pretrained, embed_dim, datasets_raw, devi
     model = RNNClassifier(
         vocab_size=len(vocab), embed_dim=embed_dim, hidden_size=args.hidden_size,
         num_layers=args.num_layers, num_classes=2, model_type=args.model_type,
-        pooling=args.pooling, dropout=args.dropout,
-        pretrained=pretrained, freeze=args.freeze_embedding,
+        dropout=args.dropout, pretrained=pretrained
     ).to(device)
 
-    # class weights (default OFF agar identik dengan baseline transformer default)
+    # Inisialisasi bobot kelas jika diminta
     weight = None
     if args.class_weight:
         classes = np.array([0, 1])
         w = compute_class_weight(class_weight="balanced", classes=classes, y=train_labels)
         weight = torch.tensor(w, dtype=torch.float, device=device)
         logger.info("[seed %d] class weights (balanced): %s", seed, w.tolist())
-    loss_fct = nn.CrossEntropyLoss(weight=weight)
+        
+    # Menggunakan Focal Loss yang sudah dibuat
+    loss_fct = FocalLoss(alpha=weight, gamma=2.0)
 
     optimizer = torch.optim.Adam(
         [p for p in model.parameters() if p.requires_grad],
         lr=args.learning_rate, weight_decay=args.weight_decay,
     )
+    
+    # Scheduler untuk menurunkan LR jika F1 stuck
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode='max', factor=0.5, patience=2
+    )
+
     use_amp = args.fp16 and device.type == "cuda"
     scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
 
-    best_metric = None             # F1 valid terbaik (strict) utk simpan model
+    best_metric = None
     best_state = None
     best_epoch = -1
     patience_counter = 0
@@ -493,18 +449,24 @@ def run_single_seed(args, seed, vocab, pretrained, embed_dim, datasets_raw, devi
 
         val_metrics, _ = evaluate(model, val_loader, device, loss_fct)
         cur = val_metrics[args.metric_for_best_model]
+        
+        # Step scheduler
+        scheduler.step(cur)
+        current_lr = optimizer.param_groups[0]['lr']
+
         logger.info(
-            "[seed %d] epoch %3d | train_loss %.4f | val_f1 %.4f acc %.4f P %.4f R %.4f",
+            "[seed %d] epoch %3d | train_loss %.4f | val_f1 %.4f acc %.4f P %.4f R %.4f | LR: %.6f",
             seed, epoch, epoch_loss / max(n, 1), val_metrics["f1"],
             val_metrics["accuracy"], val_metrics["precision"], val_metrics["recall"],
+            current_lr
         )
 
         prev_best = best_metric
-        if best_metric is None or cur > best_metric:           # strict -> simpan model terbaik
+        if best_metric is None or cur > best_metric:
             best_metric = cur
             best_state = copy.deepcopy(model.state_dict())
             best_epoch = epoch
-        # mirror EarlyStoppingCallback: reset hanya bila peningkatan > threshold
+            
         if prev_best is None or (cur > prev_best and (cur - prev_best) > args.early_stopping_threshold):
             patience_counter = 0
         else:
@@ -514,14 +476,10 @@ def run_single_seed(args, seed, vocab, pretrained, embed_dim, datasets_raw, devi
                             seed, epoch, args.early_stopping_patience)
                 break
 
-    # ---- TEST dievaluasi SEKALI dengan model val-terbaik ----
     if best_state is not None:
         model.load_state_dict(best_state)
-    test_metrics, test_preds = evaluate(model, test_loader, device, loss_fct)   # argmax = threshold 0.50
+    test_metrics, test_preds = evaluate(model, test_loader, device, loss_fct)
 
-    # ---- Threshold tuning: cari F1-optimal di VAL, terapkan ke TEST (test tetap sekali) ----
-    # Apple-to-apple dgn run_classification.py = argmax (0.50). Tuned dilaporkan sbg ADD-ON,
-    # keputusan threshold murni di validation (pola sama spt run_classification_aux.py).
     val_probs, val_labels = predict_probs(model, val_loader, device)
     test_probs, test_labels = predict_probs(model, test_loader, device)
     best_t, val_f1_at_t = best_threshold_on_val(val_probs, val_labels)
@@ -560,16 +518,14 @@ def main():
     args = parse_args()
     os.makedirs(args.output_dir, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    logger.info("Device: %s | model_type=%s embedding=%s pooling=%s",
-                device, args.model_type, args.embedding, args.pooling)
+    logger.info("Device: %s | model_type=%s embedding=%s",
+                device, args.model_type, args.embedding)
 
     datasets_raw = load_splits(args)
     seeds = [int(s) for s in str(args.seeds).split(",") if s.strip() != ""]
 
-    # Vocab dari TRAIN (seed-independent: tokenisasi & frekuensi deterministik).
     vocab = build_vocab(datasets_raw["train"][0], args.do_lower_case, args.min_freq, args.vocab_size)
 
-    # Embedding pretrained (dibangun sekali; matrix di-clone tiap seed di dalam model).
     pretrained, embed_dim = None, args.embedding_dim
     if args.embedding == "fasttext":
         if not args.fasttext_path:
@@ -582,7 +538,7 @@ def main():
     for seed in seeds:
         result = run_single_seed(args, seed, vocab, pretrained, embed_dim, datasets_raw, device)
         per_seed.append(result)
-        # simpan output per-seed
+        
         seed_dir = os.path.join(args.output_dir, f"seed_{seed}")
         os.makedirs(seed_dir, exist_ok=True)
         tm = result["test_metrics"]
@@ -601,7 +557,6 @@ def main():
         write_predictions(os.path.join(seed_dir, "predict_results.txt"), result["test_preds"])
         write_predictions(os.path.join(seed_dir, "predict_results_tuned.txt"), result["test_preds_tuned"])
 
-    # ---- agregasi antar-seed (mean +/- std) ----
     def agg(key, field="test_metrics"):
         vals = np.array([r[field][key] for r in per_seed], dtype=np.float64)
         return float(vals.mean()), float(vals.std())
@@ -610,7 +565,7 @@ def main():
     f1_m, f1_s = agg("f1")
     p_m, p_s = agg("precision")
     r_m, r_s = agg("recall")
-    # tuned (threshold F1-optimal di val)
+    
     tacc_m, tacc_s = agg("accuracy", "test_metrics_tuned")
     tf1_m, tf1_s = agg("f1", "test_metrics_tuned")
     tp_m, tp_s = agg("precision", "test_metrics_tuned")
@@ -618,11 +573,9 @@ def main():
     thr_vals = np.array([r["best_threshold"] for r in per_seed], dtype=np.float64)
 
     summary = {
-        # KUNCI SAMA dengan run_classification.py (nilai = mean antar-seed, threshold 0.50/argmax)
         "eval_accuracy": acc_m, "eval_f1": f1_m, "eval_precision": p_m, "eval_recall": r_m,
         "eval_accuracy_std": acc_s, "eval_f1_std": f1_s,
         "eval_precision_std": p_s, "eval_recall_std": r_s,
-        # ADD-ON: threshold F1-optimal di val (test tetap sekali; bandingkan vs 0.50)
         "eval_accuracy_tuned": tacc_m, "eval_f1_tuned": tf1_m,
         "eval_precision_tuned": tp_m, "eval_recall_tuned": tr_m,
         "eval_f1_tuned_std": tf1_s,
@@ -632,7 +585,6 @@ def main():
         "n_total_params": per_seed[0]["n_total_params"],
         "config": {
             "model_type": args.model_type, "embedding": args.embedding,
-            "freeze_embedding": args.freeze_embedding, "pooling": args.pooling,
             "hidden_size": args.hidden_size, "num_layers": args.num_layers,
             "embedding_dim": embed_dim, "max_seq_length": args.max_seq_length,
             "vocab_size": len(vocab), "learning_rate": args.learning_rate,
@@ -649,12 +601,11 @@ def main():
     }
     with open(os.path.join(args.output_dir, "eval_results.json"), "w") as f:
         json.dump(summary, f, indent=4)
-    # prediksi test referensi (seed pertama)
+        
     write_predictions(os.path.join(args.output_dir, "predict_results.txt"), per_seed[0]["test_preds"])
 
     logger.info("=" * 78)
-    logger.info("HASIL TEST (%s, %s, %s) — %d seed %s", args.model_type, args.embedding,
-                args.pooling, len(seeds), seeds)
+    logger.info("HASIL TEST (%s, %s) — %d seed %s", args.model_type, args.embedding, len(seeds), seeds)
     logger.info("  -- threshold 0.50 / argmax (apple-to-apple) --")
     logger.info("  F1 (positif)  : %.4f +/- %.4f", f1_m, f1_s)
     logger.info("  Accuracy      : %.4f +/- %.4f", acc_m, acc_s)
