@@ -15,7 +15,6 @@ python scripts/run_rnn_classification.py \
     --embedding_dim 300 \
     --hidden_size 128 \
     --num_layers 1 \
-    --pooling max \
     --dropout 0.3 \
     --learning_rate 1e-3 \
     --batch_size 32 \

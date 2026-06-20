@@ -10,7 +10,7 @@
 FASTTEXT_PATH="${FASTTEXT_PATH:-embeddings/cc.id.300.bin}"
 
 # Ekuivalen HF: ganti 3 baris --*_file dengan: --use_hf_dataset --text_column_name tweet
-# Tambahkan --freeze_embedding utk membekukan embedding (default: fine-tune).
+# Catatan: embedding fastText saat ini DI-FINE-TUNE (script tak punya flag freeze).
 python scripts/run_rnn_classification.py \
     --model_type bigru \
     --embedding fasttext \
@@ -23,7 +23,6 @@ python scripts/run_rnn_classification.py \
     --max_seq_length 128 \
     --hidden_size 128 \
     --num_layers 1 \
-    --pooling max \
     --dropout 0.3 \
     --learning_rate 1e-3 \
     --batch_size 32 \
