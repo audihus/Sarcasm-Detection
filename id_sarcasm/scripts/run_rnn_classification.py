@@ -350,7 +350,8 @@ class RNNClassifier(nn.Module):
                 parts.append(out.masked_fill(~mask, float("-inf")).max(dim=1).values)
             if self.pooling in ("mean", "maxmean"):
                 summed = (out * mask).sum(dim=1)
-                parts.append(summed / lengths.unsqueeze(1).clamp(min=1).to(summed.dtype))
+                parts.append(summed / lengths.to(summed.device).unsqueeze(1).clamp(min=1).to(summed.dtype))
+                # parts.append(summed / lengths.unsqueeze(1).clamp(min=1).to(summed.dtype))
             pooled = torch.cat(parts, dim=1) if len(parts) > 1 else parts[0]
 
         return self.fc(self.dropout(pooled))
