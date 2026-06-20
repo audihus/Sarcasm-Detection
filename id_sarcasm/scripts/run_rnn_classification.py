@@ -134,7 +134,8 @@ def parse_args():
                    help="Dim embedding utk --embedding random; fasttext mengikuti dim file.")
     p.add_argument("--hidden_size", type=int, default=128, help="Hidden size per arah (output Bi = 2x).")
     p.add_argument("--num_layers", type=int, default=1)
-    p.add_argument("--pooling", type=str, default="max", choices=["last", "max", "mean"])
+    p.add_argument("--pooling", type=str, default="max", choices=["last", "max", "mean", "maxmean"],
+                   help="maxmean = concat max+mean (2x lebar head; sering naikin precision).")
     p.add_argument("--dropout", type=float, default=0.3)
 
     # --- optimisasi (DEVIASI dari transformer: Adam lr 1e-3) ---
@@ -330,7 +331,8 @@ class RNNClassifier(nn.Module):
             dropout=dropout if num_layers > 1 else 0.0,
         )
         self.dropout = nn.Dropout(dropout)
-        self.fc = nn.Linear(hidden_size * 2, num_classes)
+        pool_mult = 2 if pooling == "maxmean" else 1   # maxmean -> concat 2 representasi
+        self.fc = nn.Linear(hidden_size * 2 * pool_mult, num_classes)
 
     def forward(self, input_ids, lengths):
         emb = self.dropout(self.embedding(input_ids))            # (B, L, E)
@@ -343,12 +345,13 @@ class RNNClassifier(nn.Module):
         else:
             out, _ = pad_packed_sequence(out_packed, batch_first=True)  # (B, L, 2H)
             mask = (input_ids != PAD_IDX).unsqueeze(-1)                 # (B, L, 1)
-            if self.pooling == "max":
-                out = out.masked_fill(~mask, float("-inf"))
-                pooled = out.max(dim=1).values
-            else:  # mean
+            parts = []
+            if self.pooling in ("max", "maxmean"):
+                parts.append(out.masked_fill(~mask, float("-inf")).max(dim=1).values)
+            if self.pooling in ("mean", "maxmean"):
                 summed = (out * mask).sum(dim=1)
-                pooled = summed / lengths.unsqueeze(1).clamp(min=1).to(summed.dtype)
+                parts.append(summed / lengths.unsqueeze(1).clamp(min=1).to(summed.dtype))
+            pooled = torch.cat(parts, dim=1) if len(parts) > 1 else parts[0]
 
         return self.fc(self.dropout(pooled))
 
@@ -387,6 +390,40 @@ def evaluate(model, loader, device, loss_fct) -> Tuple[Dict[str, float], np.ndar
         "loss": total_loss / max(n, 1),
     }
     return metrics, preds
+
+
+@torch.no_grad()
+def predict_probs(model, loader, device) -> Tuple[np.ndarray, np.ndarray]:
+    """Probabilitas kelas positif (softmax[:,1]) + label, utk tuning threshold."""
+    model.eval()
+    probs, labels = [], []
+    for input_ids, lengths, y in loader:
+        input_ids = input_ids.to(device)
+        logits = model(input_ids, lengths)
+        probs.append(torch.softmax(logits, dim=1)[:, 1].cpu().numpy())
+        labels.append(y.numpy())
+    return np.concatenate(probs), np.concatenate(labels)
+
+
+def metrics_at(probs: np.ndarray, labels: np.ndarray, threshold: float) -> Dict[str, float]:
+    pred = (probs >= threshold).astype(int)
+    return {
+        "accuracy": accuracy_score(labels, pred),
+        "f1": f1_score(labels, pred, average="binary", pos_label=1, zero_division=0),
+        "precision": precision_score(labels, pred, average="binary", pos_label=1, zero_division=0),
+        "recall": recall_score(labels, pred, average="binary", pos_label=1, zero_division=0),
+    }
+
+
+def best_threshold_on_val(val_probs: np.ndarray, val_labels: np.ndarray) -> Tuple[float, float]:
+    """Threshold F1-optimal di VALIDATION (sweep 0.05..0.95). Mengembalikan (t, f1_val)."""
+    best_t, best_f1 = 0.5, -1.0
+    for t in np.arange(0.05, 0.96, 0.01):
+        f = f1_score(val_labels, (val_probs >= t).astype(int),
+                     average="binary", pos_label=1, zero_division=0)
+        if f > best_f1:
+            best_f1, best_t = f, float(t)
+    return best_t, best_f1
 
 
 def run_single_seed(args, seed, vocab, pretrained, embed_dim, datasets_raw, device) -> Dict:
@@ -479,12 +516,23 @@ def run_single_seed(args, seed, vocab, pretrained, embed_dim, datasets_raw, devi
     # ---- TEST dievaluasi SEKALI dengan model val-terbaik ----
     if best_state is not None:
         model.load_state_dict(best_state)
-    test_metrics, test_preds = evaluate(model, test_loader, device, loss_fct)
+    test_metrics, test_preds = evaluate(model, test_loader, device, loss_fct)   # argmax = threshold 0.50
+
+    # ---- Threshold tuning: cari F1-optimal di VAL, terapkan ke TEST (test tetap sekali) ----
+    # Apple-to-apple dgn run_classification.py = argmax (0.50). Tuned dilaporkan sbg ADD-ON,
+    # keputusan threshold murni di validation (pola sama spt run_classification_aux.py).
+    val_probs, val_labels = predict_probs(model, val_loader, device)
+    test_probs, test_labels = predict_probs(model, test_loader, device)
+    best_t, val_f1_at_t = best_threshold_on_val(val_probs, val_labels)
+    test_metrics_tuned = metrics_at(test_probs, test_labels, best_t)
+    test_preds_tuned = (test_probs >= best_t).astype(int)
+
     logger.info(
-        "[seed %d] BEST val_%s=%.4f @epoch %d | TEST f1 %.4f acc %.4f P %.4f R %.4f",
+        "[seed %d] BEST val_%s=%.4f @epoch %d | TEST@0.50 f1 %.4f P %.4f R %.4f | "
+        "TEST@%.2f(tuned) f1 %.4f P %.4f R %.4f",
         seed, args.metric_for_best_model, best_metric or 0.0, best_epoch,
-        test_metrics["f1"], test_metrics["accuracy"],
-        test_metrics["precision"], test_metrics["recall"],
+        test_metrics["f1"], test_metrics["precision"], test_metrics["recall"],
+        best_t, test_metrics_tuned["f1"], test_metrics_tuned["precision"], test_metrics_tuned["recall"],
     )
 
     n_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -495,6 +543,10 @@ def run_single_seed(args, seed, vocab, pretrained, embed_dim, datasets_raw, devi
         "best_epoch": best_epoch,
         "test_metrics": test_metrics,
         "test_preds": test_preds.tolist(),
+        "best_threshold": best_t,
+        "val_f1_at_best_threshold": float(val_f1_at_t),
+        "test_metrics_tuned": test_metrics_tuned,
+        "test_preds_tuned": test_preds_tuned.tolist(),
         "n_trainable_params": int(n_trainable),
         "n_total_params": int(n_total),
     }
@@ -533,30 +585,47 @@ def main():
         seed_dir = os.path.join(args.output_dir, f"seed_{seed}")
         os.makedirs(seed_dir, exist_ok=True)
         tm = result["test_metrics"]
+        tmt = result["test_metrics_tuned"]
         with open(os.path.join(seed_dir, "eval_results.json"), "w") as f:
             json.dump({
                 "eval_accuracy": tm["accuracy"], "eval_f1": tm["f1"],
                 "eval_precision": tm["precision"], "eval_recall": tm["recall"],
                 "eval_loss": tm["loss"], "best_val_metric": result["best_val_metric"],
                 "best_epoch": result["best_epoch"], "seed": seed,
+                "best_threshold": result["best_threshold"],
+                "val_f1_at_best_threshold": result["val_f1_at_best_threshold"],
+                "eval_accuracy_tuned": tmt["accuracy"], "eval_f1_tuned": tmt["f1"],
+                "eval_precision_tuned": tmt["precision"], "eval_recall_tuned": tmt["recall"],
             }, f, indent=4)
         write_predictions(os.path.join(seed_dir, "predict_results.txt"), result["test_preds"])
+        write_predictions(os.path.join(seed_dir, "predict_results_tuned.txt"), result["test_preds_tuned"])
 
     # ---- agregasi antar-seed (mean +/- std) ----
-    def agg(key):
-        vals = np.array([r["test_metrics"][key] for r in per_seed], dtype=np.float64)
+    def agg(key, field="test_metrics"):
+        vals = np.array([r[field][key] for r in per_seed], dtype=np.float64)
         return float(vals.mean()), float(vals.std())
 
     acc_m, acc_s = agg("accuracy")
     f1_m, f1_s = agg("f1")
     p_m, p_s = agg("precision")
     r_m, r_s = agg("recall")
+    # tuned (threshold F1-optimal di val)
+    tacc_m, tacc_s = agg("accuracy", "test_metrics_tuned")
+    tf1_m, tf1_s = agg("f1", "test_metrics_tuned")
+    tp_m, tp_s = agg("precision", "test_metrics_tuned")
+    tr_m, tr_s = agg("recall", "test_metrics_tuned")
+    thr_vals = np.array([r["best_threshold"] for r in per_seed], dtype=np.float64)
 
     summary = {
-        # KUNCI SAMA dengan run_classification.py (nilai = mean antar-seed)
+        # KUNCI SAMA dengan run_classification.py (nilai = mean antar-seed, threshold 0.50/argmax)
         "eval_accuracy": acc_m, "eval_f1": f1_m, "eval_precision": p_m, "eval_recall": r_m,
         "eval_accuracy_std": acc_s, "eval_f1_std": f1_s,
         "eval_precision_std": p_s, "eval_recall_std": r_s,
+        # ADD-ON: threshold F1-optimal di val (test tetap sekali; bandingkan vs 0.50)
+        "eval_accuracy_tuned": tacc_m, "eval_f1_tuned": tf1_m,
+        "eval_precision_tuned": tp_m, "eval_recall_tuned": tr_m,
+        "eval_f1_tuned_std": tf1_s,
+        "best_threshold_mean": float(thr_vals.mean()), "best_threshold_std": float(thr_vals.std()),
         "n_seeds": len(seeds), "seeds": seeds,
         "n_trainable_params": per_seed[0]["n_trainable_params"],
         "n_total_params": per_seed[0]["n_total_params"],
@@ -571,7 +640,9 @@ def main():
         },
         "per_seed": [
             {"seed": r["seed"], "best_val_metric": r["best_val_metric"],
-             "best_epoch": r["best_epoch"], **{f"test_{k}": v for k, v in r["test_metrics"].items()}}
+             "best_epoch": r["best_epoch"], "best_threshold": r["best_threshold"],
+             **{f"test_{k}": v for k, v in r["test_metrics"].items()},
+             **{f"test_{k}_tuned": v for k, v in r["test_metrics_tuned"].items()}}
             for r in per_seed
         ],
     }
@@ -583,10 +654,17 @@ def main():
     logger.info("=" * 78)
     logger.info("HASIL TEST (%s, %s, %s) — %d seed %s", args.model_type, args.embedding,
                 args.pooling, len(seeds), seeds)
+    logger.info("  -- threshold 0.50 / argmax (apple-to-apple) --")
     logger.info("  F1 (positif)  : %.4f +/- %.4f", f1_m, f1_s)
     logger.info("  Accuracy      : %.4f +/- %.4f", acc_m, acc_s)
     logger.info("  Precision     : %.4f +/- %.4f", p_m, p_s)
     logger.info("  Recall        : %.4f +/- %.4f", r_m, r_s)
+    logger.info("  -- threshold tuned @val (add-on; t=%.2f +/- %.2f) --",
+                float(thr_vals.mean()), float(thr_vals.std()))
+    logger.info("  F1 (positif)  : %.4f +/- %.4f", tf1_m, tf1_s)
+    logger.info("  Accuracy      : %.4f +/- %.4f", tacc_m, tacc_s)
+    logger.info("  Precision     : %.4f +/- %.4f", tp_m, tp_s)
+    logger.info("  Recall        : %.4f +/- %.4f", tr_m, tr_s)
     logger.info("  Trainable params: %s (total %s)",
                 f"{per_seed[0]['n_trainable_params']:,}", f"{per_seed[0]['n_total_params']:,}")
     logger.info("  Output -> %s", os.path.join(args.output_dir, "eval_results.json"))

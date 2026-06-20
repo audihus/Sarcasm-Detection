@@ -21,6 +21,15 @@ Recipe: `recipes/twitter/baseline/rnn_{bilstm,bigru}_{random,fasttext}_twitter.s
 Metrik dihitung dgn `sklearn` `average="binary", pos_label=1` — identik dengan
 `evaluate.load("f1")` default yang dipakai baseline transformer.
 
+**Threshold tuning (add-on, sah apple-to-apple).** Headline `eval_f1` tetap threshold
+0.50 / argmax (sama persis baseline transformer). Sebagai TAMBAHAN, script juga cari
+threshold F1-optimal di **validation** lalu terapkan ke test SEKALI, dilaporkan sebagai
+`eval_f1_tuned` (+ `best_threshold_mean`). Keputusan threshold murni di val, test tak
+diintip — pola identik `run_classification_aux.py`. Berguna utk data timpang: kalau
+recall ≫ precision, threshold > 0.5 sering menaikkan F1. **Caveat:** val cuma 268
+sampel (67 positif), threshold bisa overfit ke val → kadang tak menggeneralisasi; nilai
+dari mean±std antar-seed, bukan satu run.
+
 ## 2. Deviasi yang DISENGAJA (RNN dilatih from scratch)
 
 RNN acak BUKAN fine-tuning transformer, jadi LR transformer (1e-5) tidak relevan.
@@ -51,7 +60,9 @@ mengisolasi efek pretrained embedding.
 
 ## 4. Model
 
-`embedding → Bi-LSTM/Bi-GRU (1 layer, hidden 128/arah) → pooling (max default) → Dropout → Linear(→2)`.
+`embedding → Bi-LSTM/Bi-GRU (1 layer, hidden 128/arah) → pooling → Dropout → Linear(→2)`.
+Pooling: `--pooling {max,mean,last,maxmean}` (default `max`; `maxmean` = concat max+mean,
+head 2x lebar, sering menaikkan precision).
 Parameter ~0.5M (fastText, embedding di-freeze) s.d. ~2.9M (random 300-dim trainable),
 kontras dgn transformer 110M–560M.
 
@@ -86,7 +97,7 @@ efek pretrained embedding (random vs fastText). Semua keputusan di valid; test s
 
 ```
 outputs/rnn-<model>-<embedding>-twitter/
-├── eval_results.json        # mean ± std antar-seed; kunci eval_* + config + per_seed
+├── eval_results.json        # mean ± std antar-seed; eval_* (thr 0.50) + eval_*_tuned + config + per_seed
 ├── predict_results.txt      # prediksi test (seed pertama), format index<TAB>prediction
-└── seed_<s>/                # per-seed: eval_results.json + predict_results.txt
+└── seed_<s>/                # per-seed: eval_results.json + predict_results.txt + predict_results_tuned.txt
 ```
