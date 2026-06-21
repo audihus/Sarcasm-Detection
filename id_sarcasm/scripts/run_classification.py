@@ -717,24 +717,27 @@ def main():
     )
 
     class DiceLoss(nn.Module):
-        """Self-adjusting Dice Loss (Li et al., ACL 2020).
-        True-class-only formulation: hanya probabilitas kelas yang benar
-        yang masuk ke perhitungan, menghindari class collapse.
-        Faktor (1-p)*p secara otomatis down-weights sampel yang sudah mudah
-        (p tinggi) tanpa perlu alpha manual — lebih stabil untuk dataset kecil.
+        """Batch-level Soft Dice Loss untuk imbalanced classification.
+        Dihitung per kelas: sum numerator & denominator dulu di seluruh batch
+        BARU dibagi — ini yang membuat gradientnya selalu ke arah yang benar.
+        Versi per-sample salah karena gradientnya nol di p=0.5 dan terbalik
+        untuk p>0.5, menyebabkan model collapse ke prediksi semua satu kelas.
         """
         def __init__(self, smooth: float = 1.0):
             super().__init__()
             self.smooth = smooth
 
         def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+            num_classes = logits.size(-1)
             probs = torch.softmax(logits, dim=-1)
-            # ambil probabilitas kelas yang benar saja
-            p = probs[torch.arange(probs.size(0), device=probs.device), labels]
-            # self-adjusting: (1-p)*p kecil saat model sudah yakin → loss kecil
-            adj = (1.0 - p) * p
-            dice = (2.0 * adj + self.smooth) / (adj + 1.0 + self.smooth)
-            return (1.0 - dice).mean()
+            total = 0.0
+            for c in range(num_classes):
+                p_c = probs[:, c]
+                y_c = (labels == c).float()
+                numerator = 2.0 * (p_c * y_c).sum() + self.smooth
+                denominator = p_c.sum() + y_c.sum() + self.smooth
+                total += numerator / denominator
+            return 1.0 - total / num_classes
 
     class WeightedTrainer(Trainer):
         def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
