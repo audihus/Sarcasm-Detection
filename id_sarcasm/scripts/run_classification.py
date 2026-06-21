@@ -198,6 +198,10 @@ class DataTrainingArguments:
     do_augment: bool = field(default=False, metadata={"help": "Whether to augment with iSarcasm dataset."})
     do_weighted_loss: bool = field(default=False, metadata={"help": "Whether to use weighted cross-entropy loss."})
     weight_multiplier: float = field(default=1.0, metadata={"help": "Weighted loss multiplier factor."})
+    add_surface_markers: bool = field(
+        default=False,
+        metadata={"help": "Register surface marker tokens (<username>, [CAPS], [ELONG], etc.) as special tokens."},
+    )
 
     def __post_init__(self):
         if self.dataset_name is None:
@@ -561,6 +565,18 @@ def main():
         trust_remote_code=model_args.trust_remote_code,
         ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,
     )
+
+    # Daftarkan surface marker tokens agar tidak dipecah jadi subword
+    if data_args.add_surface_markers:
+        _markers = ["<username>", "<link>", "<hashtag>",
+                    "[CAPS]", "[ELONG]", "[REPPUNC]", "[EMOTICON]"]
+        num_added = tokenizer.add_special_tokens({"additional_special_tokens": _markers})
+        if num_added > 0:
+            model.resize_token_embeddings(len(tokenizer))
+        logger.info(
+            "Surface markers registered: %d new token(s), embedding size -> %d",
+            num_added, len(tokenizer),
+        )
 
     # Padding strategy
     if data_args.pad_to_max_length:

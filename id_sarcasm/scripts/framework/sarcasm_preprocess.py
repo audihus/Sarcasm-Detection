@@ -124,6 +124,24 @@ def surface_markers(text):
         out.extend(flags)                                # flag muncul tepat setelah kata yang ditandai
     return " ".join(out)
 
+def _surface_normalize_nomarkers(text):
+    """surface_markers tanpa menambahkan flag token — hanya normalisasi."""
+    text = _join_repeated_punct(text)
+    text = re.sub(r"[!?]{2,}", " ! ", text)       # !!! -> !  (tanpa [REPPUNC])
+    text = re.sub(r"\.{3,}", " . ", text)           # ... -> .  (tanpa [REPPUNC])
+    out = []
+    for tok in text.split():
+        if tok in SPECIAL_TOKENS or tok in PLACEHOLDERS or tok.startswith(":"):
+            out.append(tok)
+            continue
+        if re.search(r"(.)\1{2,}", tok):            # elongasi: ciutkan saja, tanpa [ELONG]
+            tok = re.sub(r"(.)\1{2,}", r"\1", tok)
+        core = re.sub(r"[^A-Za-z]", "", tok)
+        if len(core) > 1 and core.isupper():        # CAPS: lowercase saja, tanpa [CAPS]
+            tok = tok.lower()
+        out.append(tok)
+    return " ".join(out)
+
 def _normalize_encoder_tokens(text):
     # Reduplikasi: kata2 -> kata (sebelum lookup token agar tidak ada false-match)
     text = re.sub(r"\b([a-zA-Z]{2,})2\b", r"\1", text)
@@ -141,6 +159,16 @@ def to_encoder_text(raw):
     t = EMOTICON_RE.sub(" [EMOTICON] ", t)               # emoticon -> marker
     t = emoji.demojize(t, delimiters=(" :", ": "))       # emoji -> alias :rolling_eyes:
     t = surface_markers(t)                               # elongasi/CAPS/reppunc -> marker
+    t = _normalize_encoder_tokens(t)                     # reduplikasi+negasi+slang -> baku
+    t = collapse_placeholders(t)
+    return tidy_whitespace(t)
+
+def to_encoder_text_nomarkers(raw):
+    """Sama seperti to_encoder_text tapi tanpa [CAPS]/[ELONG]/[REPPUNC]/[EMOTICON]."""
+    t = repair_encoding(raw)
+    t = EMOTICON_RE.sub(" ", t)                          # emoticon -> buang
+    t = emoji.demojize(t, delimiters=(" :", ": "))       # emoji -> alias (tetap)
+    t = _surface_normalize_nomarkers(t)                  # elongasi/CAPS normalize, tanpa marker
     t = _normalize_encoder_tokens(t)                     # reduplikasi+negasi+slang -> baku
     t = collapse_placeholders(t)
     return tidy_whitespace(t)
