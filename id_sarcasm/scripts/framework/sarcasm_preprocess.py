@@ -143,16 +143,11 @@ def _surface_normalize_nomarkers(text):
     return " ".join(out)
 
 def _normalize_encoder_tokens(text):
-    # Reduplikasi: kata2 -> kata (sebelum lookup token agar tidak ada false-match)
-    text = re.sub(r"\b([a-zA-Z]{2,})2\b", r"\1", text)
-    result = []
-    for tok in text.split():
-        if tok in SPECIAL_TOKENS or tok in PLACEHOLDERS or tok.startswith(":"):
-            result.append(tok)   # jangan sentuh marker/placeholder/alias emoji
-            continue
-        normalized = NEGATORS.get(tok.lower(), SLANG.get(tok.lower(), tok))
-        result.extend(normalized.split())   # flatten multi-kata (dll -> dan lain lain)
-    return " ".join(result)
+    # Hanya reduplikasi: kata2 -> kata
+    # Negasi & slang TIDAK dinormalisasi di encoder — token informal (gak, lu, gue)
+    # membawa distributional signal yang sudah dipelajari pretrained model dan
+    # terbukti diskriminatif (hampir eksklusif di tweet non-sarkastik).
+    return re.sub(r"\b([a-zA-Z]{2,})2\b", r"\1", text)
 
 def to_encoder_text(raw):
     t = repair_encoding(raw)
