@@ -6,19 +6,20 @@ Satu teks mentah -> dua keluaran dengan perlakuan yang SENGAJA berlawanan:
   to_encoder_text(raw)    -> str  untuk IndoBERT.
       Noise DIPERTAHANKAN tapi di-surface jadi token eksplisit
       ([CAPS], [ELONG], [REPPUNC], [EMOTICON]); placeholder & emoji dijaga.
-      Alasannya: tokenizer IndoBERT melumat sinyal permukaan (uncased,
-      subword), jadi penanda harus ditandai dulu sebelum masuk.
+      Reduplikasi, negasi informal, dan slang juga dibakukan agar vocabulary
+      konsisten masuk tokenizer.
 
   to_lexicon_tokens(raw)  -> list[str]  untuk lookup InSet (label incongruity).
       Noise DINORMALKAN: slang/singkatan dibakukan, negasi dikanonkan,
       elongasi diciutkan, placeholder/emoji dibuang, supaya kata cocok
       dengan entri kamus InSet.
 
-Urutan langkah (1..6 yang sudah kita sepakati):
+Urutan langkah:
   1 repair_encoding   paling awal; semua langkah lain jalan di atas teks ini
   2 placeholder       <username>/<link>/<hashtag> jadi special token; runtun di-collapse
   3 emoji & emoticon  setelah repair
-  4 surface_markers   jalur encoder
+  4 surface_markers   jalur encoder — surface noise -> marker eksplisit
+  4b normalize_encoder jalur encoder — reduplikasi + negasi + slang -> baku
   5 normalisasi        jalur leksikon
   6 tidy_whitespace   kosmetik
 """
@@ -42,18 +43,28 @@ EMOTICON_RE = re.compile(r"(?:<3|[:;=x]['`\-\^]?[)(\]\[dpov3/\\|]+)", re.IGNOREC
 NEGATORS = {
     "gak": "tidak", "ga": "tidak", "gk": "tidak", "kaga": "tidak",
     "nggak": "tidak", "ngga": "tidak", "enggak": "tidak", "engga": "tidak",
-    "tdk": "tidak", "tak": "tidak", "gada": "tidak ada", "bkn": "bukan",
-    "blm": "belum", "jgn": "jangan",
+    "tdk": "tidak", "tak": "tidak", "ngak": "tidak", "ndak": "tidak",
+    "gada": "tidak ada", "bkn": "bukan", "blm": "belum", "jgn": "jangan",
 }
 
-# Slang/singkatan -> baku (starter; perluas dengan Colloquial Indonesian Lexicon).
+# Slang/singkatan -> baku (berdasarkan EDA bottom-up Twitter training data).
 SLANG = {
+    # Singkatan original
     "yg": "yang", "dgn": "dengan", "dg": "dengan", "utk": "untuk", "tp": "tapi",
     "tpi": "tapi", "krn": "karena", "karna": "karena", "kalo": "kalau",
     "klo": "kalau", "aja": "saja", "udah": "sudah", "udh": "sudah", "dr": "dari",
     "jd": "jadi", "jg": "juga", "sm": "sama", "org": "orang", "dpt": "dapat",
     "bgt": "banget", "stlh": "setelah", "lg": "lagi", "dl": "dulu",
     "sprt": "seperti", "hrs": "harus", "gmn": "bagaimana", "bgmn": "bagaimana",
+    # Singkatan tambahan (dari EDA, freq >= 5)
+    "sdh": "sudah", "msh": "masih", "skrg": "sekarang", "sy": "saya",
+    "kl": "kalau", "sbg": "sebagai", "kpd": "kepada", "pd": "pada",
+    "bs": "bisa", "mrk": "mereka", "dlm": "dalam", "thn": "tahun",
+    "trus": "terus", "jdi": "jadi", "emg": "memang", "dll": "dan lain lain",
+    # Kata ganti informal
+    "gue": "saya", "gw": "saya", "lu": "kamu", "lo": "kamu",
+    # Informal lainnya
+    "tau": "tahu", "pake": "pakai", "ngerti": "mengerti",
 }
 
 
@@ -113,11 +124,24 @@ def surface_markers(text):
         out.extend(flags)                                # flag muncul tepat setelah kata yang ditandai
     return " ".join(out)
 
+def _normalize_encoder_tokens(text):
+    # Reduplikasi: kata2 -> kata (sebelum lookup token agar tidak ada false-match)
+    text = re.sub(r"\b([a-zA-Z]{2,})2\b", r"\1", text)
+    result = []
+    for tok in text.split():
+        if tok in SPECIAL_TOKENS or tok in PLACEHOLDERS or tok.startswith(":"):
+            result.append(tok)   # jangan sentuh marker/placeholder/alias emoji
+            continue
+        normalized = NEGATORS.get(tok.lower(), SLANG.get(tok.lower(), tok))
+        result.extend(normalized.split())   # flatten multi-kata (dll -> dan lain lain)
+    return " ".join(result)
+
 def to_encoder_text(raw):
     t = repair_encoding(raw)
     t = EMOTICON_RE.sub(" [EMOTICON] ", t)               # emoticon -> marker
     t = emoji.demojize(t, delimiters=(" :", ": "))       # emoji -> alias :rolling_eyes:
-    t = surface_markers(t)
+    t = surface_markers(t)                               # elongasi/CAPS/reppunc -> marker
+    t = _normalize_encoder_tokens(t)                     # reduplikasi+negasi+slang -> baku
     t = collapse_placeholders(t)
     return tidy_whitespace(t)
 
