@@ -198,6 +198,7 @@ class DataTrainingArguments:
     do_augment: bool = field(default=False, metadata={"help": "Whether to augment with iSarcasm dataset."})
     do_weighted_loss: bool = field(default=False, metadata={"help": "Whether to use weighted cross-entropy loss."})
     weight_multiplier: float = field(default=1.0, metadata={"help": "Weighted loss multiplier factor."})
+    do_dice_loss: bool = field(default=False, metadata={"help": "Whether to use Asymmetric Dice Loss (Li et al., ACL 2020)."})
     add_surface_markers: bool = field(
         default=False,
         metadata={"help": "Register surface marker tokens (<username>, [CAPS], [ELONG], etc.) as special tokens."},
@@ -715,17 +716,39 @@ def main():
         * data_args.weight_multiplier
     )
 
+    class AsymmetricDiceLoss(nn.Module):
+        """Self-adjusting Dice Loss (Li et al., ACL 2020, §3.2).
+        The (1-p) factor down-weights easy/confident predictions, naturally
+        handling class imbalance without manual class weights.
+        """
+        def __init__(self, smooth: float = 1.0):
+            super().__init__()
+            self.smooth = smooth
+
+        def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+            probs = torch.softmax(logits, dim=-1)
+            # probability of the true class for each sample
+            p = probs[torch.arange(probs.size(0), device=probs.device), labels]
+            # self-adjusting: (1-p)*p reduces loss for high-confidence (easy) examples
+            adj = (1.0 - p) * p
+            dice = (2.0 * adj + self.smooth) / (adj + 1.0 + self.smooth)
+            return (1.0 - dice).mean()
+
     class WeightedTrainer(Trainer):
         def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
             labels = inputs.pop("labels")
             outputs = model(**inputs)
             logits = outputs.get("logits")
-            loss_fct = nn.CrossEntropyLoss(
-                weight=torch.tensor(weights, device=model.device, dtype=torch.float)
-                if data_args.do_weighted_loss
-                else None
-            )
-            loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+            if data_args.do_dice_loss:
+                loss_fct = AsymmetricDiceLoss()
+                loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+            else:
+                loss_fct = nn.CrossEntropyLoss(
+                    weight=torch.tensor(weights, device=model.device, dtype=torch.float)
+                    if data_args.do_weighted_loss
+                    else None
+                )
+                loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
             return (loss, outputs) if return_outputs else loss
 
     # Initialize our Trainer
