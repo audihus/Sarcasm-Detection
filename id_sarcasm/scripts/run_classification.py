@@ -199,6 +199,12 @@ class DataTrainingArguments:
     do_weighted_loss: bool = field(default=False, metadata={"help": "Whether to use weighted cross-entropy loss."})
     weight_multiplier: float = field(default=1.0, metadata={"help": "Weighted loss multiplier factor."})
     do_dice_loss: bool = field(default=False, metadata={"help": "Whether to use self-adjusting Dice Loss (Li et al., ACL 2020)."})
+    do_focal_loss: bool = field(default=False, metadata={"help": "Use Focal Loss (Lin et al., ICCV 2017)."})
+    focal_gamma: float = field(default=2.0, metadata={"help": "Focal Loss focusing parameter gamma (default 2.0)."})
+    focal_alpha: float = field(default=0.75, metadata={"help": "Focal Loss class weight for positive class (default 0.75)."})
+    do_poly_loss: bool = field(default=False, metadata={"help": "Use Poly Loss (Liu et al., ICLR 2022)."})
+    poly_epsilon: float = field(default=1.0, metadata={"help": "Poly Loss epsilon coefficient (default 1.0)."})
+    optimize_threshold: bool = field(default=False, metadata={"help": "Search optimal classification threshold on validation set."})
     add_surface_markers: bool = field(
         default=False,
         metadata={"help": "Register surface marker tokens (<username>, [CAPS], [ELONG], etc.) as special tokens."},
@@ -739,21 +745,58 @@ def main():
                 total += numerator / denominator
             return 1.0 - total / num_classes
 
+    class FocalLoss(nn.Module):
+        """Focal Loss (Lin et al., ICCV 2017).
+        Down-weights easy samples via (1-p)^gamma; alpha memberi bobot lebih
+        ke kelas sarkastik (minoritas).
+        """
+        def __init__(self, gamma: float = 2.0, alpha: float = 0.75):
+            super().__init__()
+            self.gamma = gamma
+            self.alpha = alpha
+
+        def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+            ce = nn.functional.cross_entropy(logits, labels, reduction="none")
+            p_t = torch.exp(-ce)
+            alpha_t = torch.where(labels == 1,
+                                  torch.full_like(ce, self.alpha),
+                                  torch.full_like(ce, 1.0 - self.alpha))
+            return (alpha_t * (1.0 - p_t) ** self.gamma * ce).mean()
+
+    class PolyLoss(nn.Module):
+        """Poly Loss (Liu et al., ICLR 2022).
+        CE + epsilon*(1-p_t): koreksi polinomial yang secara universal lebih
+        baik dari CE tanpa hyperparameter sensitif.
+        """
+        def __init__(self, epsilon: float = 1.0):
+            super().__init__()
+            self.epsilon = epsilon
+
+        def forward(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+            ce = nn.functional.cross_entropy(logits, labels, reduction="none")
+            probs = torch.softmax(logits, dim=-1)
+            p_t = probs[torch.arange(len(labels), device=logits.device), labels]
+            return (ce + self.epsilon * (1.0 - p_t)).mean()
+
     class WeightedTrainer(Trainer):
         def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
             labels = inputs.pop("labels")
             outputs = model(**inputs)
             logits = outputs.get("logits")
-            if data_args.do_dice_loss:
-                loss_fct = DiceLoss()
-                loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+            flat_logits = logits.view(-1, self.model.config.num_labels)
+            flat_labels = labels.view(-1)
+            if data_args.do_focal_loss:
+                loss = FocalLoss(gamma=data_args.focal_gamma,
+                                 alpha=data_args.focal_alpha)(flat_logits, flat_labels)
+            elif data_args.do_poly_loss:
+                loss = PolyLoss(epsilon=data_args.poly_epsilon)(flat_logits, flat_labels)
+            elif data_args.do_dice_loss:
+                loss = DiceLoss()(flat_logits, flat_labels)
             else:
-                loss_fct = nn.CrossEntropyLoss(
+                loss = nn.CrossEntropyLoss(
                     weight=torch.tensor(weights, device=model.device, dtype=torch.float)
-                    if data_args.do_weighted_loss
-                    else None
-                )
-                loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+                    if data_args.do_weighted_loss else None
+                )(flat_logits, flat_labels)
             return (loss, outputs) if return_outputs else loss
 
     # Initialize our Trainer
@@ -785,6 +828,36 @@ def main():
         trainer.log_metrics("train", metrics)
         trainer.save_metrics("train", metrics)
         trainer.save_state()
+
+    # Threshold calibration: cari threshold optimal di validation set
+    best_threshold = 0.5
+    if data_args.optimize_threshold and training_args.do_train and not is_regression and not is_multi_label:
+        logger.info("*** Threshold Calibration ***")
+        val_output = trainer.predict(eval_dataset, metric_key_prefix="threshold_search")
+        val_logits = val_output.predictions
+        val_labels = val_output.label_ids
+        val_probs = torch.softmax(torch.tensor(val_logits, dtype=torch.float), dim=-1)[:, 1].numpy()
+        best_f1_thresh = 0.0
+        for t in np.arange(0.10, 0.91, 0.05):
+            preds = (val_probs >= t).astype(int)
+            score = f1.compute(predictions=preds, references=val_labels)["f1"]
+            if score > best_f1_thresh:
+                best_f1_thresh, best_threshold = score, float(t)
+        logger.info("Best threshold: %.2f  (val F1=%.4f)", best_threshold, best_f1_thresh)
+
+        # Override compute_metrics untuk pakai best_threshold saat evaluasi test
+        def compute_metrics(p: EvalPrediction):
+            logits = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
+            probs = torch.softmax(torch.tensor(logits, dtype=torch.float), dim=-1)[:, 1].numpy()
+            preds = (probs >= best_threshold).astype(int)
+            return {
+                "accuracy": accuracy.compute(predictions=preds, references=p.label_ids)["accuracy"],
+                "f1": f1.compute(predictions=preds, references=p.label_ids)["f1"],
+                "precision": precision.compute(predictions=preds, references=p.label_ids)["precision"],
+                "recall": recall.compute(predictions=preds, references=p.label_ids)["recall"],
+                "threshold": best_threshold,
+            }
+        trainer.compute_metrics = compute_metrics
 
     # Evaluation
     if training_args.do_eval:
