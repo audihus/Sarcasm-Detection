@@ -8,7 +8,11 @@
       "PowerShell(Get-ChildItem -Path \"E:\\\\Luaran Kelulusan\\\\Sarcasm Detection\\\\Code\\\\multi_channel_method\\\\id_sarcasm\\\\preprocessing\" -File | ForEach-Object { $_.Name })",
       "PowerShell(Get-ChildItem -Path \"E:\\\\Luaran Kelulusan\\\\Sarcasm Detection\\\\Code\\\\multi_channel_method\\\\id_sarcasm\\\\scripts\" -File | ForEach-Object { $_.Name })",
       "PowerShell(Head *)",
-      "Bash(dir /s /b \"E:\\\\Luaran Kelulusan\\\\Sarcasm Detection\\\\Code\\\\multi_channel_method\\\\id_sarcasm\\\\real_data\")"
+      "Bash(dir /s /b \"E:\\\\Luaran Kelulusan\\\\Sarcasm Detection\\\\Code\\\\multi_channel_method\\\\id_sarcasm\\\\real_data\")",
+      "PowerShell(conda run -n sarcasm python \"e:/Folder audi/Code/Sarcasm-Detection/id_sarcasm/scripts/run_classical_classification.py\" --dataset_name \"e:/Folder audi/Code/Sarcasm-Detection/data/twitter_indonesia_sarcastic\" --text_column_name tweet --output_folder \"e:/Folder audi/Code/Sarcasm-Detection/id_sarcasm/results_baseline_repro\")",
+      "PowerShell(conda run -n sarcasm python \"C:\\\\Users\\\\farih\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--Folder-audi-Code-Sarcasm-Detection\\\\5cd06339-e054-4de2-8306-89f127d8ce34\\\\scratchpad\\\\run_mvsc_v2.py\")",
+      "PowerShell(Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Milliseconds 500; Write-Output \"leftover python: $\\(\\(Get-Process python -ErrorAction SilentlyContinue | Measure-Object\\).Count\\)\"; conda run -n sarcasm python -u \"C:\\\\Users\\\\farih\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--Folder-audi-Code-Sarcasm-Detection\\\\5cd06339-e054-4de2-8306-89f127d8ce34\\\\scratchpad\\\\run_mvsc_v4.py\")",
+      "PowerShell(conda run -n sarcasm pip install sentencepiece)"
     ]
   }
 }
