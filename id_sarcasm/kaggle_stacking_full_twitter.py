@@ -1,16 +1,12 @@
 # ============================================================================
-# FULL Stacking Ablation — Classical (LR) x ALL paper transformers (Twitter)
-# Untuk laporan komprehensif: semua 6 transformer paper + LR, di-stack dengan
-# berbagai konfigurasi + double-stacking 2-level. Semua OOF + bootstrap CI.
+# SYSTEMATIC Fusion Check — LR + SETIAP transformer paper (Twitter)
+# Fusi LR dengan tiap transformer SATU PER SATU (weighted-avg & meta-stack),
+# pilih metode terbaik BY VALIDATION, lapor F1 / 95% CI / P(>SOTA). Plus baris
+# pembanding multi-model. 6 transformer paper, inferensi-only (cepat).
 #
 # KAGGLE: Settings -> GPU T4 x1, Internet = ON. Pin versi spt baseline:
 #   !pip install -q transformers==4.46.3 datasets==3.1.0 evaluate==0.4.3 \
 #                   accelerate==1.1.1 scikit-learn nltk sentencepiece
-#
-# CATATAN KEJUJURAN: makin banyak model di-stack pada val kecil (268) makin
-# rawan OVERFIT. Karena itu kita laporkan VAL_F1 (OOF) di samping TEST_F1 —
-# jarak val-test yang lebar = sinyal overfit. Bandingkan, jangan asal pilih
-# yang TEST-nya tertinggi.
 # ============================================================================
 import warnings, json
 import numpy as np
@@ -153,52 +149,45 @@ def stack(keys):
     thr, val_f1 = best_threshold(yva, oof)
     return ft, thr, val_f1
 
-def double_stack():
-    """2-level: stack IndoBERT-family & XLM-R-family dulu (level-1, OOF), lalu
-    stack [LR + indo_stack + xlmr_stack] (level-2). Rawan overfit -> sbg ablation."""
-    # level-1 produce OOF val preds + test preds for each family
-    iv = cross_val_predict(LogisticRegression(class_weight="balanced", max_iter=2000, random_state=SEED),
-                           np.column_stack([P_val[k] for k in ["indobert_base", "indobert_large", "indobert_lem"]]),
-                           yva, cv=SKF, method="predict_proba")[:, 1]
-    xv = cross_val_predict(LogisticRegression(class_weight="balanced", max_iter=2000, random_state=SEED),
-                           np.column_stack([P_val[k] for k in ["xlmr_base", "xlmr_large"]]),
-                           yva, cv=SKF, method="predict_proba")[:, 1]
-    it, _ = _meta_oof(["indobert_base", "indobert_large", "indobert_lem"])
-    xt, _ = _meta_oof(["xlmr_base", "xlmr_large"])
-    Mv = np.column_stack([P_val["lr"], iv, xv]); Mt = np.column_stack([P_test["lr"], it, xt])
-    meta2 = LogisticRegression(class_weight="balanced", max_iter=2000, random_state=SEED)
-    oof2 = cross_val_predict(meta2, Mv, yva, cv=SKF, method="predict_proba")[:, 1]
-    thr, val_f1 = best_threshold(yva, oof2)
-    meta2.fit(Mv, yva)
-    return meta2.predict_proba(Mt)[:, 1], thr, val_f1
-
-ALL_T = ["indobert_base", "indobert_large", "indobert_lem", "mbert", "xlmr_base", "xlmr_large"]
-STRONG = ["indobert_base", "xlmr_base", "xlmr_large"]
-EXPERIMENTS = {
-    "wavg  LR+XLMRlarge":          lambda: wavg(["lr", "xlmr_large"]),
-    "stack LR+IBbase+XLMRlarge":   lambda: stack(["lr", "indobert_base", "xlmr_large"]),
-    "stack LR+STRONG(3)":          lambda: stack(["lr"] + STRONG),
-    "stack ALL-transformers(6)":   lambda: stack(ALL_T),
-    "stack LR+ALL(7)":             lambda: stack(["lr"] + ALL_T),
-    "double-stack 2level":         double_stack,
-}
-
-# ---------------- 4) run + report ----------------
-print("\n=== STACKING ABLATION (val OOF vs test; bandingkan gap-nya) ===")
-print(f"{'config':28s} {'VAL_F1':>7s} {'TEST_F1':>8s}  {'95% CI':>17s} {'P(>SOTA)':>9s}")
+# ---------------- 4) SYSTEMATIC: LR + tiap transformer (satu per satu) ----------------
+# Untuk SETIAP transformer: fusi dengan LR via weighted-avg DAN meta-stack,
+# lalu pilih metode terbaik BY VALIDATION (jujur). Jawab: transformer mana yang
+# paling untung kalau digabung LR, dan mana yang setelah +LR melewati SOTA.
+order = sorted(MODELS, key=lambda k: PAPER_F1[k], reverse=True)   # kuat -> lemah
+print("\n=== SYSTEMATIC: LR + each transformer ===")
+print(f"{'transformer':15s} {'alone':>7s} {'+LR_wavg':>8s} {'+LR_stk':>8s} {'best':>7s} "
+      f"{'dAlone':>7s} {'dSOTA':>7s} {'P(>SOTA)':>9s} {'95%CI(best)':>15s}")
 results = {}
-for name, fn in EXPERIMENTS.items():
-    ft, thr, val_f1 = fn()
-    m = report(yte, ft, thr); lo, hi, pgt = bootstrap(yte, (ft >= thr).astype(int))
-    gap = val_f1 - m["f1"]
-    results[name] = {**m, "val_f1": round(val_f1, 4), "thr": round(thr, 3),
-                     "ci": [round(lo, 4), round(hi, 4)], "p_beat_sota": round(pgt, 3),
-                     "val_test_gap": round(gap, 4)}
-    flag = "  <-- overfit?" if gap > 0.04 else ""
-    print(f"{name:28s} {val_f1:7.4f} {m['f1']:8.4f}  [{lo:.3f},{hi:.3f}] {pgt:8.1%}{flag}")
+for k in order:
+    alone = report(yte, P_test[k], 0.5)["f1"]
+    ftw, thw, vw = wavg(["lr", k]); fw = report(yte, ftw, thw)["f1"]
+    fts, ths, vs = stack(["lr", k]); fs = report(yte, fts, ths)["f1"]
+    if vw >= vs:                                   # pilih metode by VALIDATION, bukan test
+        method, ft, thr, fbest = "wavg", ftw, thw, fw
+    else:
+        method, ft, thr, fbest = "stack", fts, ths, fs
+    lo, hi, pgt = bootstrap(yte, (ft >= thr).astype(int))
+    beat = "BEAT" if fbest > SOTA else ""
+    results[k] = {"alone": alone, "lr_wavg": fw, "lr_stack": fs, "best_method": method,
+                  "best_test_f1": fbest, "d_vs_alone": round(fbest - alone, 4),
+                  "d_vs_sota": round(fbest - SOTA, 4), "ci": [round(lo, 4), round(hi, 4)],
+                  "p_beat_sota": round(pgt, 3)}
+    print(f"{k:15s} {alone:7.4f} {fw:8.4f} {fs:8.4f} {fbest:7.4f} "
+          f"{fbest-alone:+7.4f} {fbest-SOTA:+7.4f} {pgt:8.1%}  [{lo:.3f},{hi:.3f}] {beat}")
 
-print(f"\nSOTA XLM-R large = {SOTA}. 'BEAT' kalau TEST_F1 > {SOTA} (cek juga CI & gap).")
-print("Pilih yang TEST tinggi TAPI gap val-test kecil + CI tak terlalu lebar.")
-with open("stacking_full_results_twitter.json", "w") as f:
+# ---------------- pembanding: LR sendiri + kombinasi 3-model terbaik ----------------
+print("\n=== context (pembanding) ===")
+lr_thr, _ = best_threshold(yva, P_val["lr"])
+lr_alone = report(yte, P_test["lr"], lr_thr)["f1"]
+print(f"  {'LR alone (MVSC)':18s} {lr_alone:.4f}")
+ft3, th3, v3 = stack(["lr", "indobert_base", "xlmr_large"])
+m3 = report(yte, ft3, th3); lo3, hi3, p3 = bootstrap(yte, (ft3 >= th3).astype(int))
+print(f"  {'LR+IB+XLMR (3-model)':18s} {m3['f1']:.4f}  P(>SOTA)={p3:.1%}  CI[{lo3:.3f},{hi3:.3f}]")
+results["_context"] = {"lr_alone": lr_alone,
+                       "lr_ib_xlmr_3model": {"test_f1": m3["f1"], "p_beat_sota": round(p3, 3),
+                                             "ci": [round(lo3, 4), round(hi3, 4)]}}
+
+print(f"\nSOTA = {SOTA}. Lihat kolom: 'dAlone'>0 = fusi LR menambah; 'dSOTA'>0 = lewat SOTA.")
+with open("stacking_systematic_results_twitter.json", "w") as f:
     json.dump(results, f, indent=2)
-print("saved -> stacking_full_results_twitter.json")
+print("saved -> stacking_systematic_results_twitter.json")
