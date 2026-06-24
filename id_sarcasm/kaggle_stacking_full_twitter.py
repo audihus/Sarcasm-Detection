@@ -93,9 +93,15 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 print("device:", DEVICE)
 
 def _pos(cfg):
+    # identik dgn run_classification.py & kaggle_hybrid_fusion_twitter.py:
+    # index kelas sarkas diambil dari label2id model, bukan menebak.
     l2i = getattr(cfg, "label2id", None) or {}
     for k in ("1", "LABEL_1"):
-        if k in l2i: return int(l2i[k])
+        if k in l2i:
+            return int(l2i[k])
+    for kk, v in l2i.items():
+        if "sarc" in str(kk).lower():
+            return int(v)
     return 1
 
 @torch.no_grad()
@@ -159,33 +165,35 @@ print(f"{'transformer':15s} {'alone':>7s} {'+LR_wavg':>8s} {'+LR_stk':>8s} {'bes
       f"{'dAlone':>7s} {'dSOTA':>7s} {'P(>SOTA)':>9s} {'95%CI(best)':>15s}")
 results = {}
 for k in order:
-    alone = report(yte, P_test[k], 0.5)["f1"]
-    ftw, thw, vw = wavg(["lr", k]); fw = report(yte, ftw, thw)["f1"]
-    fts, ths, vs = stack(["lr", k]); fs = report(yte, fts, ths)["f1"]
-    if vw >= vs:                                   # pilih metode by VALIDATION, bukan test
-        method, ft, thr, fbest = "wavg", ftw, thw, fw
+    am = report(yte, P_test[k], 0.5)                  # alone (argmax) -> full metrics
+    ftw, thw, vw = wavg(["lr", k]); wm = report(yte, ftw, thw)
+    fts, ths, vs = stack(["lr", k]); sm = report(yte, fts, ths)
+    if vw >= vs:                                      # pilih metode by VALIDATION, bukan test
+        method, ft, thr, bm = "wavg", ftw, thw, wm
     else:
-        method, ft, thr, fbest = "stack", fts, ths, fs
+        method, ft, thr, bm = "stack", fts, ths, sm
     lo, hi, pgt = bootstrap(yte, (ft >= thr).astype(int))
-    beat = "BEAT" if fbest > SOTA else ""
-    results[k] = {"alone": alone, "lr_wavg": fw, "lr_stack": fs, "best_method": method,
-                  "best_test_f1": fbest, "d_vs_alone": round(fbest - alone, 4),
-                  "d_vs_sota": round(fbest - SOTA, 4), "ci": [round(lo, 4), round(hi, 4)],
-                  "p_beat_sota": round(pgt, 3)}
-    print(f"{k:15s} {alone:7.4f} {fw:8.4f} {fs:8.4f} {fbest:7.4f} "
-          f"{fbest-alone:+7.4f} {fbest-SOTA:+7.4f} {pgt:8.1%}  [{lo:.3f},{hi:.3f}] {beat}")
+    beat = "BEAT" if bm["f1"] > SOTA else ""
+    results[k] = {"alone_f1": am["f1"], "lr_wavg_f1": wm["f1"], "lr_stack_f1": sm["f1"],
+                  "best_method": method,
+                  "f1": bm["f1"], "precision": bm["prec"], "recall": bm["rec"], "accuracy": bm["acc"],
+                  "d_vs_alone": round(bm["f1"] - am["f1"], 4), "d_vs_sota": round(bm["f1"] - SOTA, 4),
+                  "ci": [round(lo, 4), round(hi, 4)], "p_beat_sota": round(pgt, 3)}
+    print(f"{k:15s} {am['f1']:7.4f} {wm['f1']:8.4f} {sm['f1']:8.4f} {bm['f1']:7.4f} "
+          f"{bm['f1']-am['f1']:+7.4f} {bm['f1']-SOTA:+7.4f} {pgt:8.1%}  [{lo:.3f},{hi:.3f}] {beat}")
 
 # ---------------- pembanding: LR sendiri + kombinasi 3-model terbaik ----------------
 print("\n=== context (pembanding) ===")
 lr_thr, _ = best_threshold(yva, P_val["lr"])
-lr_alone = report(yte, P_test["lr"], lr_thr)["f1"]
-print(f"  {'LR alone (MVSC)':18s} {lr_alone:.4f}")
+lrm = report(yte, P_test["lr"], lr_thr)
+print(f"  {'LR alone (MVSC)':20s} F1={lrm['f1']:.4f} P={lrm['prec']:.4f} R={lrm['rec']:.4f} Acc={lrm['acc']:.4f}")
 ft3, th3, v3 = stack(["lr", "indobert_base", "xlmr_large"])
 m3 = report(yte, ft3, th3); lo3, hi3, p3 = bootstrap(yte, (ft3 >= th3).astype(int))
-print(f"  {'LR+IB+XLMR (3-model)':18s} {m3['f1']:.4f}  P(>SOTA)={p3:.1%}  CI[{lo3:.3f},{hi3:.3f}]")
-results["_context"] = {"lr_alone": lr_alone,
-                       "lr_ib_xlmr_3model": {"test_f1": m3["f1"], "p_beat_sota": round(p3, 3),
-                                             "ci": [round(lo3, 4), round(hi3, 4)]}}
+print(f"  {'LR+IB+XLMR (3-model)':20s} F1={m3['f1']:.4f} P={m3['prec']:.4f} R={m3['rec']:.4f} Acc={m3['acc']:.4f}  P(>SOTA)={p3:.1%}")
+results["_context"] = {
+    "lr_alone": {"f1": lrm["f1"], "precision": lrm["prec"], "recall": lrm["rec"], "accuracy": lrm["acc"]},
+    "lr_ib_xlmr_3model": {"f1": m3["f1"], "precision": m3["prec"], "recall": m3["rec"], "accuracy": m3["acc"],
+                          "p_beat_sota": round(p3, 3), "ci": [round(lo3, 4), round(hi3, 4)]}}
 
 print(f"\nSOTA = {SOTA}. Lihat kolom: 'dAlone'>0 = fusi LR menambah; 'dSOTA'>0 = lewat SOTA.")
 with open("stacking_systematic_results_twitter.json", "w") as f:
