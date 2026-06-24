@@ -182,13 +182,17 @@ def fuse_weighted(keys):
     return ft, thr, {"w": round(w, 3)}
 
 def fuse_meta(keys):
-    """k-model stacking: meta-LR on val probabilities."""
+    """k-model stacking: meta-LR on val probabilities.
+    Threshold dari prediksi OUT-OF-FOLD (bukan in-sample) -> jujur, anti-optimis."""
+    from sklearn.model_selection import cross_val_predict, StratifiedKFold
     Mv = np.column_stack([P_val[k] for k in keys])
     Mt = np.column_stack([P_test[k] for k in keys])
     meta = LogisticRegression(class_weight="balanced", max_iter=2000, random_state=SEED)
+    skf = StratifiedKFold(5, shuffle=True, random_state=SEED)
+    fv = cross_val_predict(meta, Mv, yva, cv=skf, method="predict_proba")[:, 1]  # OOF
     meta.fit(Mv, yva)
-    fv = meta.predict_proba(Mv)[:, 1]; ft = meta.predict_proba(Mt)[:, 1]
-    thr, _ = best_threshold(yva, fv)
+    ft = meta.predict_proba(Mt)[:, 1]
+    thr, _ = best_threshold(yva, fv)   # threshold dari OOF, bukan in-sample
     return ft, thr, {"coef": [round(c, 2) for c in meta.coef_[0]]}
 
 FUSIONS = {
