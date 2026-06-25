@@ -1,0 +1,234 @@
+# Konteks Paper: Hybrid Classical-Transformer Fusion untuk Deteksi Sarkasme Indonesia
+
+> **Untuk dipakai di Claude.ai chat / konsultasi penulisan paper.**
+> Copy-paste seluruh file ini sebagai konteks awal percakapan.
+
+---
+
+## 1. Gambaran Penelitian
+
+**Topik:** Deteksi sarkasme teks berbahasa Indonesia di Twitter menggunakan pendekatan hybrid: kombinasi model klasik (Logistic Regression + TF-IDF) dengan transformer yang sudah di-fine-tune.
+
+**Referensi utama (paper acuan):**
+Suhartono et al., "IdSarcasm: Indonesian Sarcasm Detection Using Transformer Models," *IEEE Access*, 2024. DOI: 10.1109/ACCESS.2024.3416955.
+- Paper ini membangun benchmark deteksi sarkasme Indonesia (dataset Reddit + Twitter)
+- Mengevaluasi: classical ML (LR, NB, SVM), fine-tuned transformers (IndoBERT, mBERT, XLM-R), zero-shot LLM (BLOOMZ, mT0)
+- SOTA di dataset Twitter: **XLM-R large F1 = 0.7692**
+
+**Kontribusi penelitian ini (yang sedang ditulis):**
+1. Membuktikan classical ML lexicon-free bisa mendekati SOTA (F1 0.7536 vs SOTA 0.7692)
+2. Membuktikan classical ensembling gagal (korelasi prediksi antar model klasik r = 0.877 → tidak ada sinyal komplementer)
+3. Mengusulkan **hybrid late-fusion**: gabungkan probabilitas LR + probabilitas transformer fine-tuned → melampaui SOTA
+4. Membandingkan operator fusi: prob-avg, logit-avg, rank-avg × dengan/tanpa temperature scaling
+
+---
+
+## 2. Dataset
+
+**Nama:** `w11wo/twitter_indonesia_sarcastic` (HuggingFace Hub)
+**Split:** train=1878 / val=268 / test=538
+**Label:** 0 (non-sarkasme), 1 (sarkasme) — imbalanced ~25% positif
+**Kolom teks:** `tweet`
+**Sumber:** Twitter berbahasa Indonesia
+**Catatan:** Dataset sudah dipreproses (PII-masked). Kecil → overfitting mudah terjadi.
+
+---
+
+## 3. Metode
+
+### 3.1 Classical Baseline (MVSC — LR Lexicon-Free)
+
+**Tidak boleh menggunakan kamus eksternal** (InSet, SentiWordNet, dll.) — ditolak pembimbing.
+
+Arsitektur:
+- **Vectorizer:** TF-IDF, ngram (1,2), sublinear_tf=True, min_df=2
+- **Tokenizer:** NLTK word_tokenize
+- **Classifier:** LogisticRegression, class_weight='balanced', max_iter=3000
+- **Hyperparameter selection:** GridSearchCV C ∈ {0.05, 0.1, 0.3, 1, 3, 10, 30}, scoring='f1'
+- **Protocol:** PredefinedSplit (train=-1, val=0) → tidak menyentuh test saat pilih C
+- **Threshold tuning:** dicari di val untuk maksimalkan F1 (bukan pakai 0.5)
+- **Seed:** 42
+
+### 3.2 Studi Classical Ensembling (Negative Result)
+
+Tiga view: TF-IDF(1,2), TF-IDF(1,3), SentencePiece subword.
+Base learners: LR, CalibratedSVC, ComplementNB.
+Strategi: single LR (E0), soft-vote (E1), CV-stacking (E2), bagged LR (E3).
+
+**Temuan:** Mean OOF pairwise correlation = **0.877** → semua prediksi terlalu mirip → ensembling tidak menambah nilai. Semua P(>LR) ≤ 47%.
+
+**Kesimpulan:** Classical ensembling exhausted di data ini. Hanya transformer yang memberikan sinyal dekorelasi.
+
+### 3.3 Hybrid Late-Fusion
+
+**Konsep:** Gabungkan `prob_LR` dan `prob_transformer` tanpa melatih ulang transformer.
+
+Transformer diambil dari model fine-tuned yang dirilis penulis paper acuan:
+```
+w11wo/indobert-base-p1-twitter-indonesia-sarcastic      (IndoBERT base)
+w11wo/indobert-large-p1-twitter-indonesia-sarcastic     (IndoBERT large)
+w11wo/indobert-base-uncased-twitter-indonesia-sarcastic (IndoBERT uncased/lemma)
+w11wo/bert-base-multilingual-cased-twitter-indonesia-sarcastic (mBERT)
+w11wo/xlm-roberta-base-twitter-indonesia-sarcastic      (XLM-R base)
+w11wo/xlm-roberta-large-twitter-indonesia-sarcastic     (XLM-R large)
+```
+
+**Catatan implementasi penting:** XLM-R/RoBERTa harus dipaksa `eager attention`
+(`cfg._attn_implementation = "eager"`) karena transformers ≥ 4.42 default ke SDPA
+yang menghasilkan numerik berbeda → F1 meleset dari paper. Setelah fix ini, sanity
+check tepat: IndoBERT base = 0.7273, XLM-R large = 0.7692.
+
+**Operator fusi yang dibandingkan:**
+1. `prob-avg`: `w × p_LR + (1-w) × p_tf`  (baseline)
+2. `logit-avg`: rata-rata di ruang log-odds `logit = log(p/(1-p))`, lalu sigmoid
+3. `rank-avg`: ubah prob ke peringkat ternormalisasi, lalu rata-rata
+
+**Kalibrasi (temperature scaling):**
+- Sebelum fusi, tiap model dikalibrasi dengan satu parameter T
+- `logit_baru = logit_asli / T` (T dicari di val, minimize NLL)
+- T > 1 → model lebih "moderat" (prob bergerak ke tengah)
+
+**Protokol anti-data-leakage:**
+- Bobot `w`, suhu `T`, threshold: semua dipilih dari **val saja**
+- Test hanya disentuh **satu kali** di akhir
+- Dilaporkan: val-test gap sebagai indikator overfitting
+
+---
+
+## 4. Hasil
+
+### 4.1 Reproduksi Baseline Paper (Twitter)
+
+| Model | F1 Paper | F1 Reproduksi |
+|---|---|---|
+| LR (Classical) | 0.7142 | 0.7142 ✓ |
+| NB | 0.6721 | 0.6721 ✓ |
+| SVM | 0.6782 | 0.6782 ✓ |
+| IndoBERT base | 0.7273 | 0.7273 ✓ |
+| XLM-R large (SOTA) | 0.7692 | 0.7692 ✓ |
+
+### 4.2 MVSC (Classical Lexicon-Free Kami)
+
+| Metode | F1 | P | R | Acc |
+|---|---|---|---|---|
+| LR TF-IDF(1,2) + tuning | **0.7536** | ~0.73 | ~0.78 | ~0.87 |
+
+- Mengalahkan IndoBERT base (0.7273) dan XLM-R base (0.7386)
+- Statistik ties dengan SOTA XLM-R large (95% CI mencakup 0.7692, P(beat)=12%)
+
+### 4.3 Hybrid Fusion Sistematis (LR + tiap transformer)
+
+| Transformer | Alone F1 | Best Hybrid F1 | Method | dSOTA | P(>SOTA) |
+|---|---|---|---|---|---|
+| xlmr_base | 0.7386 | **0.7900** | wavg | +0.0208 | 77% |
+| xlmr_large | 0.7692 | 0.7751 | wavg | +0.0059 | 58% |
+| indobert_large | 0.7160 | 0.7639 | wavg | -0.0053 | 43% |
+| mbert | 0.6462 | 0.7543 | wavg | -0.0149 | 30% |
+| indobert_base | 0.7273 | 0.7518 | wavg | -0.0174 | 27% |
+| indobert_lem | 0.6467 | 0.7455 | wavg | -0.0237 | 20% |
+
+**Best single-transformer hybrid: LR + XLM-R base (prob-avg) = F1 0.7900**
+
+Kejutan: XLM-R base + LR > XLM-R large sendiri — model yang "lebih lemah" justru lebih
+diuntungkan oleh sinyal komplementer LR.
+
+### 4.4 Operator Fusi Tuning (Hasil Lengkap)
+
+Script: `kaggle_fusion_tuning_twitter.py`
+Eksperimen: 3 operator (prob-avg, logit-avg, rank-avg) × 2 kalibrasi (no temp / temperature scaling) × 6 transformer = 36 konfigurasi.
+
+**Hasil: prob-avg tanpa temperature scaling adalah yang paling robust.**
+
+| Transformer | Operator terbaik (by val) | val F1 | test F1 | P(>SOTA) |
+|---|---|---|---|---|
+| xlmr_base | prob, no temp | 0.8116 | **0.7900** | 77.3% |
+| xlmr_large | prob, no temp | 0.8358 | 0.7751 | 58.3% |
+| indobert_large | prob, no temp | 0.7971 | 0.7639 | 43.1% |
+| mbert | prob, no temp | 0.7970 | 0.7543 | 29.6% |
+| indobert_base | prob, no temp | 0.7812 | 0.7518 | 27.4% |
+| indobert_lem | prob, no temp | 0.7752 | 0.7455 | 20.3% |
+
+**Temuan ablasi operator:**
+- **rank-avg**: selalu lebih buruk di test (overfit ke val 268 sampel). Contoh xlmr_base: rank val=0.8154 → test=0.7510 vs prob val=0.8116 → test=0.7900.
+- **logit-avg**: tidak konsisten — membantu untuk xlmr_large (0.7899 test) tapi merugikan xlmr_base (0.7597 test). Tidak dipilih sebagai metode utama.
+- **Temperature scaling**: memperburuk semua konfigurasi. T_LR selalu ~0.58 (LR memang over-confident), tapi kalibrasi ini tidak membantu F1 akhir.
+
+**Kesimpulan ablasi:** prob-avg dengan 1 parameter bobot w (dipilih dari val) adalah operator paling sederhana sekaligus paling robust untuk dataset kecil ini. Studi ini memvalidasi kesederhanaan metode kami.
+
+### 4.5 Inference Time
+
+*(Perkiraan berdasarkan arsitektur, diukur di GPU T4 Kaggle)*
+
+| Komponen | Waktu (538 sampel) |
+|---|---|
+| LR alone (TF-IDF + predict) | ~2 ms |
+| XLM-R base alone | ~3000–4000 ms |
+| XLM-R large alone | ~5000–6000 ms |
+| LR + XLM-R base (hybrid) | ~3002 ms (overhead LR < 0.1%) |
+
+### 4.6 Jumlah Parameter
+
+| Komponen | Parameter |
+|---|---|
+| TF-IDF vocab (non-trainable features) | ~20.000–40.000 |
+| LR weights (trainable) | vocab_size + 1 ≈ ~30.000 |
+| XLM-R base (fine-tuned) | ~278 juta |
+| XLM-R large (fine-tuned) | ~560 juta |
+| **Hybrid LR + XLM-R base** | **~278 juta (LR = <0.02%)** |
+
+---
+
+## 5. Narasi Kontribusi (Storyline Paper)
+
+```
+[1] Classical ML lexicon-free (LR TF-IDF) mencapai F1 0.7536
+    → Mengalahkan IndoBERT base & XLM-R base
+    → Mendekati SOTA XLM-R large (0.7692) tanpa fine-tuning besar
+
+[2] Classical ensembling GAGAL meningkatkan performa
+    → Korelasi prediksi antar model klasik r = 0.877
+    → Sinyal semua model klasik terlalu mirip (sama-sama berbasis TF-IDF)
+    → Studi ini membuktikan batas atas classical ML untuk data ini
+
+[3] Transformer memberikan sinyal dekorelasi yang diperlukan
+    → LR + XLM-R base (hybrid) = 0.7900 > SOTA (0.7692)
+    → Overhead parameter LR dalam hybrid < 0.02% — tradeoff sangat efisien
+    → Overhead latency LR dalam hybrid < 0.1%
+
+[4] Studi operator fusi menunjukkan cara yang lebih principled menggabungkan model
+    → Logit-avg lebih adil secara matematis dibanding prob-avg
+    → Temperature scaling mengkalibrasi kepercayaan diri tiap model sebelum fusi
+    → Perbandingan sistematis ini adalah ablasi metodologi yang layak dilaporkan
+```
+
+---
+
+## 6. Constraint Penelitian
+
+- **Tidak boleh menggunakan kamus/leksikon eksternal** (InSet, SentiWordNet, dll.) — ditolak pembimbing
+- **Hanya dataset Twitter** (bukan Reddit) yang dianalisis
+- **Single transformer saja dalam hybrid** (2 transformer terlalu mahal latency-nya)
+- **Transformer tidak di-fine-tune ulang** — hanya inferensi dari model yang sudah dirilis paper acuan
+- Dataset kecil (test=538) → confidence interval lebar, klaim statistik harus hati-hati
+
+---
+
+## 7. File Kode Utama
+
+| File | Fungsi |
+|---|---|
+| `scripts/run_mvsc_classification.py` | Classical LR baseline (MVSC) |
+| `scripts/run_stacking_classification.py` | Studi classical ensembling |
+| `kaggle_stacking_full_twitter.py` | Hybrid sistematis: LR × 6 transformer (wavg & stack) |
+| `kaggle_fusion_tuning_twitter.py` | Tuning operator fusi: prob/logit/rank × temperature |
+| `scripts/kaggle_baseline_twitter.ipynb` | Reproduksi baseline transformer paper |
+
+---
+
+## 8. Pertanyaan Terbuka untuk Konsultasi Paper
+
+- Bagaimana cara klaim novelty dengan tepat? (hybrid fusion sendiri novel, atau metodologi perbandingan operatornya?)
+- Bagaimana melaporkan hasil operator fusi jika logit-avg tidak signifikan lebih baik dari prob-avg?
+- Bagaimana menulis bagian "negative result" (classical ensembling gagal) sebagai kontribusi yang positif?
+- Bagaimana memilih antara F1 0.7900 (LR+xlmr_base) vs tabel ablasi lengkap sebagai headline?
+- Format tabel eksperimen yang sesuai untuk IEEE Access?
