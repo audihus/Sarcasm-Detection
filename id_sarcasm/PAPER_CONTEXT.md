@@ -155,7 +155,40 @@ Eksperimen: 3 operator (prob-avg, logit-avg, rank-avg) × 2 kalibrasi (no temp /
 
 **Kesimpulan ablasi:** prob-avg dengan 1 parameter bobot w (dipilih dari val) adalah operator paling sederhana sekaligus paling robust untuk dataset kecil ini. Studi ini memvalidasi kesederhanaan metode kami.
 
-### 4.5 Inference Time
+### 4.5 Studi Komposisi Hybrid: 2 Classical + 1 Transformer
+
+Script: `kaggle_2classical_twitter.py`
+Ide: daripada menambah transformer kedua (latency 2×), coba tambah model klasik lagi
+dengan inductive bias berbeda. Meta-LR dilatih di atas 3 input (OOF cross-val threshold).
+
+**Konfigurasi yang diuji (anchor: LR(1,2) + xlmr_base):**
+
+| Config | Komponen | val F1 | test F1 | val-test gap |
+|---|---|---|---|---|
+| C1 | LR(1,2) + LR(1,3) + xlmr_base | 0.7922 | 0.7593 | +0.0329 |
+| C2 | LR(1,2) + CNB(1,2) + xlmr_base | 0.7949 | 0.7316 | **+0.0633** |
+| C3 | LR(1,2) + SVC(1,2) + xlmr_base | 0.7895 | 0.7571 | +0.0324 |
+| C4 | semua classical + xlmr_base | — | 0.7423 | — |
+| **B2 (ref)** | **LR(1,2) + xlmr_base prob-avg** | **~0.811** | **0.7900** | **~0.021** |
+
+**Ablasi tanpa transformer:**
+
+| Config | Komponen | test F1 |
+|---|---|---|
+| A1 | LR(1,2) + LR(1,3) | 0.7535 |
+| A2 | LR(1,2) + CNB(1,2) | 0.7255 |
+| A3 | LR(1,2) + SVC(1,2) | 0.7391 |
+
+**Temuan kunci:**
+- **Semua C1-C4 lebih buruk dari B2 (0.7900)** — meta-LR dengan 3+ input overfit ke val=268 sampel.
+- **Koefisien meta-LR**: transformer selalu dominan (~2.9) vs classical tambahan (~1.7-2.0). Meta-learner "mengetahui" classical tambahan tidak berguna.
+- **C2 paling parah**: val tertinggi (0.7949) tapi test terendah di cluster ini (0.7316) — gap +0.0633 adalah sinyal overfit terbesar di seluruh eksperimen.
+- **Ablasi (A1-A3)**: 2 classical tanpa transformer hampir sama dengan LR tunggal (0.7509) → konsisten dengan r=0.877 dari studi ensembling.
+- **Konfirmasi**: sinyal transformer tetap esensial; mengganti satu transformer dengan model klasik kedua selalu rugi.
+
+**Kesimpulan:** B2 (LR+xlmr_base, prob-avg, 1 parameter w) tetap sebagai metode terbaik. Studi ini mengkonfirmasi bahwa kesederhanaan bukan kompromi — melainkan pilihan optimal untuk dataset kecil ini.
+
+### 4.6 Inference Time
 
 *(Perkiraan berdasarkan arsitektur, diukur di GPU T4 Kaggle)*
 
