@@ -8,7 +8,7 @@
 #   !pip install -q transformers==4.46.3 datasets==3.1.0 evaluate==0.4.3 \
 #                   accelerate==1.1.1 scikit-learn nltk sentencepiece
 # ============================================================================
-import warnings, json
+import warnings, json, time
 import numpy as np
 warnings.filterwarnings("ignore")
 
@@ -76,7 +76,11 @@ from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy.sparse import vstack
 
+_LR_VEC  = None   # simpan untuk timing & param count
+_LR_FULL = None   # model fit on train+val (untuk predict test)
+
 def get_lr_probs():
+    global _LR_VEC, _LR_FULL
     vec = TfidfVectorizer(tokenizer=word_tokenize, token_pattern=None, ngram_range=(1, 2), min_df=2, sublinear_tf=True)
     Xtr, Xva, Xte = vec.fit_transform(tr_t), vec.transform(va_t), vec.transform(te_t)
     base = LogisticRegression(class_weight="balanced", max_iter=3000, random_state=SEED)
@@ -84,6 +88,8 @@ def get_lr_probs():
     gs = GridSearchCV(base, {"C": [0.05, 0.1, 0.3, 1, 3, 10, 30]}, scoring="f1", cv=ps, n_jobs=-1, refit=True)
     gs.fit(vstack([Xtr, Xva]), np.concatenate([ytr, yva]))
     valm = clone(base).set_params(C=gs.best_params_["C"]).fit(Xtr, ytr)
+    _LR_VEC  = vec
+    _LR_FULL = gs.best_estimator_
     return valm.predict_proba(Xva)[:, 1], gs.best_estimator_.predict_proba(Xte)[:, 1]
 
 # ---------------- 2) transformers (inference only) ----------------
@@ -104,6 +110,8 @@ def _pos(cfg):
             return int(v)
     return 1
 
+INFER_TIMES = {}   # model_name -> detik (hanya test set)
+
 @torch.no_grad()
 def transformer_probs(model_name, texts):
     cfg = AutoConfig.from_pretrained(model_name)
@@ -112,9 +120,19 @@ def transformer_probs(model_name, texts):
     tok = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, config=cfg).to(DEVICE).eval()
     pos, probs = _pos(model.config), []
+    is_test = (len(texts) == len(te_t))
+    if is_test:
+        # warmup 1 batch agar CUDA kernel sudah loaded, lalu ukur pure forward
+        enc0 = tok(texts[:BATCH], padding=True, truncation=True, max_length=MAX_LEN, return_tensors="pt").to(DEVICE)
+        model(**enc0)
+        if DEVICE == "cuda": torch.cuda.synchronize()
+        t0 = time.perf_counter()
     for i in range(0, len(texts), BATCH):
         enc = tok(texts[i:i + BATCH], padding=True, truncation=True, max_length=MAX_LEN, return_tensors="pt").to(DEVICE)
         probs.append(torch.softmax(model(**enc).logits, dim=-1)[:, pos].cpu().numpy())
+    if is_test:
+        if DEVICE == "cuda": torch.cuda.synchronize()
+        INFER_TIMES[model_name] = time.perf_counter() - t0
     del model
     if DEVICE == "cuda": torch.cuda.empty_cache()
     return np.concatenate(probs)
@@ -199,3 +217,136 @@ print(f"\nSOTA = {SOTA}. Lihat kolom: 'dAlone'>0 = fusi LR menambah; 'dSOTA'>0 =
 with open("stacking_systematic_results_twitter.json", "w") as f:
     json.dump(results, f, indent=2)
 print("saved -> stacking_systematic_results_twitter.json")
+
+# ============================================================================
+# 5) MULTI-SEED ROBUSTNESS
+# Transformer probs sudah fixed (pre-trained). Variance dari CV-fold
+# assignment meta-LR. wavg deterministik (tidak ada randomness).
+# ============================================================================
+MS_SEEDS = [42, 1, 2, 3, 4]
+print(f"\n=== MULTI-SEED ROBUSTNESS (seeds={MS_SEEDS}) ===")
+print("  Transformer probs fixed (no re-training). Variance = meta-LR CV-fold split.\n")
+
+# B2: wavg deterministik — tidak perlu loop
+ft_b2, thr_b2, _ = wavg(["lr", "xlmr_base"])
+f1_b2 = report(yte, ft_b2, thr_b2)["f1"]
+print(f"  LR+xlmr_base (wavg)       : {f1_b2:.4f}  (deterministik, tidak ada variance seed)")
+
+# B3: 3-model meta-LR — seed mempengaruhi StratifiedKFold OOF split -> threshold
+f1_3m = []
+for s in MS_SEEDS:
+    Mv = np.column_stack([P_val[k] for k in ["lr", "indobert_base", "xlmr_large"]])
+    Mt = np.column_stack([P_test[k] for k in ["lr", "indobert_base", "xlmr_large"]])
+    meta_s = LogisticRegression(class_weight="balanced", max_iter=2000, random_state=s)
+    skf_s  = StratifiedKFold(5, shuffle=True, random_state=s)
+    oof    = cross_val_predict(meta_s, Mv, yva, cv=skf_s, method="predict_proba")[:, 1]
+    meta_s.fit(Mv, yva)
+    ft_s   = meta_s.predict_proba(Mt)[:, 1]
+    thr_s, _ = best_threshold(yva, oof)
+    f1_3m.append(report(yte, ft_s, thr_s)["f1"])
+
+mean_3m = float(np.mean(f1_3m)); std_3m = float(np.std(f1_3m))
+print(f"  LR+IB+XLMR_lg (3-model)   : {mean_3m:.4f} ± {std_3m:.4f}")
+print(f"    per-seed {MS_SEEDS}: {[round(f, 4) for f in f1_3m]}")
+ms_out = {"b2_wavg": f1_b2, "b3_per_seed": f1_3m,
+          "b3_mean": round(mean_3m, 4), "b3_std": round(std_3m, 4), "seeds": MS_SEEDS}
+
+# ============================================================================
+# 6) INFERENCE TIME  (test set, n=538; exclude model loading)
+# ============================================================================
+print("\n=== INFERENCE TIME (test set, exclude model load) ===")
+
+# LR: TF-IDF.transform + predict_proba — best of 3 runs
+Xte_lr = _LR_VEC.transform(te_t)          # warmup transform
+_LR_FULL.predict_proba(Xte_lr)            # warmup predict
+t_lr_list = []
+for _ in range(3):
+    t = time.perf_counter()
+    Xt = _LR_VEC.transform(te_t)
+    _LR_FULL.predict_proba(Xt)
+    t_lr_list.append(time.perf_counter() - t)
+t_lr = min(t_lr_list)
+n_te = len(te_t)
+print(f"  {'LR (TF-IDF+predict)':25s}: {t_lr*1000:7.1f} ms total | {t_lr/n_te*1000:.3f} ms/sample")
+
+# Transformer (diukur saat inferensi tadi, test set saja)
+print(f"\n  {'model':20s}  {'total (ms)':>11}  {'ms/sample':>10}")
+t_by_key = {}
+for k in order:
+    name = MODELS[k]
+    if name in INFER_TIMES:
+        t = INFER_TIMES[name]
+        t_by_key[k] = t
+        print(f"  {k:20s}  {t*1000:9.0f} ms   {t/n_te*1000:8.2f} ms/sample")
+
+# Overhead LR dibanding transformer dalam hybrid
+print(f"\n  --- Overhead LR dalam hybrid ---")
+if "xlmr_base" in t_by_key:
+    t_b2_total = t_lr + t_by_key["xlmr_base"]
+    pct = t_lr / t_by_key["xlmr_base"] * 100
+    print(f"  B2 LR+xlmr_base   : {t_b2_total*1000:.0f} ms  (LR = {pct:.2f}% dari transformer)")
+if "indobert_base" in t_by_key and "xlmr_large" in t_by_key:
+    t_tf_sum = t_by_key["indobert_base"] + t_by_key["xlmr_large"]
+    t_b3_total = t_lr + t_tf_sum
+    pct3 = t_lr / t_tf_sum * 100
+    print(f"  B3 LR+IB+XLMR_lg  : {t_b3_total*1000:.0f} ms  (LR = {pct3:.2f}% dari total transformer)")
+
+# ============================================================================
+# 7) PARAMETER COUNT
+# Classical LR: vocab_size koefisien + 1 intercept (kecil vs transformer).
+# Transformer: muat ke CPU saja untuk hitung params (hemat GPU).
+# ============================================================================
+print("\n=== PARAMETER COUNT ===")
+
+# Classical LR
+lr_n_params = int(_LR_FULL.coef_.size) + int(_LR_FULL.intercept_.size)
+lr_vocab     = len(_LR_VEC.vocabulary_)
+print(f"  TF-IDF vocab (features non-trainable) : {lr_vocab:>10,}")
+print(f"  LR trainable params (coef+intercept)  : {lr_n_params:>10,}  (= vocab_size + 1)")
+
+# Transformer: load on CPU hanya untuk count params
+print(f"\n  {'model':20s}  {'params':>15}  {'(M)':>8}")
+tf_params = {}
+for k, name in MODELS.items():
+    try:
+        m = AutoModelForSequenceClassification.from_pretrained(name, ignore_mismatched_sizes=True)
+        n = sum(p.numel() for p in m.parameters())
+        del m
+        tf_params[k] = n
+        print(f"  {k:20s}  {n:>15,}  ({n/1e6:6.1f}M)")
+    except Exception as e:
+        print(f"  {k:20s}  ERROR: {e}")
+
+# Meta-LR (3-input): 3 weights + 1 intercept = 4 params
+meta3_params = 4
+print(f"\n  Meta-LR (3-input stacking)            : {meta3_params:>10,}  (3 bobot + 1 intercept)")
+
+# Hybrid total
+print(f"\n  --- Hybrid total ---")
+if "xlmr_base" in tf_params:
+    total_b2 = lr_n_params + tf_params["xlmr_base"]
+    pct_lr_b2 = lr_n_params / total_b2 * 100
+    print(f"  B2 (LR + xlmr_base)   : {total_b2/1e6:7.1f}M  (LR = {lr_n_params:,} = {pct_lr_b2:.4f}%)")
+if "indobert_base" in tf_params and "xlmr_large" in tf_params:
+    total_b3 = lr_n_params + tf_params["indobert_base"] + tf_params["xlmr_large"] + meta3_params
+    pct_lr_b3 = lr_n_params / total_b3 * 100
+    print(f"  B3 (LR+IB+XLMR_large) : {total_b3/1e6:7.1f}M  (LR = {lr_n_params:,} = {pct_lr_b3:.4f}%)")
+
+# Simpan semua profiling ke JSON
+profiling_out = {
+    "multi_seed": ms_out,
+    "inference_time_ms": {
+        "lr": round(t_lr * 1000, 1),
+        "n_test_samples": n_te,
+        **{k: round(t_by_key[k] * 1000, 0) for k in t_by_key},
+    },
+    "parameters": {
+        "lr_trainable": lr_n_params,
+        "tfidf_vocab_features": lr_vocab,
+        "meta_lr_3model": meta3_params,
+        **{k: tf_params[k] for k in tf_params},
+    }
+}
+with open("profiling_results_twitter.json", "w") as f:
+    json.dump(profiling_out, f, indent=2)
+print("\nsaved -> profiling_results_twitter.json")
