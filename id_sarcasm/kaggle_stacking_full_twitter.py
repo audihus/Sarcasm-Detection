@@ -315,8 +315,13 @@ for ax, (pred, title) in zip(axes, configs):
 plt.suptitle("Confusion Matrix: Baseline vs Hybrid (XLM-R base + LR)", fontsize=13, y=1.02)
 plt.tight_layout()
 plt.savefig("confusion_matrix_comparison.png", dpi=150, bbox_inches="tight")
-plt.show()
+plt.close()
 print("saved -> confusion_matrix_comparison.png")
+try:
+    from IPython.display import Image, display as ipy_display
+    ipy_display(Image("confusion_matrix_comparison.png"))
+except Exception:
+    pass
 
 # ============================================================================
 # 5) MULTI-SEED / ROBUSTNESS
