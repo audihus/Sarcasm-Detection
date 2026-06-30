@@ -38,7 +38,7 @@ ytr = np.array(ds["train"]["label"]); yva = np.array(ds["validation"]["label"]);
 print(f"train {len(ytr)} | val {len(yva)} | test {len(yte)} (pos {yte.sum()})")
 
 # ---------------- helpers ----------------
-from sklearn.metrics import f1_score, precision_recall_fscore_support, accuracy_score
+from sklearn.metrics import f1_score, precision_recall_fscore_support, accuracy_score, confusion_matrix
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, PredefinedSplit, cross_val_predict, StratifiedKFold
 from sklearn.base import clone
@@ -275,6 +275,48 @@ for k in order:
           f"{r['recall']:6.4f} {r['f1']:6.4f}  [{ci[0]:.3f},{ci[1]:.3f}]  {r['p_beat_sota']:8.1%}{beat}")
 print(f"\n  {'lr_alone (MVSC)':15s}  {'---':>6}  {lrm['acc']:6.4f} {lrm['prec']:6.4f} "
       f"{lrm['rec']:6.4f} {lrm['f1']:6.4f}  (standalone, no fusion)")
+
+# ============================================================================
+# CONFUSION MATRIX — XLM-R base alone vs XLM-R base + LR hybrid
+# ============================================================================
+print("\n=== CONFUSION MATRIX ===")
+print("  Baseline : XLM-R base @0.5 (alone)")
+print("  Metode   : XLM-R base + LR (wavg, val-tuned threshold)\n")
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+pred_base_cm = (P_test["xlmr_base"] >= 0.5).astype(int)
+ft_cm, thr_cm, _ = wavg(["lr", "xlmr_base"])
+pred_ours_cm = (ft_cm >= thr_cm).astype(int)
+
+def _cm_metrics(y_true, y_pred):
+    pr, rc, f1, _ = precision_recall_fscore_support(y_true, y_pred, average="binary", zero_division=0)
+    acc = accuracy_score(y_true, y_pred)
+    return round(acc, 4), round(pr, 4), round(rc, 4), round(f1, 4)
+
+labels = ["Non-Sarcasm", "Sarcasm"]
+configs = [
+    (pred_base_cm, "XLM-R base @0.5\n(Baseline alone)"),
+    (pred_ours_cm, f"XLM-R base + LR wavg\n(Ours, thr={thr_cm:.3f})"),
+]
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+for ax, (pred, title) in zip(axes, configs):
+    cm = confusion_matrix(yte, pred)
+    acc, pr, rc, f1 = _cm_metrics(yte, pred)
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax,
+                xticklabels=labels, yticklabels=labels, cbar=False,
+                annot_kws={"size": 14})
+    ax.set_xlabel("Predicted", fontsize=12)
+    ax.set_ylabel("True", fontsize=12)
+    ax.set_title(f"{title}\nAcc={acc}  P={pr}  R={rc}  F1={f1}", fontsize=11)
+
+plt.suptitle("Confusion Matrix: Baseline vs Hybrid (XLM-R base + LR)", fontsize=13, y=1.02)
+plt.tight_layout()
+plt.savefig("confusion_matrix_comparison.png", dpi=150, bbox_inches="tight")
+plt.show()
+print("saved -> confusion_matrix_comparison.png")
 
 # ============================================================================
 # 5) MULTI-SEED / ROBUSTNESS
