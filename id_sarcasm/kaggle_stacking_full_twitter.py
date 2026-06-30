@@ -73,7 +73,9 @@ for pkg in ["punkt", "punkt_tab"]:
         try: nltk.download(pkg, quiet=True)
         except Exception: pass
 from nltk.tokenize import word_tokenize
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC
 from scipy.sparse import vstack
 
 _LR_VEC  = None   # simpan untuk timing & param count
@@ -91,6 +93,34 @@ def get_lr_probs():
     _LR_VEC  = vec
     _LR_FULL = gs.best_estimator_
     return valm.predict_proba(Xva)[:, 1], gs.best_estimator_.predict_proba(Xte)[:, 1]
+
+def reproduce_classical_paper():
+    """Reproduce LR/NB/SVM paper exact: unigram BoW+TF-IDF, accuracy GridSearch, seed=41."""
+    CLF_PAPER_F1 = {"lr": 0.7142, "nb": 0.6721, "svm": 0.6782}
+    classifiers_def = {
+        "lr":  (LogisticRegression(max_iter=3000),  {"C": [0.01, 0.1, 1, 10, 100]}),
+        "nb":  (MultinomialNB(),                    {"alpha": np.linspace(0.001, 1, 50)}),
+        "svm": (SVC(),                              {"C": [0.01, 0.1, 1, 10, 100], "kernel": ["rbf", "linear"]}),
+    }
+    ps = PredefinedSplit([-1]*len(ytr) + [0]*len(yva))
+    best_per_clf = {}
+    np.random.seed(41)   # paper seed
+    for feat_name, VecCls in [("BoW", CountVectorizer), ("TFIDF", TfidfVectorizer)]:
+        vec = VecCls(tokenizer=word_tokenize, token_pattern=None)
+        Xtr_f = vec.fit_transform(tr_t)
+        Xva_f = vec.transform(va_t)
+        Xte_f = vec.transform(te_t)
+        Xdev  = vstack([Xtr_f, Xva_f])
+        ydev  = np.concatenate([ytr, yva])
+        for cname, (clf_base, param_grid) in classifiers_def.items():
+            gs = GridSearchCV(clone(clf_base), param_grid, cv=ps, n_jobs=-1, refit=True)
+            gs.fit(Xdev, ydev)
+            pred = gs.predict(Xte_f)
+            f1 = f1_score(yte, pred, zero_division=0)
+            if cname not in best_per_clf or f1 > best_per_clf[cname][1]:
+                best_per_clf[cname] = (pred, f1, feat_name)
+    np.random.seed(SEED)   # restore seed=42
+    return best_per_clf, CLF_PAPER_F1
 
 # ---------------- 2) transformers (inference only) ----------------
 import torch
@@ -139,17 +169,37 @@ def transformer_probs(model_name, texts):
 
 P_val, P_test = {}, {}
 P_val["lr"], P_test["lr"] = get_lr_probs()
+print("[reproduce] classical paper (LR/NB/SVM) ...")
+clf_results, CLF_PAPER_F1 = reproduce_classical_paper()
 for key, name in MODELS.items():
     print(f"[infer] {key} ...")
     P_val[key], P_test[key] = transformer_probs(name, va_t), transformer_probs(name, te_t)
 
-# ---- sanity: tiap model @0.5 vs paper ----
-print("\n=== MODEL ALONE (transformer @0.5 = paper protocol) ===")
-for k in MODELS:
-    f = report(yte, P_test[k], 0.5)["f1"]
-    print(f"  {k:15s} F1@0.5={f:.4f}  paper={PAPER_F1[k]:.4f}  {'OK' if abs(f-PAPER_F1[k])<0.01 else 'CEK!'}")
+# ---- reproduce vs paper: classical + transformer ----
 lr_thr, _ = best_threshold(yva, P_val["lr"])
-print(f"  {'lr (MVSC)':15s} F1={report(yte, P_test['lr'], lr_thr)['f1']:.4f} @tuned")
+m_lr_rep = report(yte, P_test["lr"], lr_thr)
+
+print("\n=== REPRODUCE vs PAPER ===")
+
+print("\n  [Classical — Paper Protocol (best of BoW/TF-IDF per classifier)]")
+print(f"  {'model':12s}  {'Acc':>6} {'Prec':>6} {'Rec':>6} {'F1':>6}  {'F1_paper':>8}  {'bestVec':>8}  {'check':>5}")
+print("  " + "-"*72)
+for cname, (pred, f1v, vec_name) in clf_results.items():
+    pr, rc, f1c, _ = precision_recall_fscore_support(yte, pred, average="binary", zero_division=0)
+    acc = accuracy_score(yte, pred)
+    chk = 'OK' if abs(f1c - CLF_PAPER_F1[cname]) < 0.01 else 'CEK!'
+    print(f"  {cname+'_paper':12s}  {acc:6.4f} {pr:6.4f} {rc:6.4f} {f1c:6.4f}  "
+          f"{CLF_PAPER_F1[cname]:8.4f}  {vec_name:>8}  {chk}")
+print(f"  {'lr_mvsc':12s}  {m_lr_rep['acc']:6.4f} {m_lr_rep['prec']:6.4f} {m_lr_rep['rec']:6.4f} {m_lr_rep['f1']:6.4f}  "
+      f"  {'(ours)':>8}  {'bigram+tuned':>8}")
+
+print("\n  [Transformer — Paper Protocol @0.5]")
+print(f"  {'model':15s}  {'Acc':>6} {'Prec':>6} {'Rec':>6} {'F1':>6}  {'F1_paper':>8}  {'check':>5}")
+print("  " + "-"*65)
+for k in MODELS:
+    m = report(yte, P_test[k], 0.5)
+    chk = 'OK' if abs(m['f1'] - PAPER_F1[k]) < 0.01 else 'CEK!'
+    print(f"  {k:15s}  {m['acc']:6.4f} {m['prec']:6.4f} {m['rec']:6.4f} {m['f1']:6.4f}  {PAPER_F1[k]:8.4f}  {chk}")
 
 # ---------------- 3) fusion engines ----------------
 def wavg(keys):
@@ -213,6 +263,19 @@ with open("stacking_systematic_results_twitter.json", "w") as f:
     json.dump(results, f, indent=2)
 print("saved -> stacking_systematic_results_twitter.json")
 
+print("\n=== FULL METRICS — BEST FUSION (LR + transformer, best method by val) ===")
+print(f"  {'transformer':15s}  {'method':>6}  {'Acc':>6} {'Prec':>6} {'Rec':>6} {'F1':>6}  "
+      f"{'95%CI':>14}  {'P(>SOTA)':>9}")
+print("  " + "-"*85)
+for k in order:
+    r = results[k]
+    ci = r['ci']
+    beat = "  BEAT" if r['f1'] > SOTA else ""
+    print(f"  {k:15s}  {r['best_method']:>6}  {r['accuracy']:6.4f} {r['precision']:6.4f} "
+          f"{r['recall']:6.4f} {r['f1']:6.4f}  [{ci[0]:.3f},{ci[1]:.3f}]  {r['p_beat_sota']:8.1%}{beat}")
+print(f"\n  {'lr_alone (MVSC)':15s}  {'---':>6}  {lrm['acc']:6.4f} {lrm['prec']:6.4f} "
+      f"{lrm['rec']:6.4f} {lrm['f1']:6.4f}  (standalone, no fusion)")
+
 # ============================================================================
 # 5) MULTI-SEED / ROBUSTNESS
 # wavg sepenuhnya deterministik (LR lbfgs deterministik; weight sweep deterministik;
@@ -241,8 +304,8 @@ ms_out = {"note": "wavg+LR pipeline fully deterministic; CI from bootstrap", "co
 # ============================================================================
 # 6) INFERENCE TIME  (test set, n=538; exclude model loading)
 # ============================================================================
-print("\n=== INFERENCE TIME (test set n={}, exclude model load) ===".format(len(te_t)))
-print("  (LR diukur best-of-3; transformer diukur saat inferensi awal dengan GPU warmup)\n")
+print("\n=== LATENCY: SEBELUM vs SESUDAH KOMBINASI DENGAN LR ===")
+print(f"  test set n={len(te_t)} | LR diukur best-of-3 | transformer diukur dengan GPU warmup\n")
 
 # LR: TF-IDF.transform + predict_proba — best of 3 runs
 Xte_lr = _LR_VEC.transform(te_t)
@@ -263,16 +326,18 @@ for k in order:
     if name in INFER_TIMES:
         t_by_key[k] = INFER_TIMES[name]
 
-# Tabel perbandingan: transformer-only vs transformer+LR
-hdr = f"  {'model':18s}  {'transformer_only':>17}  {'ms/sample':>10}  {'hybrid(+LR)':>12}  {'LR_overhead':>12}"
-print(hdr)
-print("  " + "-" * (len(hdr) - 2))
+# Tabel sebelum vs sesudah kombinasi dengan LR
+print(f"  {'model':18s}  {'Sebelum (tf saja)':>20} {'ms/sample':>10}  "
+      f"{'Sesudah (+LR hybrid)':>22} {'ms/sample':>10}  {'LR overhead':>12}")
+print("  " + "-"*100)
 for k, t_tf in t_by_key.items():
     t_hybrid = t_lr + t_tf
     pct = t_lr / t_tf * 100
-    print(f"  {k:18s}  {t_tf*1000:14.0f} ms  {t_tf/n_te*1000:8.2f} ms/s  "
-          f"{t_hybrid*1000:9.0f} ms  {pct:9.2f}%")
-print(f"\n  LR alone (TF-IDF+pred):  {t_lr*1000:.1f} ms total  |  {t_lr/n_te*1000:.3f} ms/sample")
+    ms_tf = t_tf / n_te * 1000
+    ms_hybrid = t_hybrid / n_te * 1000
+    print(f"  {k:18s}  {t_tf*1000:18.0f} ms  {ms_tf:10.3f} ms/s  "
+          f"{t_hybrid*1000:20.0f} ms  {ms_hybrid:10.3f} ms/s  {pct:9.2f}%")
+print(f"\n  LR saja (TF-IDF+predict_proba): {t_lr*1000:.1f} ms total  |  {t_lr/n_te*1000:.4f} ms/sample")
 
 # ============================================================================
 # 7) PARAMETER COUNT

@@ -188,7 +188,40 @@ dengan inductive bias berbeda. Meta-LR dilatih di atas 3 input (OOF cross-val th
 
 **Kesimpulan:** B2 (LR+xlmr_base, prob-avg, 1 parameter w) tetap sebagai metode terbaik. Studi ini mengkonfirmasi bahwa kesederhanaan bukan kompromi — melainkan pilihan optimal untuk dataset kecil ini.
 
-### 4.6 Inference Time
+### 4.6 Studi Character N-gram TF-IDF
+
+Script: `kaggle_char_ngram_twitter.py`
+Gap dari paper acuan: IdSarcasm hanya pakai word unigram TF-IDF — tidak ada character-level features sama sekali.
+Hipotesis: char n-gram `(char_wb)` menangkap elongasi informal ("bangetttt"), afiks bahasa Indonesia ("me-", "-kan"), dan variasi ejaan ("gabisa") yang tidak bisa ditangkap word n-gram.
+
+**Char range tuning** (dipilih dari val F1 standalone): best = **(2,4)**
+
+**Ablasi Classical:**
+
+| Label | Komponen | test F1 |
+|---|---|---|
+| B0 | LR word(1,2) | **0.7509** (referensi MVSC) |
+| B1 | LR char(2,4) alone | 0.7143 (-0.0366) |
+| B2 | LR word+char combined | 0.7322 (-0.0187) |
+
+**Ablasi Hybrid (perbandingan per transformer, LR variant):**
+
+| Transformer | word | char(2,4) | word+char | Gap char vs word |
+|---|---|---|---|---|
+| xlmr_base | **0.7900** | 0.7622 | 0.7723 | +0.0572 (overfit) |
+| xlmr_large | 0.7751 | 0.7722 | 0.7724 | +0.0460 |
+| indobert_base | 0.7518 | 0.7450 | 0.7603 | +0.0407 |
+| mbert | 0.7543 | 0.7055 | 0.7214 | +0.0814 (overfit parah) |
+
+**Temuan kunci:**
+- **Char n-gram SELALU memperburuk** classical standalone (-0.04 sampai -0.02 F1).
+- **Hybrid dengan char juga turun** untuk semua transformer kuat. Val-test gap membesar (+0.04–+0.08), pola overfit yang sama dengan eksperimen 2-classical.
+- Word+char combined sedikit membantu transformer lemah (indobert_base: +0.0085) tapi tidak signifikan statistik (CI sangat lebar).
+- Feature space char n-gram terlalu besar untuk dataset kecil ini (1878 train) — char bigrams → overfit.
+
+**Kesimpulan:** LR word(1,2) tetap representasi klasik optimal. Char n-gram tidak menambah nilai, baik standalone maupun dalam hybrid. Studi ini — bersama dengan eksperimen 2-classical dan operator fusi — membangun argumen: **untuk dataset skala ini, parsimonious model selalu menang**.
+
+### 4.7 Inference Time
 
 *(Perkiraan berdasarkan arsitektur, diukur di GPU T4 Kaggle)*
 
@@ -199,7 +232,7 @@ dengan inductive bias berbeda. Meta-LR dilatih di atas 3 input (OOF cross-val th
 | XLM-R large alone | ~5000–6000 ms |
 | LR + XLM-R base (hybrid) | ~3002 ms (overhead LR < 0.1%) |
 
-### 4.6 Jumlah Parameter
+### 4.8 Jumlah Parameter
 
 | Komponen | Parameter |
 |---|---|
@@ -228,10 +261,12 @@ dengan inductive bias berbeda. Meta-LR dilatih di atas 3 input (OOF cross-val th
     → Overhead parameter LR dalam hybrid < 0.02% — tradeoff sangat efisien
     → Overhead latency LR dalam hybrid < 0.1%
 
-[4] Studi operator fusi menunjukkan cara yang lebih principled menggabungkan model
-    → Logit-avg lebih adil secara matematis dibanding prob-avg
-    → Temperature scaling mengkalibrasi kepercayaan diri tiap model sebelum fusi
-    → Perbandingan sistematis ini adalah ablasi metodologi yang layak dilaporkan
+[4] Studi ablasi sistematis memvalidasi kesederhanaan metode
+    → Operator fusi: prob-avg lebih robust dari logit-avg dan rank-avg di dataset kecil
+    → Char n-gram: feature space terlalu besar untuk 1878 sampel, selalu overfit
+    → 2-classical + 1-transformer: meta-LR overfit ke val=268, semua config lebih buruk dari B2
+    → Pola konsisten: setiap tambahan kompleksitas → val-test gap membesar → test F1 turun
+    → Kesimpulan: LR word(1,2) + XLM-R base prob-avg adalah titik optimal Pareto (akurasi × kesederhanaan)
 ```
 
 ---
@@ -254,6 +289,8 @@ dengan inductive bias berbeda. Meta-LR dilatih di atas 3 input (OOF cross-val th
 | `scripts/run_stacking_classification.py` | Studi classical ensembling |
 | `kaggle_stacking_full_twitter.py` | Hybrid sistematis: LR × 6 transformer (wavg & stack) |
 | `kaggle_fusion_tuning_twitter.py` | Tuning operator fusi: prob/logit/rank × temperature |
+| `kaggle_2classical_twitter.py` | 2 classical + 1 transformer via meta-LR stacking |
+| `kaggle_char_ngram_twitter.py` | Char n-gram TF-IDF ablasi: word vs char vs word+char × 6 transformer |
 | `scripts/kaggle_baseline_twitter.ipynb` | Reproduksi baseline transformer paper |
 
 ---
