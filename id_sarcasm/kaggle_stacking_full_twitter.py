@@ -283,45 +283,23 @@ print("\n=== CONFUSION MATRIX ===")
 print("  Baseline : XLM-R base @0.5 (alone)")
 print("  Metode   : XLM-R base + LR (wavg, val-tuned threshold)\n")
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 pred_base_cm = (P_test["xlmr_base"] >= 0.5).astype(int)
 ft_cm, thr_cm, _ = wavg(["lr", "xlmr_base"])
 pred_ours_cm = (ft_cm >= thr_cm).astype(int)
 
-def _cm_metrics(y_true, y_pred):
+def print_cm(y_true, y_pred, title):
+    cm = confusion_matrix(y_true, y_pred)
+    tn, fp, fn, tp = cm.ravel()
     pr, rc, f1, _ = precision_recall_fscore_support(y_true, y_pred, average="binary", zero_division=0)
     acc = accuracy_score(y_true, y_pred)
-    return round(acc, 4), round(pr, 4), round(rc, 4), round(f1, 4)
+    print(f"  {title}")
+    print(f"  {'':20s}  Pred Non-Sarcasm  Pred Sarcasm")
+    print(f"  {'True Non-Sarcasm':20s}  {tn:16d}  {fp:12d}  (TN / FP)")
+    print(f"  {'True Sarcasm':20s}  {fn:16d}  {tp:12d}  (FN / TP)")
+    print(f"  Acc={acc:.4f}  Prec={pr:.4f}  Recall={rc:.4f}  F1={f1:.4f}\n")
 
-labels = ["Non-Sarcasm", "Sarcasm"]
-configs = [
-    (pred_base_cm, "XLM-R base @0.5\n(Baseline alone)"),
-    (pred_ours_cm, f"XLM-R base + LR wavg\n(Ours, thr={thr_cm:.3f})"),
-]
-
-fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-for ax, (pred, title) in zip(axes, configs):
-    cm = confusion_matrix(yte, pred)
-    acc, pr, rc, f1 = _cm_metrics(yte, pred)
-    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax,
-                xticklabels=labels, yticklabels=labels, cbar=False,
-                annot_kws={"size": 14})
-    ax.set_xlabel("Predicted", fontsize=12)
-    ax.set_ylabel("True", fontsize=12)
-    ax.set_title(f"{title}\nAcc={acc}  P={pr}  R={rc}  F1={f1}", fontsize=11)
-
-plt.suptitle("Confusion Matrix: Baseline vs Hybrid (XLM-R base + LR)", fontsize=13, y=1.02)
-plt.tight_layout()
-plt.savefig("confusion_matrix_comparison.png", dpi=150, bbox_inches="tight")
-plt.close()
-print("saved -> confusion_matrix_comparison.png")
-try:
-    from IPython.display import Image, display as ipy_display
-    ipy_display(Image("confusion_matrix_comparison.png"))
-except Exception:
-    pass
+print_cm(yte, pred_base_cm, "Baseline — XLM-R base @0.5 (alone)")
+print_cm(yte, pred_ours_cm, f"Ours     — XLM-R base + LR wavg (thr={thr_cm:.3f})")
 
 # ============================================================================
 # 5) MULTI-SEED / ROBUSTNESS
