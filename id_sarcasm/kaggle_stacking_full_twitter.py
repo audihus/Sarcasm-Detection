@@ -14,7 +14,7 @@ warnings.filterwarnings("ignore")
 
 DATASET  = "w11wo/twitter_indonesia_sarcastic"
 TEXT_COL = "tweet"
-SEED, MAX_LEN, BATCH = 42, 128, 32
+SEED, MAX_LEN, BATCH = 41, 128, 32
 SOTA = 0.7692
 np.random.seed(SEED)
 
