@@ -142,6 +142,16 @@ def auroc_safe(y, score):
     if len(np.unique(y)) < 2: return float("nan")
     return float(roc_auc_score(y, score))
 
+def mcnemar_exact(y, pred_a, pred_b):
+    """McNemar exact (binomial) pada pasangan diskordan -- pelengkap paired_bootstrap
+    (P(a>b) independen bisa optimis; McNemar mengecek signifikansi pd pasangan yg sama)."""
+    ca, cb = (pred_a == y), (pred_b == y)
+    n_a_only = int((ca & ~cb).sum()); n_b_only = int((~ca & cb).sum())
+    n = n_a_only + n_b_only
+    from scipy.stats import binomtest
+    p = binomtest(min(n_a_only, n_b_only), n, 0.5).pvalue if n else 1.0
+    return {"n_a_only_correct": n_a_only, "n_b_only_correct": n_b_only, "p_value": round(float(p), 4)}
+
 if SMOKE:   # self-test: best_threshold vektorisasi == versi loop asli
     rng0 = np.random.default_rng(0)
     for _ in range(20):
@@ -440,6 +450,8 @@ gap = round(m_casc_va["f1"] - m_casc_te["f1"], 4)
 lo, hi, pgt = bootstrap(yte, cascade_te)
 vs_b2 = paired_bootstrap(yte, cascade_te, pred_b2)
 vs_sota = paired_bootstrap(yte, cascade_te, pred_sota)
+mc_b2 = mcnemar_exact(yte, cascade_te, pred_b2)
+mc_sota = mcnemar_exact(yte, cascade_te, pred_sota)
 
 n_dis_te = int(dis_te.sum())
 t_lr = measure_lr_latency()
@@ -453,8 +465,10 @@ t_sota = INFER_TIMES.get("xlmr_large", float("nan"))
 print(f"  cascade: val F1={m_casc_va['f1']:.4f}  test F1={m_casc_te['f1']:.4f}  gap={gap:+.4f}")
 print(f"  test: P={m_casc_te['prec']:.4f} R={m_casc_te['rec']:.4f} Acc={m_casc_te['acc']:.4f}"
       f"  CI95=[{lo:.3f},{hi:.3f}]  P(>SOTA)={pgt:.1%}")
-print(f"  vs B2:   dF1={vs_b2['d_f1_mean']:+.4f}  P(cascade>B2)={vs_b2['p_a_beats_b']:.1%}")
-print(f"  vs SOTA: dF1={vs_sota['d_f1_mean']:+.4f}  P(cascade>SOTA)={vs_sota['p_a_beats_b']:.1%}")
+print(f"  vs B2:   dF1={vs_b2['d_f1_mean']:+.4f} CI95={vs_b2['d_f1_ci95']}  P(cascade>B2)={vs_b2['p_a_beats_b']:.1%}"
+      f"  McNemar p={mc_b2['p_value']:.4f} (cascade-only={mc_b2['n_a_only_correct']}, B2-only={mc_b2['n_b_only_correct']})")
+print(f"  vs SOTA: dF1={vs_sota['d_f1_mean']:+.4f} CI95={vs_sota['d_f1_ci95']}  P(cascade>SOTA)={vs_sota['p_a_beats_b']:.1%}"
+      f"  McNemar p={mc_sota['p_value']:.4f} (cascade-only={mc_sota['n_a_only_correct']}, SOTA-only={mc_sota['n_b_only_correct']})")
 if not (np.isnan(t_base) or np.isnan(t_m3)):
     print(f"  latency: B2(LR+xlmr_base)={t_b2*1000:.0f}ms | cascade(+{winner} on {n_dis_te}/{len(te_t)} kasus)="
           f"{t_cascade*1000:.0f}ms | SOTA(xlmr_large alone)={t_sota*1000:.0f}ms")
@@ -475,7 +489,8 @@ else:
 OUT["stage4_cascade_outcome"] = {
     "winner_model3": winner, "cascade_val": m_casc_va, "cascade_test": m_casc_te,
     "gap_val_test": gap, "ci95_test": [round(lo, 4), round(hi, 4)], "p_beat_sota": round(pgt, 3),
-    "vs_B2_paired": vs_b2, "vs_SOTA_paired": vs_sota, "n_disagree_test": n_dis_te,
+    "vs_B2_paired": vs_b2, "vs_SOTA_paired": vs_sota,
+    "vs_B2_mcnemar": mc_b2, "vs_SOTA_mcnemar": mc_sota, "n_disagree_test": n_dis_te,
     "latency_ms": {"b2": round(t_b2 * 1000, 1), "cascade": round(t_cascade * 1000, 1),
                    "sota_alone": round(t_sota * 1000, 1) if not np.isnan(t_sota) else None},
     "decision_thresholds": {"min_acc_disagree": 0.60, "min_f1": B2_REF, "max_gap": GAP_THRESHOLD},
