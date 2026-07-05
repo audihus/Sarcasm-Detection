@@ -16,7 +16,7 @@ Suhartono et al., "IdSarcasm: Indonesian Sarcasm Detection Using Transformer Mod
 - SOTA di dataset Twitter: **XLM-R large F1 = 0.7692**
 
 **Kontribusi penelitian ini (yang sedang ditulis):**
-1. Membuktikan classical ML lexicon-free bisa mendekati SOTA (F1 0.7536 vs SOTA 0.7692)
+1. Membuktikan classical ML lexicon-free bisa mendekati SOTA (F1 0.7509 vs SOTA 0.7692)
 2. Membuktikan classical ensembling gagal (korelasi prediksi antar model klasik r = 0.877 → tidak ada sinyal komplementer)
 3. Mengusulkan **hybrid late-fusion**: gabungkan probabilitas LR + probabilitas transformer fine-tuned → melampaui SOTA
 4. Membandingkan operator fusi: prob-avg, logit-avg, rank-avg × dengan/tanpa temperature scaling
@@ -36,7 +36,7 @@ Suhartono et al., "IdSarcasm: Indonesian Sarcasm Detection Using Transformer Mod
 
 ## 3. Metode
 
-### 3.1 Classical Baseline (MVSC — LR Lexicon-Free)
+### 3.1 Classical Baseline (LR Tuned — Lexicon-Free)
 
 **Tidak boleh menggunakan kamus eksternal** (InSet, SentiWordNet, dll.) — ditolak pembimbing.
 
@@ -47,7 +47,7 @@ Arsitektur:
 - **Hyperparameter selection:** GridSearchCV C ∈ {0.05, 0.1, 0.3, 1, 3, 10, 30}, scoring='f1'
 - **Protocol:** PredefinedSplit (train=-1, val=0) → tidak menyentuh test saat pilih C
 - **Threshold tuning:** dicari di val untuk maksimalkan F1 (bukan pakai 0.5)
-- **Seed:** 42
+- **Seed:** 41 (sama dengan paper acuan)
 
 ### 3.2 Studi Classical Ensembling (Negative Result)
 
@@ -107,14 +107,16 @@ check tepat: IndoBERT base = 0.7273, XLM-R large = 0.7692.
 | IndoBERT base | 0.7273 | 0.7273 ✓ |
 | XLM-R large (SOTA) | 0.7692 | 0.7692 ✓ |
 
-### 4.2 MVSC (Classical Lexicon-Free Kami)
+### 4.2 LR Tuned (Classical Lexicon-Free Kami)
 
 | Metode | F1 | P | R | Acc |
 |---|---|---|---|---|
-| LR TF-IDF(1,2) + tuning | **0.7536** | ~0.73 | ~0.78 | ~0.87 |
+| LR TF-IDF(1,2) + tuning | **0.7509** | 0.7273 | 0.7761 | 0.8717 |
 
 - Mengalahkan IndoBERT base (0.7273) dan XLM-R base (0.7386)
-- Statistik ties dengan SOTA XLM-R large (95% CI mencakup 0.7692, P(beat)=12%)
+- Statistik ties dengan SOTA XLM-R large (95% CI mencakup 0.7692, P(beat)=~12%)
+- Angka 0.7509 menggunakan val-tuned threshold (protokol bersih: threshold dipilih dari val saja, test disentuh sekali)
+- **Catatan angka kanonik:** angka lama **0.7536** (dari `run_mvsc_classification.py`) sudah **superseded**. Penyebab beda sudah diverifikasi (2026-07-04): protokol val-tuned yang SAMA menghasilkan 0.7536 di environment lokal (sklearn/nltk terbaru) dan 0.7509 di environment Kaggle pinned — jadi ini **perbedaan environment** (tokenisasi/versi library), bukan protokol; script lama juga punya bug tambahan `headline = max(f1_default, f1_tuned)`. Angka kanonik = **0.7509** dari environment Kaggle pinned, tempat SEMUA angka headline lain (0.7900, 0.7692, dst.) dihitung — apples-to-apples. Jangan pakai 0.7536 di paper.
 
 ### 4.3 Hybrid Fusion Sistematis (LR + tiap transformer)
 
@@ -200,7 +202,7 @@ Hipotesis: char n-gram `(char_wb)` menangkap elongasi informal ("bangetttt"), af
 
 | Label | Komponen | test F1 |
 |---|---|---|
-| B0 | LR word(1,2) | **0.7509** (referensi MVSC) |
+| B0 | LR word(1,2) | **0.7509** (referensi LR (tuned)) |
 | B1 | LR char(2,4) alone | 0.7143 (-0.0366) |
 | B2 | LR word+char combined | 0.7322 (-0.0187) |
 
@@ -247,7 +249,7 @@ Hipotesis: char n-gram `(char_wb)` menangkap elongasi informal ("bangetttt"), af
 ## 5. Narasi Kontribusi (Storyline Paper)
 
 ```
-[1] Classical ML lexicon-free (LR TF-IDF) mencapai F1 0.7536
+[1] Classical ML lexicon-free (LR TF-IDF) mencapai F1 0.7509
     → Mengalahkan IndoBERT base & XLM-R base
     → Mendekati SOTA XLM-R large (0.7692) tanpa fine-tuning besar
 
@@ -285,13 +287,13 @@ Hipotesis: char n-gram `(char_wb)` menangkap elongasi informal ("bangetttt"), af
 
 | File | Fungsi |
 |---|---|
-| `scripts/run_mvsc_classification.py` | Classical LR baseline (MVSC) |
-| `scripts/run_stacking_classification.py` | Studi classical ensembling |
-| `kaggle_stacking_full_twitter.py` | Hybrid sistematis: LR × 6 transformer (wavg & stack) |
-| `kaggle_fusion_tuning_twitter.py` | Tuning operator fusi: prob/logit/rank × temperature |
-| `kaggle_2classical_twitter.py` | 2 classical + 1 transformer via meta-LR stacking |
-| `kaggle_char_ngram_twitter.py` | Char n-gram TF-IDF ablasi: word vs char vs word+char × 6 transformer |
-| `scripts/kaggle_baseline_twitter.ipynb` | Reproduksi baseline transformer paper |
+| `scripts/run_mvsc_classification.py` | LR (tuned) standalone (classical baseline kami) |
+| `kaggle_stacking_full_twitter.py` | **MAIN**: LR (tuned) × 6 transformer, reproduksi baseline, confusion matrix, latency |
+| `kaggle_mvsc_bootstrap_twitter.py` | Bootstrap CI dan P(beat SOTA) untuk LR (tuned) |
+| `scripts/run_classical_classification.py` | Reproduksi paper protocol: NB/SVM/LR seed=41, accuracy-GS |
+| `scripts/run_classification.py` | Reproduksi baseline transformer (paper protocol) |
+| `scripts/kaggle_baseline_twitter.ipynb` | Kaggle runner notebook |
+| `kaggle_complementarity_gated_twitter.py` | **BARU**: analisis komplementaritas LR↔transformer, uji berpasangan (paired bootstrap + McNemar), gated fusion (G1/G2/G3), kNN retrieval fusion, MC-dropout gate |
 
 ---
 
@@ -302,3 +304,38 @@ Hipotesis: char n-gram `(char_wb)` menangkap elongasi informal ("bangetttt"), af
 - Bagaimana menulis bagian "negative result" (classical ensembling gagal) sebagai kontribusi yang positif?
 - Bagaimana memilih antara F1 0.7900 (LR+xlmr_base) vs tabel ablasi lengkap sebagai headline?
 - Format tabel eksperimen yang sesuai untuk IEEE Access?
+
+---
+
+## 9. Eksperimen Berikutnya (script siap — `kaggle_complementarity_gated_twitter.py`, hasil menyusul)
+
+Motivasi: mengisi dua gap sebelum submit — (a) klaim "transformer memberi sinyal dekorelasi"
+belum pernah DIUKUR untuk pasangan LR↔transformer (baru classical↔classical r=0.877);
+(b) bobot fusi `w` statis — gating per-sampel berpeluang menaikkan 0.7900.
+
+**Tahap A — Komplementaritas (novelty utama):** korelasi prob & phi LR↔xlmr_base/large,
+disagreement breakdown (siapa benar saat beda pendapat), oracle F1 (upper bound fusi),
+error overlap 2×2, contoh kualitatif (LR mengoreksi XLM-R & sebaliknya, dengan top TF-IDF
+features), plus **uji berpasangan yang proper**: paired bootstrap ΔF1 + McNemar exact
+(B2 vs SOTA di test yang sama) — menggantikan P(>SOTA)=77% independen.
+
+**Tahap B — Confidence-gated fusion (maks 2 parameter, semua dari val):**
+- G1 hard gate: TF yakin (conf ≥ τ) → pakai TF saja; ragu → wavg
+- G2 soft gate: w_tf(x) = sigmoid(a + b·|logit_tf|)
+- G3 disagreement gate: bobot LR naik saat |p_LR − p_tf| besar
+Setiap keluarga memuat wavg statis sebagai kasus khusus → val F1 ≥ B2 dijamin;
+yang diuji adalah generalisasi ke test (val-test gap).
+
+**Tahap C — kNN retrieval fusion (stretch):** CLS embedding xlmr_base (inference-only,
+share forward pass → overhead ~0), kNN cosine k∈{5,10,25,50} dari val, p_kNN = fraksi
+tetangga sarkastik; cek dekorelasi dulu, lalu 3-way prob-avg. Framing: retrieval-augmented
+fusion (kNN-LM style), inductive bias instance-based — tanpa leksikon, tanpa fine-tuning.
+
+**Tahap D — MC-dropout uncertainty gate (stretch):** K=10 forward pass dropout-aktif
+(Gal & Ghahramani 2016) → std prediktif sebagai sinyal gate (diagnostik: AUROC sinyal→error
+vs raw confidence). Analisis-only (10× latency bukan mode deployment).
+
+Interpretasi yang sudah dikunci di muka: Tahap A selalu menang (korelasi rendah = bukti klaim
+inti; tinggi = reframing jujur). B/C/D: jika ada varian > 0.7900 dengan gap kecil → headline
+baru; jika gagal semua → baris ablasi tambahan yang memperkuat narasi parsimoni.
+Hasil akan diisi sebagai §4.9 (komplementaritas) dan §4.10 (gated/kNN/MC).

@@ -65,7 +65,7 @@ def bootstrap(y, pred, n=5000):
     out = np.array(out)
     return float(np.percentile(out, 2.5)), float(np.percentile(out, 97.5)), float((out > SOTA).mean())
 
-# ---------------- 1) classical LR (MVSC) ----------------
+# ---------------- 1) classical LR (tuned) ----------------
 import nltk
 for pkg in ["punkt", "punkt_tab"]:
     try: nltk.data.find(f"tokenizers/{pkg}")
@@ -190,7 +190,7 @@ for cname, (pred, f1v, vec_name) in clf_results.items():
     chk = 'OK' if abs(f1c - CLF_PAPER_F1[cname]) < 0.01 else 'CEK!'
     print(f"  {cname+'_paper':12s}  {acc:6.4f} {pr:6.4f} {rc:6.4f} {f1c:6.4f}  "
           f"{CLF_PAPER_F1[cname]:8.4f}  {vec_name:>8}  {chk}")
-print(f"  {'lr_mvsc':12s}  {m_lr_rep['acc']:6.4f} {m_lr_rep['prec']:6.4f} {m_lr_rep['rec']:6.4f} {m_lr_rep['f1']:6.4f}  "
+print(f"  {'lr_tuned':12s}  {m_lr_rep['acc']:6.4f} {m_lr_rep['prec']:6.4f} {m_lr_rep['rec']:6.4f} {m_lr_rep['f1']:6.4f}  "
       f"  {'(ours)':>8}  {'bigram+tuned':>8}")
 
 print("\n  [Transformer — Paper Protocol @0.5]")
@@ -254,7 +254,7 @@ for k in order:
 print("\n=== context (pembanding) ===")
 lr_thr, _ = best_threshold(yva, P_val["lr"])
 lrm = report(yte, P_test["lr"], lr_thr)
-print(f"  {'LR alone (MVSC)':20s} F1={lrm['f1']:.4f} P={lrm['prec']:.4f} R={lrm['rec']:.4f} Acc={lrm['acc']:.4f}")
+print(f"  {'LR alone (tuned)':20s} F1={lrm['f1']:.4f} P={lrm['prec']:.4f} R={lrm['rec']:.4f} Acc={lrm['acc']:.4f}")
 results["_context"] = {
     "lr_alone": {"f1": lrm["f1"], "precision": lrm["prec"], "recall": lrm["rec"], "accuracy": lrm["acc"]}}
 

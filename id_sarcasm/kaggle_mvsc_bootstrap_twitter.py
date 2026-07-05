@@ -1,13 +1,13 @@
 # ============================================================================
-# MVSC Bootstrap CI & P(beats SOTA) — val-tuned threshold (F1=0.7509)
+# LR (tuned) Bootstrap CI & P(beats SOTA) — val-tuned threshold (F1=0.7509)
 #
 # Konteks: ditemukan bug di run_mvsc_classification.py (headline = max(f1_default,
 # f1_tuned) — test-set selection). Angka yang benar adalah 0.7509 dari val-tuned
-# threshold. Script ini menghitung ulang 95% CI dan P(MVSC > SOTA) secara bersih.
+# threshold. Script ini menghitung ulang 95% CI dan P(LR tuned > SOTA) secara bersih.
 #
 # Perbandingan:
-#   MVSC : LR TF-IDF(1,2), val-tuned threshold  → F1 = 0.7509
-#   SOTA : XLM-R large, threshold=0.5 (paper)   → F1 = 0.7692
+#   LR (tuned) : LR TF-IDF(1,2), val-tuned threshold  → F1 = 0.7509
+#   SOTA       : XLM-R large, threshold=0.5 (paper)   → F1 = 0.7692
 #
 # KAGGLE: Settings -> GPU T4 x1, Internet = ON.
 #   !pip install -q transformers==4.46.3 datasets==3.1.0 scikit-learn nltk sentencepiece
@@ -61,7 +61,7 @@ def paired_bootstrap(y, pred_a, pred_b, n=N_BOOT, seed=SEED):
     return ci_lo, ci_hi, p_beat
 
 # ============================================================================
-# 1) MVSC: LR TF-IDF(1,2), val-tuned threshold
+# 1) LR (tuned): LR TF-IDF(1,2), val-tuned threshold
 # ============================================================================
 import nltk
 for pkg in ["punkt", "punkt_tab"]:
@@ -76,7 +76,7 @@ from sklearn.model_selection import GridSearchCV, PredefinedSplit
 from sklearn.base import clone
 from scipy.sparse import vstack
 
-print("\n[MVSC] Fitting LR TF-IDF(1,2) ...")
+print("\n[LR tuned] Fitting LR TF-IDF(1,2) ...")
 vec  = TfidfVectorizer(tokenizer=word_tokenize, token_pattern=None,
                        ngram_range=(1,2), min_df=2, sublinear_tf=True)
 Xtr  = vec.fit_transform(tr_t)
@@ -104,13 +104,13 @@ pred_mvsc = (pt_lr >= thr).astype(int)
 
 # sanity: harus 0.7509
 f1_mvsc_check = f1_score(yte, pred_mvsc, zero_division=0)
-print(f"  MVSC F1 @val-tuned thr={thr:.4f} = {f1_mvsc_check:.4f}  "
+print(f"  LR (tuned) F1 @val-tuned thr={thr:.4f} = {f1_mvsc_check:.4f}  "
       f"({'OK' if abs(f1_mvsc_check-0.7509)<0.002 else 'CEK! expected ~0.7509'})")
 
 # juga hitung @0.5 untuk referensi (angka lama)
 pred_mvsc_05 = (pt_lr >= 0.5).astype(int)
 f1_mvsc_05   = f1_score(yte, pred_mvsc_05, zero_division=0)
-print(f"  MVSC F1 @0.5 (ref/lama) = {f1_mvsc_05:.4f}")
+print(f"  LR (tuned) F1 @0.5 (ref/lama) = {f1_mvsc_05:.4f}")
 
 # ============================================================================
 # 2) SOTA: XLM-R large @0.5 (paper protocol)
@@ -163,19 +163,19 @@ pr, rc, f1, _ = precision_recall_fscore_support(yte, pred_mvsc, average="binary"
 
 print(f"""
 ============================================================
-HASIL RECOMPUTE BOOTSTRAP — MVSC vs SOTA (Twitter)
+HASIL RECOMPUTE BOOTSTRAP — LR (tuned) vs SOTA (Twitter)
 ============================================================
 
-MVSC (val-tuned threshold = {thr:.4f}):
+LR (tuned) — val-tuned threshold = {thr:.4f}:
   F1     = {f1_mvsc_check:.4f}
   Prec   = {pr:.4f}  |  Recall = {rc:.4f}
   95% CI = [{lo:.4f}, {hi:.4f}]
-  P(F1_MVSC > F1_SOTA) = {p_beat:.1%}
+  P(LR tuned > SOTA) = {p_beat:.1%}
 
-MVSC lama (@0.5, ada bug test-set selection):
+LR (tuned) @0.5 (ref/lama, ada bug test-set selection):
   F1     = {f1_mvsc_05:.4f}
   95% CI = [{lo_old:.4f}, {hi_old:.4f}]
-  P(F1_MVSC > F1_SOTA) = {p_beat_old:.1%}
+  P(LR tuned > SOTA) = {p_beat_old:.1%}
 
 SOTA — XLM-R large @0.5:
   F1     = {f1_sota:.4f}
