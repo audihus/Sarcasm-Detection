@@ -244,6 +244,88 @@ Hipotesis: char n-gram `(char_wb)` menangkap elongasi informal ("bangetttt"), af
 | XLM-R large (fine-tuned) | ~560 juta |
 | **Hybrid LR + XLM-R base** | **~278 juta (LR = <0.02%)** |
 
+### 4.9 Komplementaritas LR ↔ Transformer
+
+Script: `kaggle_complementarity_gated_twitter.py` (Tahap A). Motivasi: klaim "transformer memberi
+sinyal dekorelasi" (poin [3] narasi) sebelumnya hanya didukung korelasi classical↔classical
+(r=0.877, studi ensembling §4.3); belum pernah diukur langsung untuk pasangan LR↔transformer.
+
+**Korelasi prediksi (test, n=538):**
+
+| Pasangan | r (prob) | φ (label) | Disagreement | Oracle F1 |
+|---|---|---|---|---|
+| LR ↔ xlmr_base | 0.686 | 0.571 | 97 (18.0%) | 0.9058 |
+| LR ↔ xlmr_large | 0.669 | 0.581 | 85 (15.8%) | 0.9154 |
+| xlmr_base ↔ xlmr_large | 0.756 | 0.666 | 76 (14.1%) | 0.8806 |
+
+**Temuan kunci:**
+- **Korelasi LR↔transformer (0.67–0.76) lebih rendah dari classical↔classical (0.877)** — bukti
+  kuantitatif pertama bahwa transformer memang memberi sinyal yang lebih berbeda dari LR, meski
+  tidak sampai independen. Ini mengisi gap novelty terbesar sebelumnya: klaim [3] sekarang
+  bersandar pada angka, bukan asumsi.
+- **Error overlap LR × xlmr_base**: both-benar 415 (77.1%), hanya-LR-benar 43 (8.0%),
+  hanya-TF-benar 54 (10.0%), both-salah 26 (4.8%). Hanya 4.8% sampel yang tak terselamatkan
+  fusi apa pun — sisanya (18.0%) adalah "ruang fusi" tempat salah satu model masih benar.
+- **Oracle F1 = 0.9058** (upper bound: pilih prediksi benar setiap kali LR & transformer beda
+  pendapat, menggunakan label asli sebagai "wasit"). Ini plafon teoretis untuk kombinasi
+  keduanya — bukan metode yang bisa dideploy, tapi ukuran headroom. Gap antara oracle (0.906)
+  dan hasil fusi terbaik yang benar-benar dicapai (0.7900, §4.9) menunjukkan bahwa menebak
+  "siapa yang harus dipercaya per-sampel" dari sinyal tak sempurna adalah masalah yang keras —
+  dan val=268 sampel tidak cukup untuk melatihnya dengan baik (lihat §4.10).
+- **Contoh kualitatif** (test): LR mengoreksi XLM-R base yang salah-yakin pada tweet dengan
+  pola permukaan sarkastik implisit tanpa kata kunci leksikal jelas (mis. `[301]` "Lord Luhut
+  trending topik..." y=0, p_tf=0.991 vs p_lr=0.153; fitur LR dominan: token `<`/`>` placeholder
+  PII-mask). Sebaliknya, XLM-R base mengoreksi LR yang salah-yakin pada tweet dengan sarkasme
+  kontekstual/tanpa kata bermuatan sentimen eksplisit (mis. `[360]` "...bergaya juga ya mantan
+  kamu banyak yang peduli." y=1, p_lr=0.118 vs p_tf=0.993) — pola yang sesuai dugaan: LR kuat
+  pada isyarat leksikal permukaan, transformer kuat pada konteks semantik yang lebih dalam.
+
+### 4.10 Confidence-Gated / kNN / MC-Dropout Fusion — Studi Negative Result Keempat
+
+Script: `kaggle_complementarity_gated_twitter.py` (Tahap B/C/D). Motivasi: bobot fusi statis w
+(B2, §4.3–4.4) mungkin bisa dilampaui oleh bobot yang beradaptasi per-sampel berdasarkan
+confidence/uncertainty. Tiga keluarga gating diuji (G1 hard, G2 soft, G3 disagreement — maks 2
+parameter, tiap keluarga memuat wavg statis sebagai kasus khusus), plus dua sinyal fusi baru
+(kNN retrieval, MC-dropout uncertainty).
+
+| Metode | anchor | val F1 | test F1 | gap val−test |
+|---|---|---|---|---|
+| **B2 wavg statis (referensi)** | xlmr_base | 0.8116 (**terendah**) | **0.7900** (**terbaik**) | **+0.022** |
+| G3 disagreement gate | xlmr_large | 0.8382 | 0.7730 | +0.065 |
+| G1 hard gate | xlmr_large | 0.8358 | 0.7751 | +0.061 |
+| G2 soft gate | xlmr_large | 0.8358 | 0.7666 | +0.069 |
+| G2 soft gate | xlmr_base | 0.8244 | 0.7529 | +0.072 |
+| 3-way LR+kNN+xlmr_base | — | 0.8158 | 0.7443 | +0.072 |
+| G1 hard gate | xlmr_base | 0.8120 | 0.7388 | +0.073 |
+| G3 disagreement gate | xlmr_base | 0.8120 | 0.7500 | +0.062 |
+| MC-std gate (menang by-val) | xlmr_base | 0.8489 (**tertinggi**) | 0.7527 | +0.096 (**terbesar**) |
+
+**Temuan kunci:**
+- **Setiap metode yang lebih kompleks dari B2 kalah di test** — meski val F1-nya lebih tinggi
+  dari B2. Pola ini persis konsisten dengan studi 2-classical (§4.5) dan char n-gram (§4.6):
+  makin canggih metodenya, makin besar val-test gap.
+- **Ironi terkuat**: MC-std gate punya val F1 TERTINGGI (0.8489) di antara semua kandidat —
+  dan itulah yang akan terpilih oleh protokol seleksi "pilih by-val" — tapi test F1-nya
+  (0.7527) dan gap-nya (+0.096) juga yang TERBURUK. B2 justru sebaliknya: val F1 terendah,
+  test F1 tertinggi. Ini demonstrasi tekstbuk bahwa val=268 sampel terlalu kecil untuk memilih
+  di antara metode fusi bertingkat parameter lebih dari satu.
+- **kNN retrieval gagal di gerbang dekorelasi**: korelasi prob kNN↔xlmr_base = 0.916 — hampir
+  identik dengan transformer itu sendiri (wajar, kNN dibangun dari embedding CLS xlmr_base) →
+  bukan sinyal baru, melainkan salinan berisik dari transformer. Ditandai sebagai negative
+  result sesuai protokol; 3-way fusion (LR+kNN+xlmr_base) pun kalah dari B2.
+- **MC-dropout (K=10) sebagai sinyal uncertainty justru kalah dari confidence mentah**: AUROC
+  std-prediktif memprediksi error XLM-R = 0.72 (test), sedangkan AUROC confidence mentah
+  `|p-0.5|` = 0.83 (test) — sinyal Bayesian yang lebih mahal (10× inferensi) memberi informasi
+  LEBIH BURUK daripada trik satu-baris. Temuan negative-result tersendiri.
+
+**Kesimpulan:** empat keluarga metode berbeda (gating confidence/disagreement, retrieval kNN,
+uncertainty MC-dropout) dicoba secara sistematis untuk melampaui B2 — semuanya overfit ke
+val=268 sampel. Bersama §4.5 (2-classical) dan §4.6 (char n-gram), ini adalah studi ablasi
+KEEMPAT dan KELIMA yang mengonfirmasi pola yang sama: **untuk dataset skala ini, setiap
+penambahan parameter fusi di atas satu (w tunggal) selalu memperbesar val-test gap dan
+menurunkan F1 test.** B2 (LR + XLM-R base, prob-avg, 1 parameter) bertahan sebagai metode
+terbaik di seluruh ruang metode yang sudah dieksplorasi.
+
 ---
 
 ## 5. Narasi Kontribusi (Storyline Paper)
@@ -267,8 +349,16 @@ Hipotesis: char n-gram `(char_wb)` menangkap elongasi informal ("bangetttt"), af
     → Operator fusi: prob-avg lebih robust dari logit-avg dan rank-avg di dataset kecil
     → Char n-gram: feature space terlalu besar untuk 1878 sampel, selalu overfit
     → 2-classical + 1-transformer: meta-LR overfit ke val=268, semua config lebih buruk dari B2
-    → Pola konsisten: setiap tambahan kompleksitas → val-test gap membesar → test F1 turun
+    → Gating (confidence/disagreement) + kNN retrieval + MC-dropout uncertainty: SEMUA overfit
+      juga — bahkan metode dgn val F1 tertinggi (MC-std gate 0.849) punya test F1 & gap terburuk
+    → Pola konsisten (5 studi ablasi independen): setiap tambahan kompleksitas → val-test gap
+      membesar → test F1 turun
     → Kesimpulan: LR word(1,2) + XLM-R base prob-avg adalah titik optimal Pareto (akurasi × kesederhanaan)
+
+[5] Sinyal LR↔transformer terukur lebih dekorelasi dari classical↔classical
+    → r = 0.67–0.76 (LR↔transformer) vs r = 0.877 (classical↔classical, poin [2])
+    → Oracle F1 (upper bound kombinasi LR+transformer) = 0.906 — headroom besar di atas 0.7900
+    → Mengisi bukti kuantitatif utk klaim [3]: transformer memang memberi sinyal yang beda dari LR
 ```
 
 ---
@@ -293,7 +383,8 @@ Hipotesis: char n-gram `(char_wb)` menangkap elongasi informal ("bangetttt"), af
 | `scripts/run_classical_classification.py` | Reproduksi paper protocol: NB/SVM/LR seed=41, accuracy-GS |
 | `scripts/run_classification.py` | Reproduksi baseline transformer (paper protocol) |
 | `scripts/kaggle_baseline_twitter.ipynb` | Kaggle runner notebook |
-| `kaggle_complementarity_gated_twitter.py` | **BARU**: analisis komplementaritas LR↔transformer, uji berpasangan (paired bootstrap + McNemar), gated fusion (G1/G2/G3), kNN retrieval fusion, MC-dropout gate |
+| `kaggle_complementarity_gated_twitter.py` | analisis komplementaritas LR↔transformer, uji berpasangan (paired bootstrap + McNemar), gated fusion (G1/G2/G3), kNN retrieval fusion, MC-dropout gate |
+| `kaggle_oracle_diagnostic_twitter.py` | **BARU**: peta ceiling oracle (pairwise + grand oracle 7 model), probe separability (AUROC + router CV di val disagreement), akurasi kandidat model-3, outcome cascade nol-parameter + verdict HIJAU/MERAH |
 
 ---
 
@@ -304,38 +395,3 @@ Hipotesis: char n-gram `(char_wb)` menangkap elongasi informal ("bangetttt"), af
 - Bagaimana menulis bagian "negative result" (classical ensembling gagal) sebagai kontribusi yang positif?
 - Bagaimana memilih antara F1 0.7900 (LR+xlmr_base) vs tabel ablasi lengkap sebagai headline?
 - Format tabel eksperimen yang sesuai untuk IEEE Access?
-
----
-
-## 9. Eksperimen Berikutnya (script siap — `kaggle_complementarity_gated_twitter.py`, hasil menyusul)
-
-Motivasi: mengisi dua gap sebelum submit — (a) klaim "transformer memberi sinyal dekorelasi"
-belum pernah DIUKUR untuk pasangan LR↔transformer (baru classical↔classical r=0.877);
-(b) bobot fusi `w` statis — gating per-sampel berpeluang menaikkan 0.7900.
-
-**Tahap A — Komplementaritas (novelty utama):** korelasi prob & phi LR↔xlmr_base/large,
-disagreement breakdown (siapa benar saat beda pendapat), oracle F1 (upper bound fusi),
-error overlap 2×2, contoh kualitatif (LR mengoreksi XLM-R & sebaliknya, dengan top TF-IDF
-features), plus **uji berpasangan yang proper**: paired bootstrap ΔF1 + McNemar exact
-(B2 vs SOTA di test yang sama) — menggantikan P(>SOTA)=77% independen.
-
-**Tahap B — Confidence-gated fusion (maks 2 parameter, semua dari val):**
-- G1 hard gate: TF yakin (conf ≥ τ) → pakai TF saja; ragu → wavg
-- G2 soft gate: w_tf(x) = sigmoid(a + b·|logit_tf|)
-- G3 disagreement gate: bobot LR naik saat |p_LR − p_tf| besar
-Setiap keluarga memuat wavg statis sebagai kasus khusus → val F1 ≥ B2 dijamin;
-yang diuji adalah generalisasi ke test (val-test gap).
-
-**Tahap C — kNN retrieval fusion (stretch):** CLS embedding xlmr_base (inference-only,
-share forward pass → overhead ~0), kNN cosine k∈{5,10,25,50} dari val, p_kNN = fraksi
-tetangga sarkastik; cek dekorelasi dulu, lalu 3-way prob-avg. Framing: retrieval-augmented
-fusion (kNN-LM style), inductive bias instance-based — tanpa leksikon, tanpa fine-tuning.
-
-**Tahap D — MC-dropout uncertainty gate (stretch):** K=10 forward pass dropout-aktif
-(Gal & Ghahramani 2016) → std prediktif sebagai sinyal gate (diagnostik: AUROC sinyal→error
-vs raw confidence). Analisis-only (10× latency bukan mode deployment).
-
-Interpretasi yang sudah dikunci di muka: Tahap A selalu menang (korelasi rendah = bukti klaim
-inti; tinggi = reframing jujur). B/C/D: jika ada varian > 0.7900 dengan gap kecil → headline
-baru; jika gagal semua → baris ablasi tambahan yang memperkuat narasi parsimoni.
-Hasil akan diisi sebagai §4.9 (komplementaritas) dan §4.10 (gated/kNN/MC).
