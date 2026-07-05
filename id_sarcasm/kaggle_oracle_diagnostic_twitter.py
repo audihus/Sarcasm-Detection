@@ -275,19 +275,25 @@ b2_scores, b2_thr, b2_val_f1, b2_w = wavg_fit(P_val["lr"], P_val["xlmr_base"], P
 m_b2 = report(yte, b2_scores, b2_thr)
 pred_b2 = (b2_scores >= b2_thr).astype(int)
 
-sanity_rows = [("LR (tuned, val-thr)", m_lr["f1"], LR_REF)]
+
+# Toleransi 0.002 utk LR/B2 (perhitungan sendiri, deterministik). Toleransi 0.01
+# utk transformer @0.5 (SAMA seperti bar kaggle_stacking_full_twitter.py sendiri
+# saat mereproduksi PAPER_F1) -- inferensi GPU tidak bit-exact antar sesi, dan
+# F1@threshold=0.5 adalah cutoff keras: 1-2 prediksi borderline yang terbalik
+# krn noise numerik bisa menggeser F1 beberapa milli-poin tanpa pipeline salah.
+sanity_rows = [("LR (tuned, val-thr)", m_lr["f1"], LR_REF, 0.002)]
 for k in MODELS:
-    sanity_rows.append((f"{k} @0.5", report(yte, P_test[k], 0.5)["f1"], PAPER_F1[k]))
-sanity_rows.append(("B2 LR+xlmr_base wavg", m_b2["f1"], B2_REF))
+    sanity_rows.append((f"{k} @0.5", report(yte, P_test[k], 0.5)["f1"], PAPER_F1[k], 0.01))
+sanity_rows.append(("B2 LR+xlmr_base wavg", m_b2["f1"], B2_REF, 0.002))
 
 sanity_ok = True
-for name, got, ref in sanity_rows:
-    ok = abs(got - ref) < 0.002
+for name, got, ref, tol in sanity_rows:
+    ok = abs(got - ref) < tol
     if SMOKE and "LR" not in name.split()[0]: status = "SKIP (smoke)"
     else:
         status = "OK" if ok else "CEK!"
         if not ok: sanity_ok = False
-    print(f"  {name:24s} F1={got:.4f}  ref={ref:.4f}  [{status}]")
+    print(f"  {name:24s} F1={got:.4f}  ref={ref:.4f}  (tol={tol})  [{status}]")
 if not sanity_ok and not SMOKE:
     print("\n  !! SANITY GAGAL — hentikan analisis, cek versi transformers/attention (eager) !!")
     sys.exit(1)
@@ -300,7 +306,7 @@ OUT = {"_meta": {"dataset": DATASET, "seed": SEED, "n_boot": N_BOOT, "smoke": SM
                  "refs": {"SOTA_xlmr_large": SOTA, "B2_wavg": B2_REF, "LR_tuned": LR_REF},
                  "b2": {"w_lr": round(float(b2_w), 3), "thr": round(b2_thr, 4),
                         "val_f1": round(b2_val_f1, 4), **m_b2}},
-       "stage0_sanity": {n: {"f1": g, "ref": r} for n, g, r in sanity_rows}}
+       "stage0_sanity": {n: {"f1": g, "ref": r, "tol": t} for n, g, r, t in sanity_rows}}
 
 # ============================================================================
 # TAHAP 1 — PETA CEILING ORACLE (pairwise LR x tiap transformer + grand oracle)
