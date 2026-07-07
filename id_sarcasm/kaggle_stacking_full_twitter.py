@@ -340,10 +340,8 @@ print("saved -> stacking_systematic_results_twitter.json")
 # 4b) WEIGHT LANDSCAPE — F1(val) sebagai fungsi w, untuk tiap transformer
 #     w=0 → transformer saja; w=1 → LR saja; w* = titik optimal
 # ============================================================================
-import matplotlib
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-plt.switch_backend("agg")   # fallback kalau Agg backend sudah terlambat di-set
+from IPython.display import display
 SAVE_DIR = "/kaggle/working/"
 
 WS = np.linspace(0, 1, 41)
@@ -393,8 +391,9 @@ for i, k in enumerate(order):
 fig.suptitle("F1(val) landscape — grid search atas w  |  w=0: TF saja, w=1: LR saja",
              fontsize=11, fontweight="bold", y=1.01)
 plt.tight_layout()
-plt.savefig(SAVE_DIR + "weight_landscape_twitter.png", dpi=150, bbox_inches="tight")
-plt.close()
+fig.savefig(SAVE_DIR + "weight_landscape_twitter.png", dpi=150, bbox_inches="tight")
+display(fig)
+plt.close(fig)
 print("saved -> /kaggle/working/weight_landscape_twitter.png")
 
 with open(SAVE_DIR + "weight_landscape_twitter.json", "w") as f:
