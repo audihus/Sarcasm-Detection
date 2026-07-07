@@ -378,18 +378,16 @@ axes = axes.flatten()
 for i, k in enumerate(order):
     ld = landscapes[k]; ax = axes[i]
     ax.plot(ld["ws"], ld["f1s"], color=COLORS.get(k, "#64748B"), lw=2)
-    ax.axvline(ld["w_opt"], color="#DC2626", ls="--", lw=1.3, label=f"w*={ld['w_opt']:.2f}")
+    ax.axvline(ld["w_opt"], color="#DC2626", ls="--", lw=1.3, label=f"w={ld['w_opt']:.2f}")
     ax.scatter([ld["w_opt"]], [ld["val_f1_opt"]], color="#DC2626", zorder=5, s=60)
-    ax.axvline(0, color="#94A3B8", ls=":", lw=1)    # w=0: TF only
-    ax.axvline(1, color="#94A3B8", ls=":", lw=1)    # w=1: LR only
     ax.set_title(k.replace("_", " "), fontsize=9, fontweight="bold")
-    ax.set_xlabel("w  (bobot LR)", fontsize=8)
-    ax.set_ylabel("val F1", fontsize=8)
+    ax.set_xlabel("w", fontsize=8)
+    ax.set_ylabel("Validation F1", fontsize=8)
     ax.legend(fontsize=8)
     ax.tick_params(labelsize=8)
     ax.grid(True, alpha=0.3)
-fig.suptitle("F1(val) landscape — grid search atas w  |  w=0: TF saja, w=1: LR saja",
-             fontsize=11, fontweight="bold", y=1.01)
+fig.suptitle("Validation F1 vs Fusion Weight w (LR + Transformer)",
+             fontsize=11, fontweight="bold")
 plt.tight_layout()
 fig.savefig(SAVE_DIR + "weight_landscape_twitter.png", dpi=150, bbox_inches="tight")
 display(fig)
@@ -437,6 +435,98 @@ def print_cm(y_true, y_pred, title):
 
 print_cm(yte, pred_base_cm, "Baseline — XLM-R base @0.5 (alone)")
 print_cm(yte, pred_ours_cm, f"Ours     — XLM-R base + LR wavg (thr={thr_cm:.3f})")
+
+# --- PNG figure ---
+from sklearn.metrics import confusion_matrix as _cm
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
+def _draw_cm(ax, y_true, y_pred, title):
+    # Layout: TP top-left → rows=[Sarcasm, Non-Sarcasm], cols=[Pred Sarc, Pred Non-Sarc]
+    cm_raw = _cm(y_true, y_pred)          # [[TN,FP],[FN,TP]]
+    tn,fp,fn,tp = cm_raw.ravel()
+    # reorder to TP top-left
+    data   = [[tp, fn], [fp, tn]]
+    labels = [["TP", "FN"], ["FP", "TN"]]
+    colors = [["#16A34A", "#D97706"], ["#DC2626", "#0F766E"]]
+    alphas = [[0.18, 0.13], [0.13, 0.18]]
+
+    ax.set_xlim(0, 2); ax.set_ylim(0, 2)
+    for r in range(2):
+        for c in range(2):
+            rect = mpatches.FancyBboxPatch(
+                (c + 0.04, 1 - r + 0.04), 0.92, 0.92,
+                boxstyle="round,pad=0.02",
+                facecolor=colors[r][c], alpha=alphas[r][c],
+                edgecolor=colors[r][c], linewidth=1.5)
+            ax.add_patch(rect)
+            ax.text(c + 0.5, 1 - r + 0.62, str(data[r][c]),
+                    ha="center", va="center",
+                    fontsize=22, fontweight="bold",
+                    color=colors[r][c], fontfamily="monospace")
+            ax.text(c + 0.5, 1 - r + 0.3, labels[r][c],
+                    ha="center", va="center",
+                    fontsize=8, fontweight="bold",
+                    color=colors[r][c], alpha=0.85)
+
+    ax.set_xticks([0.5, 1.5])
+    ax.set_xticklabels(["Pred\nSarcasm", "Pred\nNon-Sarcasm"], fontsize=8)
+    ax.set_yticks([0.5, 1.5])
+    ax.set_yticklabels(["True\nNon-Sarcasm", "True\nSarcasm"], fontsize=8, rotation=90, va="center")
+    ax.xaxis.set_ticks_position("top")
+    ax.xaxis.set_label_position("top")
+    ax.tick_params(length=0)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    pr, rc, f1, _ = precision_recall_fscore_support(y_true, y_pred, average="binary", zero_division=0)
+    acc = accuracy_score(y_true, y_pred)
+    ax.set_title(title, fontsize=9, fontweight="bold", pad=32)
+    ax.set_xlabel(f"Acc={acc:.4f}  Prec={pr:.4f}  Recall={rc:.4f}  F1={f1:.4f}",
+                  fontsize=8, labelpad=8, color="#475569")
+    ax.xaxis.set_label_position("bottom")
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4.2))
+fig.subplots_adjust(wspace=0.35)
+_draw_cm(ax1, yte, pred_base_cm, "XLM-R base  @0.5  (alone)")
+_draw_cm(ax2, yte, pred_ours_cm, f"XLM-R base + LR  (thr={thr_cm:.3f})")
+fig.suptitle("Confusion Matrix: Baseline vs. Late Fusion", fontsize=11, fontweight="bold", y=1.02)
+fig.savefig(SAVE_DIR + "confusion_matrix_twitter.png", dpi=150, bbox_inches="tight")
+display(fig)
+plt.close(fig)
+print("saved -> /kaggle/working/confusion_matrix_twitter.png")
+
+# ============================================================================
+# QUALITATIVE ANALYSIS — tweets yang "diselamatkan" oleh fusion
+# Fokus: FP→TN (baseline salah anggap sarkasme, fusion benar)
+#        FN→TP (baseline miss sarkasme, fusion benar)  [bonus]
+# ============================================================================
+print("\n=== QUALITATIVE ANALYSIS — Rescued Predictions ===")
+te_texts = list(ds["test"][TEXT_COL])
+
+# FP→TN: baseline prediksi sarkasme (salah), ours prediksi non-sarkasme (benar)
+rescued_fp = [i for i in range(len(yte))
+              if yte[i]==0 and pred_base_cm[i]==1 and pred_ours_cm[i]==0]
+# FN→TP: baseline miss sarkasme (salah), ours prediksi sarkasme (benar)
+rescued_fn = [i for i in range(len(yte))
+              if yte[i]==1 and pred_base_cm[i]==0 and pred_ours_cm[i]==1]
+
+print(f"  FP→TN (false alarm fixed by fusion): {len(rescued_fp)} cases")
+print(f"  FN→TP (missed sarcasm fixed by fusion): {len(rescued_fn)} cases\n")
+
+def show_cases(indices, case_type, n=5):
+    print(f"  [{case_type}] — top {min(n, len(indices))} by |Δ score| (fusion moved score most):")
+    scored = sorted(indices,
+                    key=lambda i: abs(ft_cm[i] - P_test["xlmr_base"][i]),
+                    reverse=True)
+    for rank, i in enumerate(scored[:n], 1):
+        print(f"  #{rank}  label={yte[i]}  xlmr_base={P_test['xlmr_base'][i]:.3f}"
+              f"  lr={P_test['lr'][i]:.3f}  fused={ft_cm[i]:.3f}")
+        print(f"       \"{te_texts[i][:120]}\"")
+        print()
+
+show_cases(rescued_fp, "FP→TN: false alarm corrected")
+show_cases(rescued_fn, "FN→TP: missed sarcasm recovered")
 
 # ============================================================================
 # 5) MULTI-SEED / ROBUSTNESS
