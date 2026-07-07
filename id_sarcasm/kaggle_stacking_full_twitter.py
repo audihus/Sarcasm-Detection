@@ -210,6 +210,79 @@ def wavg(keys):
     val_f1, w, thr = best
     return w * P_test[a] + (1 - w) * P_test[b], thr, val_f1
 
+def wavg_pso(keys, n_particles=30, n_iter=100, seed=SEED):
+    """PSO: optimasi w ∈ [0,1] dan threshold ∈ [0,1] secara joint di val set.
+    Objective: maksimalkan F1(val). PSO meminimalkan -F1.
+    Inertia decay: w_inertia turun linear 0.9→0.4 supaya konvergen di akhir.
+    """
+    a, b = keys
+    rng = np.random.default_rng(seed)
+
+    def neg_f1(w_val, thr_val):
+        fused = w_val * P_val[a] + (1 - w_val) * P_val[b]
+        return -f1_score(yva, (fused >= thr_val).astype(int), zero_division=0)
+
+    # posisi partikel: kolom-0 = w, kolom-1 = threshold
+    pos = rng.uniform(0, 1, (n_particles, 2))
+    vel = rng.uniform(-0.2, 0.2, (n_particles, 2))
+
+    p_best_pos = pos.copy()
+    p_best_val = np.array([neg_f1(p[0], p[1]) for p in pos])
+    g_idx = np.argmin(p_best_val)
+    g_best_pos = p_best_pos[g_idx].copy()
+    g_best_val = p_best_val[g_idx]
+
+    c1 = c2 = 1.5
+    for it in range(n_iter):
+        w_inertia = 0.9 - 0.5 * it / n_iter   # decay 0.9 → 0.4
+        r1 = rng.uniform(0, 1, (n_particles, 2))
+        r2 = rng.uniform(0, 1, (n_particles, 2))
+        vel = (w_inertia * vel
+               + c1 * r1 * (p_best_pos - pos)
+               + c2 * r2 * (g_best_pos - pos))
+        pos = np.clip(pos + vel, 0, 1)
+
+        for i, p in enumerate(pos):
+            v = neg_f1(p[0], p[1])
+            if v < p_best_val[i]:
+                p_best_val[i] = v
+                p_best_pos[i] = p.copy()
+
+        g_idx = np.argmin(p_best_val)
+        if p_best_val[g_idx] < g_best_val:
+            g_best_val = p_best_val[g_idx]
+            g_best_pos = p_best_pos[g_idx].copy()
+
+    w_opt, thr_opt = g_best_pos
+    val_f1 = -g_best_val
+    fused_test = w_opt * P_test[a] + (1 - w_opt) * P_test[b]
+    return fused_test, thr_opt, val_f1, w_opt
+
+def wavg_bayes(keys, n_calls=50, n_initial_points=10, seed=SEED):
+    """Bayesian Optimization (Gaussian Process) atas w dan threshold di val set.
+    Jauh lebih sedikit evaluasi dari PSO (n_calls=50 vs PSO 3000) karena
+    GP surrogate memandu pencarian ke area yang menjanjikan.
+    """
+    from skopt import gp_minimize
+    from skopt.space import Real
+
+    a, b = keys
+
+    def objective(params):
+        w_val, thr_val = params
+        fused = w_val * P_val[a] + (1 - w_val) * P_val[b]
+        return -f1_score(yva, (fused >= thr_val).astype(int), zero_division=0)
+
+    space = [Real(0.0, 1.0, name="w"), Real(0.0, 1.0, name="threshold")]
+    result = gp_minimize(objective, space, n_calls=n_calls,
+                         n_initial_points=n_initial_points,
+                         random_state=seed, verbose=False, noise=1e-10)
+
+    w_opt, thr_opt = result.x
+    val_f1 = -result.fun
+    fused_test = w_opt * P_test[a] + (1 - w_opt) * P_test[b]
+    return fused_test, thr_opt, val_f1, w_opt
+
 def _meta_oof(keys):
     """meta-LR over keys: kembalikan (test_probs, oof_val_probs)."""
     Mv = np.column_stack([P_val[k] for k in keys]); Mt = np.column_stack([P_test[k] for k in keys])
@@ -415,3 +488,60 @@ profiling_out = {
 with open("profiling_results_twitter.json", "w") as f:
     json.dump(profiling_out, f, indent=2)
 print("\nsaved -> profiling_results_twitter.json")
+
+# ============================================================================
+# 8) PERBANDINGAN: Grid Search vs PSO vs Bayesian Optimization
+# ============================================================================
+print("\n=== GRID SEARCH vs PSO vs BAYESIAN — LR + tiap transformer ===")
+print(f"  Grid  : linspace(0,1,41) × best_threshold(val) — 41 eval w, threshold analitik")
+print(f"  PSO   : n_particles=30, n_iter=100, 2D joint — ~3000 eval")
+print(f"  Bayes : GP surrogate, n_calls=50, n_initial=10 — 60 eval total\n")
+
+header = (f"  {'transformer':15s}  "
+          f"{'val':>6} {'w':>5} {'thr':>5} {'test':>6}  "
+          f"{'val':>6} {'w':>5} {'thr':>5} {'test':>6}  "
+          f"{'val':>6} {'w':>5} {'thr':>5} {'test':>6}")
+subhdr = (f"  {'':15s}  "
+          f"{'--- Grid ---':^26}  "
+          f"{'--- PSO ----':^26}  "
+          f"{'--- Bayes --':^26}")
+print(subhdr)
+print(header)
+print("  " + "-"*110)
+
+optim_results = {}
+for k in order:
+    # Grid Search
+    ft_gs, thr_gs, vf_gs = wavg(["lr", k])
+    m_gs = report(yte, ft_gs, thr_gs)
+    best_w_gs = 0.5
+    for w_cand in np.linspace(0, 1, 41):
+        _, f1_cand = best_threshold(yva, w_cand * P_val["lr"] + (1 - w_cand) * P_val[k])
+        if abs(f1_cand - vf_gs) < 1e-6:
+            best_w_gs = w_cand; break
+
+    # PSO
+    ft_pso, thr_pso, vf_pso, w_pso = wavg_pso(["lr", k])
+    m_pso = report(yte, ft_pso, thr_pso)
+
+    # Bayesian Optimization
+    ft_bayes, thr_bayes, vf_bayes, w_bayes = wavg_bayes(["lr", k])
+    m_bayes = report(yte, ft_bayes, thr_bayes)
+
+    optim_results[k] = {
+        "grid":  {"val_f1": vf_gs,   "w": round(best_w_gs, 3), "thr": round(thr_gs, 3),   "test_f1": m_gs["f1"]},
+        "pso":   {"val_f1": vf_pso,  "w": round(w_pso, 3),     "thr": round(thr_pso, 3),  "test_f1": m_pso["f1"]},
+        "bayes": {"val_f1": vf_bayes,"w": round(w_bayes, 3),    "thr": round(thr_bayes, 3),"test_f1": m_bayes["f1"]},
+    }
+    print(f"  {k:15s}  "
+          f"{vf_gs:6.4f} {best_w_gs:5.3f} {thr_gs:5.3f} {m_gs['f1']:6.4f}  "
+          f"{vf_pso:6.4f} {w_pso:5.3f} {thr_pso:5.3f} {m_pso['f1']:6.4f}  "
+          f"{vf_bayes:6.4f} {w_bayes:5.3f} {thr_bayes:5.3f} {m_bayes['f1']:6.4f}")
+
+print("\n  val_F1: seberapa baik tiap metode menemukan optimum di val set")
+print("  test  : hasil akhir di test — tidak boleh dipakai untuk pilih metode")
+print("  Jika val_F1 ketiga metode ≈ sama → landscape flat, Grid sudah cukup optimal")
+
+with open("optim_comparison_results_twitter.json", "w") as f:
+    json.dump(optim_results, f, indent=2)
+print("saved -> optim_comparison_results_twitter.json")
