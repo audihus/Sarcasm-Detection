@@ -336,6 +336,69 @@ with open("stacking_systematic_results_twitter.json", "w") as f:
     json.dump(results, f, indent=2)
 print("saved -> stacking_systematic_results_twitter.json")
 
+# ============================================================================
+# 4b) WEIGHT LANDSCAPE — F1(val) sebagai fungsi w, untuk tiap transformer
+#     w=0 → transformer saja; w=1 → LR saja; w* = titik optimal
+# ============================================================================
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+WS = np.linspace(0, 1, 41)
+COLORS = {"xlmr_large":"#1D4ED8","xlmr_base":"#2563EB","indobert_large":"#7C3AED",
+          "indobert_base":"#DB2777","mbert":"#D97706","indobert_lem":"#059669"}
+
+landscapes = {}   # {k: {"ws": [...], "f1s": [...], "w_opt": ..., "thr_opt": ..., "val_f1_opt": ...}}
+for k in order:
+    f1s, thrs = [], []
+    for w in WS:
+        thr, f1 = best_threshold(yva, w * P_val["lr"] + (1 - w) * P_val[k])
+        f1s.append(f1); thrs.append(thr)
+    best_idx = int(np.argmax(f1s))
+    landscapes[k] = {"ws": WS.tolist(), "f1s": f1s, "thrs": thrs,
+                     "w_opt": round(WS[best_idx], 3),
+                     "thr_opt": round(thrs[best_idx], 4),
+                     "val_f1_opt": round(f1s[best_idx], 4)}
+
+# Print tabel ringkas untuk paper
+print("\n=== WEIGHT OPTIMAL — untuk dilaporkan di paper ===")
+print(f"  {'transformer':15s}  {'w* (LR)':>9}  {'1-w* (TF)':>10}  {'thr*':>7}  {'val_F1*':>8}  {'test_F1':>8}")
+print("  " + "-"*70)
+for k in order:
+    ld = landscapes[k]
+    tf_f1 = results[k]["f1"]
+    print(f"  {k:15s}  {ld['w_opt']:9.3f}  {1-ld['w_opt']:10.3f}  "
+          f"{ld['thr_opt']:7.4f}  {ld['val_f1_opt']:8.4f}  {tf_f1:8.4f}")
+print("\n  w* = bobot LR dalam fusi  |  1-w* = bobot transformer")
+print("  thr* = threshold optimal (dari val)  |  test_F1 = hasil akhir di test set")
+
+# Plot landscape
+fig, axes = plt.subplots(2, 3, figsize=(13, 8), sharey=False)
+axes = axes.flatten()
+for i, k in enumerate(order):
+    ld = landscapes[k]; ax = axes[i]
+    ax.plot(ld["ws"], ld["f1s"], color=COLORS.get(k, "#64748B"), lw=2)
+    ax.axvline(ld["w_opt"], color="#DC2626", ls="--", lw=1.3, label=f"w*={ld['w_opt']:.2f}")
+    ax.scatter([ld["w_opt"]], [ld["val_f1_opt"]], color="#DC2626", zorder=5, s=60)
+    ax.axvline(0, color="#94A3B8", ls=":", lw=1)    # w=0: TF only
+    ax.axvline(1, color="#94A3B8", ls=":", lw=1)    # w=1: LR only
+    ax.set_title(k.replace("_", " "), fontsize=9, fontweight="bold")
+    ax.set_xlabel("w  (bobot LR)", fontsize=8)
+    ax.set_ylabel("val F1", fontsize=8)
+    ax.legend(fontsize=8)
+    ax.tick_params(labelsize=8)
+    ax.grid(True, alpha=0.3)
+fig.suptitle("F1(val) landscape — grid search atas w  |  w=0: TF saja, w=1: LR saja",
+             fontsize=11, fontweight="bold", y=1.01)
+plt.tight_layout()
+plt.savefig("weight_landscape_twitter.png", dpi=150, bbox_inches="tight")
+plt.close()
+print("saved -> weight_landscape_twitter.png")
+
+with open("weight_landscape_twitter.json", "w") as f:
+    json.dump(landscapes, f, indent=2)
+print("saved -> weight_landscape_twitter.json")
+
 print("\n=== FULL METRICS — BEST FUSION (LR + transformer, best method by val) ===")
 print(f"  {'transformer':15s}  {'method':>6}  {'Acc':>6} {'Prec':>6} {'Rec':>6} {'F1':>6}  "
       f"{'95%CI':>14}  {'P(>SOTA)':>9}")
