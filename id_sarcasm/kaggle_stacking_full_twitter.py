@@ -343,6 +343,8 @@ print("saved -> stacking_systematic_results_twitter.json")
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+plt.switch_backend("agg")   # fallback kalau Agg backend sudah terlambat di-set
+SAVE_DIR = "/kaggle/working/"
 
 WS = np.linspace(0, 1, 41)
 COLORS = {"xlmr_large":"#1D4ED8","xlmr_base":"#2563EB","indobert_large":"#7C3AED",
@@ -391,13 +393,13 @@ for i, k in enumerate(order):
 fig.suptitle("F1(val) landscape — grid search atas w  |  w=0: TF saja, w=1: LR saja",
              fontsize=11, fontweight="bold", y=1.01)
 plt.tight_layout()
-plt.savefig("weight_landscape_twitter.png", dpi=150, bbox_inches="tight")
+plt.savefig(SAVE_DIR + "weight_landscape_twitter.png", dpi=150, bbox_inches="tight")
 plt.close()
-print("saved -> weight_landscape_twitter.png")
+print("saved -> /kaggle/working/weight_landscape_twitter.png")
 
-with open("weight_landscape_twitter.json", "w") as f:
+with open(SAVE_DIR + "weight_landscape_twitter.json", "w") as f:
     json.dump(landscapes, f, indent=2)
-print("saved -> weight_landscape_twitter.json")
+print("saved -> /kaggle/working/weight_landscape_twitter.json")
 
 print("\n=== FULL METRICS — BEST FUSION (LR + transformer, best method by val) ===")
 print(f"  {'transformer':15s}  {'method':>6}  {'Acc':>6} {'Prec':>6} {'Rec':>6} {'F1':>6}  "
