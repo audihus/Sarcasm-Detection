@@ -1,0 +1,278 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{placeins}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Efficient Late Fusion of Logistic Regression and Transformers Models for Indonesian Sarcasm Detection}
+
+\author{
+\IEEEauthorblockN{1\textsuperscript{st} Audi Husen Mustofa}
+\IEEEauthorblockA{\textit{Department of Informatics Engineering} \\
+\textit{Faculty of Computer Science} \\
+\textit{Universitas Dian Nuswantoro}\\
+Semarang, Indonesia \\
+111202315143@mhs.dinus.ac.id}
+\and
+\IEEEauthorblockN{2\textsuperscript{nd} Ardytha Luthfiarta}
+\IEEEauthorblockA{\textit{Department of Informatics Engineering} \\
+\textit{Faculty of Computer Science} \\
+\textit{Universitas Dian Nuswantoro}\\
+Semarang, Indonesia \\
+ardytha.luthfiarta@dsn.dinus.ac.id}
+\and
+\IEEEauthorblockN{3\textsuperscript{rd} Adhitya Nugraha}
+\IEEEauthorblockA{\textit{Department of Informatics Engineering} \\
+\textit{Faculty of Computer Science} \\
+\textit{Universitas Dian Nuswantoro}\\
+Semarang, Indonesia \\
+adhitya@dsn.dinus.ac.id}
+\and
+\IEEEauthorblockN{4\textsuperscript{th} Given Name Surname}
+\IEEEauthorblockA{\textit{Department of Computer Science} \\
+\textit{Faculty of Computer Science} \\
+\textit{University Name}\\
+City, Indonesia \\
+email@domain.ac.id}
+\and
+\IEEEauthorblockN{5\textsuperscript{th} Krisna Nindya Kambara}
+\IEEEauthorblockA{\textit{Department of Informatics Engineering} \\
+\textit{Faculty of Computer Science} \\
+\textit{Universitas Dian Nuswantoro}\\
+Semarang, Indonesia \\
+111202315109@mhs.dinus.ac.id}
+\and
+\IEEEauthorblockN{6\textsuperscript{th} Helena Hapsari Nugroho}
+\IEEEauthorblockA{\textit{Department of Informatics Engineering} \\
+\textit{Faculty of Computer Science} \\
+\textit{Universitas Dian Nuswantoro}\\
+Semarang, Indonesia \\
+111202314959@mhs.dinus.ac.id}
+}
+
+\maketitle
+
+\begin{abstract}
+Sarcasm detection on social media remains a persistent challenge for low-resource languages like Indonesian. While transformer architectures achieve state-of-the-art performance, their massive parameter footprints hinder efficient deployment. Conversely, classical statistical models are computationally inexpensive but frequently under-optimized and lacking in deep contextual awareness. This paper proposes a lightweight late-fusion strategy that bridges this architectural divide by combining a highly optimized, dictionary-free Logistic Regression classifier with a single fine-tuned transformer. We first demonstrate that optimizing the statistical baseline significantly elevates its predictive capacity, effectively outperforming several standalone transformers. Through systematic evaluation, our late-fusion framework pairs this optimized statistical model with a moderate-sized transformer, achieving a new state-of-the-art F1 score of 0.7900 on a public Indonesian sarcasm corpus. This minimal configuration outperforms the prior baseline established by a significantly heavier large transformer while reducing the overall parameter footprint by fifty percent and decreasing per-sample inference latency by thirty-six percent. Furthermore, our validation search reveals that the classical component acts as the dominant predictive anchor in this architecture rather than a marginal filter. Ultimately, this research establishes that cross-paradigm collaboration provides a highly efficient, Pareto-optimal solution for low-resource figurative language classification.
+\end{abstract}
+
+\begin{IEEEkeywords}
+sarcasm detection, late fusion, transformer, logistic regression, Indonesian NLP
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Sarcasm detection on social media platforms remains a challenging task in natural language processing (NLP), particularly for low-resource languages like Indonesian. The informal nature of Indonesian Twitter (X) discourse, characterized by implicit context and rich morphological variations, often confounds standard sentiment classifiers \cite{joshi2017}. To address this, recent work has extensively benchmarked various paradigms, ranging from classical machine learning architectures to fine-tuned transformer models and zero-shot large language models (LLMs) \cite{idsarcasm}. However, in these existing benchmarks, classical and deep learning paradigms are typically treated as isolated, competing methodologies. The resulting trade-off is often stark: classical models are computationally inexpensive but struggle to capture deep semantic nuances, whereas transformer-based models achieve state-of-the-art (SOTA) performance at a significantly higher parameter cost.
+
+Recent work has begun exploring late-fusion of fine-tuned transformers with classical statistical models for general text classification, using strategies ranging from stacked meta-classifiers to adaptive performance-weighted probability fusion \cite{ramya2026hybrid, golestani2026lightweight}. However, its application to Indonesian sarcasm detection, together with a systematic evaluation of whether this combination is genuinely necessary rather than merely incidental, remains unexplored. Before proposing a complex fusion system, it is crucial to understand the limitations of simpler approaches. Our preliminary investigations reveal that attempting to improve classical baseline performance through classical-only ensembling is ineffective for this specific corpus. The predictive signals among various classical base learners share a high correlation ($r = 0.877$), indicating an exhausted, overlapping feature space that provides no complementary information when combined. 
+
+Motivated by this failure of classical ensembling, we investigate whether the fundamental structural differences between a statistical classifier and an attention mechanism can be combined to jointly improve performance. We address this gap by proposing a lightweight late-fusion strategy that pairs a highly optimized, dictionary-free logistic regression classifier (Optimized LR) with a single fine-tuned transformer. We demonstrate that this minimal configuration exceeds the published SOTA $F_1$ score with negligible computational overhead, establishing our late-fusion approach as a Pareto-optimal operating point for this low-resource setting.
+
+\section{Literature Review}
+
+The detection of sarcasm in natural language processing is notoriously more complex than standard sentiment analysis, primarily because sarcastic expressions rely heavily on implicit context rather than explicit polarity markers \cite{joshi2017}. In the context of Indonesian social media, particularly Twitter (X), this complexity is further shaped by informal slang and morphological variation typical of casual online discourse. Traditional lexicon-based approaches and standard sentiment classifiers frequently fail to capture these subtle pragmatic shifts, as the actual intent of the user directly contradicts the literal meaning of the text \cite{maynard2014}.
+
+To tackle text classification in resource-constrained Indonesian datasets, early computational approaches heavily utilized classical statistical models such as Support Vector Machines (SVM), Na\"ive Bayes, and Logistic Regression \cite{wijaya2013, wibowo2020}. These classical models offer significant advantages in terms of computational efficiency and deployment simplicity. However, in previous literature, they are often under-optimized---relying on rudimentary unigram features or external dictionaries---and quickly reach a performance ceiling. While highly adept at recognizing explicit token-level patterns, traditional bag-of-words architectures inherently lack the sequential awareness required to understand the contextual dependencies that define sarcastic intent.
+
+The paradigm shifted significantly with the introduction of transformer-based architectures, such as IndoBERT \cite{wilie2020} and cross-lingual models like XLM-RoBERTa \cite{conneau2020}. By leveraging self-attention mechanisms, these models effectively capture deep contextual relationships and implicit semantics, achieving state-of-the-art results across various figurative language tasks in Indonesian NLP. Nevertheless, this superior predictive performance introduces a severe trade-off: these deep neural networks demand massive parameter footprints and incur high inference latencies, rendering them suboptimal for lightweight or real-time deployment scenarios. 
+
+The reference benchmark established by Suhartono et al.~\cite{idsarcasm} provides a rigorous foundation by evaluating both classical and transformer-based paradigms on a standardized Indonesian sarcasm corpus. However, their evaluation treats these paradigms strictly as isolated, mutually exclusive competitors. Emerging studies have demonstrated the promise of combining these paradigms via late fusion elsewhere: Golestani and Moattar~\cite{golestani2026lightweight} combine a fine-tuned SBERT with classical Logistic Regression and Naive Bayes through adaptive, validation-performance-weighted probability fusion for sentiment classification, while Ramya and Manu~\cite{ramya2026hybrid} combine BERT with a classical classifier through stacked meta-learning for psychological stress detection. However, neither targets Indonesian sarcasm detection, nor do they isolate---through ablation---whether the classical component provides a genuine, necessary contribution or merely an incidental one. Our research addresses this specific gap in the literature. Rather than discarding classical models, we propose optimizing a logistic regression classifier and utilizing late-fusion to bridge the structural divide between classical efficiency and transformer accuracy.
+
+\section{Methodology}
+
+% Posisikan gambar 2 kolom di paling atas bab Methodology agar tidak ada gap kosong
+\begin{figure*}[t]
+\centerline{\includegraphics[width=0.85\textwidth]{assets/fusion_pipeline.png}}
+\caption{Late-fusion inference pipeline. The fusion weight $w$ and decision threshold $\tau$ are selected exclusively on the validation set.}
+\label{fig:pipeline}
+\end{figure*}
+
+\subsection{Dataset}
+We use the publicly available \texttt{w11wo/twitter\_indonesia\_sarcastic} corpus (HuggingFace Hub), consisting of Indonesian-language tweets with binary sarcasm labels. The corpus is pre-split into training (1,878 samples), validation (268 samples), and test (538 samples) sets, with sarcastic tweets accounting for approximately 25\% of all samples. The corpus has been pre-processed by its original authors with personally identifiable information masked.
+
+\subsection{Frequency-based Probability Extraction}
+
+The first branch of our pipeline extracts token-frequency probabilities ($P_{LR}$) using an optimized linear framework. Input tweets are tokenized via the NLTK word tokenizer and vectorized using a TF-IDF scheme~\cite{salton1988term} spanning both word unigrams and bigrams. To stabilize text representations across short social media posts, we apply sublinear term-frequency scaling and prune the feature space by filtering out rare tokens with a minimum document frequency of less than two.
+
+To account for class imbalance (approximately 25\% sarcastic samples), the Logistic Regression (LR) model is trained using balanced class weights, which scales the loss function inversely proportional to class frequencies. Model selection utilizes a predefined validation split to prevent data leakage, where the inverse regularization strength $C$ is grid-searched ($C \in \{0.05, 0.1, 0.3, 1, 3, 10, 30\}$) to maximize the validation $F_1$ score. Rather than enforcing a static 0.5 decision boundary, the raw logit outputs are mapped via a sigmoid function to yield continuous probability scores, and the optimal classification threshold is empirically tuned on validation performance to maximize minority class recall. 
+
+This configuration purposefully addresses several methodological limitations in the reference benchmark~\cite{idsarcasm}, which relied on uniform class weights, unigram features without document filtering, and a static 0.5 threshold. By transitioning to a feature-engineered, calibrated probability extractor, this branch establishes a highly competitive statistical baseline that provides the continuous $P_{LR}$ signals required for the subsequent late-fusion stage.
+
+\subsection{Transformer Probability Extraction}
+
+To ensure a direct and fair comparison with the reference benchmark, we integrate the exact six fine-tuned transformer architectures released by Suhartono et al.~\cite{idsarcasm}. These models are utilized strictly in inference-only mode to extract localized contextual probabilities ($P_{Trf}$), encompassing both monolingual variants optimized for native Indonesian text (IndoBERT-base, IndoBERT-large, and an uncased/lemmatized IndoBERT variant) and multilingual models optimized for informal, code-switched social media text (mBERT, XLM-R-base, and XLM-R-large).
+
+A critical technical constraint was implemented during deployment. In modern Hugging Face \texttt{transformers} library environments ($\geq 4.42$), the attention mechanism defaults to Scaled Dot-Product Attention (SDPA). However, we noted that SDPA introduces minor numerical divergences that alter the output probabilities, causing the reproduced $F_1$ scores to deviate from the originally published baseline values. To guarantee absolute reproducibility and fair alignment, the attention implementation for all RoBERTa and XLM-R models was explicitly forced to \texttt{eager} mode. This constraint stabilizes $P_{Trf}$, establishing a consistent foundation for the subsequent late-fusion stage.
+
+\subsection{Late Fusion}
+
+We propose combining the Optimized LR model with a single fine-tuned transformer through late fusion of predicted probabilities, without further fine-tuning the transformer. To ensure strict reproducibility, we utilize the exact six pre-trained transformer checkpoints released by the authors of the reference benchmark~\cite{idsarcasm}: IndoBERT-base, IndoBERT-large, an uncased/lemmatized IndoBERT variant, multilingual BERT (mBERT), XLM-R-base, and XLM-R-large. For XLM-R and RoBERTa-family models, the attention implementation is explicitly forced to \texttt{eager} mode, as \texttt{transformers} versions $\geq 4.42$ default to scaled dot-product attention (SDPA), which produces numerically divergent outputs.
+
+Fig.~\ref{fig:pipeline} illustrates the inference pipeline. The input tweet is processed independently by the classical (Optimized LR) and transformer branches. The two predicted probabilities, $P_{LR}$ and $P_{Trf}$, are combined using a weighted-average operator, a special case of the classical sum rule for classifier combination~\cite{kittler1998combining}:
+\begin{equation}
+    P_{fusion} = w \cdot P_{LR} + (1 - w) \cdot P_{Trf}
+\end{equation}
+where the fusion weight $w \in [0, 1]$ and the final decision threshold $\tau$ are optimized exclusively on the validation set to prevent data leakage. The fusion weight $w$ is selected via grid search over a fixed candidate set with a step size of 0.025. For the decision threshold $\tau$, we instead perform an exhaustive search over every unique value present in the validation set's fusion scores. This is justified by \cite{lipton2014}, which proves that the $F_1$-optimal threshold always coincides with one of the classifier's realized score values, allowing an exact $O(n \log n)$ search rather than an approximate grid. The test set is evaluated exactly once per configuration.
+
+\subsection{Evaluation Metrics}
+Model performance is evaluated using accuracy, precision, recall, and F1-score with respect to the sarcastic class:
+
+\begin{equation}
+\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+\label{eq:acc}
+\end{equation}
+
+\begin{equation}
+\text{Precision} = \frac{TP}{TP + FP}, \quad \text{Recall} = \frac{TP}{TP + FN}
+\label{eq:pr}
+\end{equation}
+
+\begin{equation}
+F1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+\label{eq:f1}
+\end{equation}
+
+\noindent where $TP$, $TN$, $FP$, and $FN$ denote true positives, true negatives, false positives, and false negatives, respectively. Because the corpus is imbalanced (approximately 25\% sarcastic), accuracy alone can be misleading, so the $F_1$-score serves as our primary metric throughout: it is the objective optimized during regularization search, threshold tuning, and fusion weight selection on the validation set, and it is the metric on which the headline comparison against the published state of the art is based. We additionally report a paired bootstrap estimate of $P(\text{late fusion} > \text{SOTA})$ using the $F_1$ metric as the comparison statistic \cite{dror2018hitchhiker}.
+
+\section{Results and Discussion}
+\label{sec:results}
+
+\subsection{Statistical Baseline Evaluation and Optimization}
+
+Table~\ref{tab:baselines} presents the baseline evaluation alongside our proposed frequency-based optimization framework. The Naive Bayes, SVM, and Logistic Regression rows are reproduced by us following the exact feature configuration and hyperparameters reported in \cite{idsarcasm} (same seed and protocol), rather than copied directly from the original publication, to ensure a controlled, same-environment comparison against Optimized LR.
+
+\begin{table}[htbp]
+\caption{Baseline Performance (Reproduced) and Optimized LR Results}
+\begin{center}
+\begin{tabular}{lcccc}
+\hline
+\textbf{Model} & \textbf{Acc} & \textbf{Prec} & \textbf{Rec} & \textbf{$F1$} \\ \hline
+\quad Naive Bayes \cite{idsarcasm} & 0.8532 & 0.7570 & 0.6045 & 0.6722 \\
+\quad SVM \cite{idsarcasm} & 0.8513 & 0.7250 & 0.6493 & 0.6850 \\
+\quad Logistic Regression \cite{idsarcasm} & 0.8680 & \textbf{0.7692} & 0.6716 & 0.7171 \\ 
+\quad \textbf{Optimized LR (Ours)} & \textbf{0.8717} & 0.7273 & \textbf{0.7761} & \textbf{0.7509} \\ \hline
+\end{tabular}
+\label{tab:baselines}
+\end{center}
+\end{table}
+
+By removing the architectural limitations of the original unigram-only configuration, our proposed Frequency-Based branch demonstrates a substantial performance leap. The Optimized LR advances the baseline Logistic Regression from its reproduced score of 0.7171 to 0.7509 (+0.0338), narrowing the gap against the massive SOTA transformer. Strikingly, this dictionary-free model outperforms three fine-tuned transformer architectures evaluated in the reference paper: mBERT (0.6462), IndoBERT-lem (0.6467), and IndoBERT-base (0.7273). 
+
+To verify whether this statistical ceiling could be raised further via intra-paradigm complexity, we evaluated an extensive classical ensemble combining three feature views (word TF-IDF spanning unigrams-to-bigrams, word TF-IDF spanning unigrams-to-trigrams, and a SentencePiece subword TF-IDF view) across three base classifiers---Logistic Regression, a calibrated Support Vector Classifier, and Complement Naive Bayes---combined via soft voting, out-of-fold logistic-regression stacking, and bagged Logistic Regression. This complex ensemble outperformed our single Optimized LR in only 47\% of 5,000 bootstrap resamples of the test-set predictions. The high correlation ($r = 0.877$) among classical out-of-fold predictions indicates statistical saturation within the bag-of-words token space. This empirical bottleneck confirms 0.7509 as the definitive performance ceiling for classical-only approaches on this corpus, establishing the necessity for cross-paradigm late fusion.
+
+\subsection{Late Fusion Performance}
+
+% Pindahkan Table II ke paling atas sub-bab agar dirender di halaman yang sama dengan teksnya
+\begin{table*}[t]
+\caption{Late Fusion Performance Across Transformer Families. The bolded row exceeds the published SOTA $F_1$ shown above the line.}
+\begin{center}
+\begin{tabular}{lcccc}
+\hline
+\textbf{Model} & \textbf{Acc} & \textbf{Prec} & \textbf{Rec} & \textbf{$F1$} \\ \hline
+\multicolumn{5}{l}{\textit{Literature Reference (Standalone, from \cite{idsarcasm})}} \\
+\quad mBERT & 0.8290 & 0.6667 & 0.6269 & 0.6462 \\
+\quad IndoBERT-lem & 0.8030 & 0.5843 & 0.7239 & 0.6467 \\
+\quad IndoBERT-base & 0.8662 & 0.7385 & 0.7164 & 0.7273 \\
+\quad IndoBERT-large & 0.8643 & 0.7480 & 0.6866 & 0.7160 \\
+\quad XLM-R-base & 0.8513 & 0.6570 & 0.8433 & 0.7386 \\
+\quad XLM-R-large (SOTA) & 0.8885 & 0.7937 & 0.7463 & 0.7692 \\ \hline
+\multicolumn{5}{l}{\textit{Our Late Fusion (Optimized LR + Transformer)}} \\
+\quad mBERT Late Fusion & 0.8680 & 0.7032 & 0.8134 & 0.7543 \\
+\quad IndoBERT-lem Late Fusion & 0.8680 & 0.7172 & 0.7761 & 0.7455 \\
+\quad IndoBERT-base Late Fusion & 0.8736 & 0.7357 & 0.7687 & 0.7518 \\
+\quad IndoBERT-large Late Fusion & 0.8736 & 0.7143 & 0.8209 & 0.7639 \\
+\quad XLM-R-large Late Fusion & 0.8792 & 0.7226 & 0.8358 & 0.7751 \\
+\quad \textbf{XLM-R-base Late Fusion (Ours)} & \textbf{0.8903} & \textbf{0.7551} & \textbf{0.8284} & \textbf{0.7900} \\ \hline
+\end{tabular}
+\label{tab:hybrid_results}
+\end{center}
+\end{table*}
+
+We systematically evaluate the integration of the Optimized LR with each fine-tuned transformer model. Table~\ref{tab:hybrid_results} outlines the resulting performance under our weighted-average (\textit{prob-avg}) fusion strategy.
+
+As shown in Table~\ref{tab:hybrid_results}, late fusion provides a much larger performance boost for moderate transformer models than for the strongest one. Combining the Optimized LR with XLM-R-base, whose standalone $F1$ of 0.7386 is shown above the line in the same table, raises its $F1$-score to \textbf{0.7900} (+0.0514). This XLM-R-base late-fusion configuration outperforms the historical SOTA, XLM-R-large ($F1=0.7692$, shown above the line), by 2.08 percentage points. A paired bootstrap test confirms this gain, showing a 77.3\% probability that the XLM-R-base late fusion consistently outperforms the historical SOTA. It should be noted that this 77.3\% probability is a single-comparison estimate conditional on having already selected the best-performing pairing (XLM-R-base) among the six transformer configurations evaluated in Table~\ref{tab:hybrid_results}, and is not adjusted for this implicit model-selection step. In contrast, fusing the Optimized LR with XLM-R-large itself yields a tiny improvement of only +0.0059, even though the validation search still assigns the Optimized LR a majority fusion weight ($w^*=0.650$) in this pairing (Fig.~\ref{fig:weight_landscape}). This suggests that XLM-R-large's already-high standalone accuracy leaves comparatively little headroom for the fusion to improve on, unlike the moderate XLM-R-base, whose complementary error pattern with the classical signal yields a much larger gain.
+
+% Taruh Confusion Matrix di tengah paragraf agar disisipkan di dalam satu kolom halaman yang sama
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{assets/confusion_matrix.png}}
+\caption{Confusion matrices on the test set ($n=538$) isolating the fusion effect: standalone XLM-R-base versus the same model fused with the Optimized LR. Adding the classical signal removes 23 false positives at the cost of only 2 additional false negatives.}
+\label{fig:confusion}
+\end{figure}
+
+Fig.~\ref{fig:confusion} isolates this fusion effect by holding the transformer fixed and comparing it with and without the Optimized LR. Adding the classical signal removes 23 false positives (59 to 36) while costing only 2 additional false negatives (21 to 23), explaining why precision rises sharply from 0.6570 to 0.7551 while recall remains nearly unchanged (0.8433 to 0.8284).
+
+This gain is not uniform across all individual metrics relative to the published SOTA. The XLM-R-base late fusion achieves higher accuracy (0.8903 vs.\ 0.8885) and substantially higher recall (0.8284 vs.\ 0.7463), but lower precision (0.7551 vs.\ 0.7937). Because $F1$ is the metric optimized throughout our pipeline and the primary basis for comparison in the reference benchmark, this is an intentional trade-off rather than a shortcoming: late fusion recovers a large number of sarcastic tweets that the SOTA misses, at a modest precision cost, yielding a net improvement on the metric that matters most for this imbalanced classification task.
+
+Beyond predictive accuracy, this late-fusion configuration establishes a Pareto-optimal operating point for practical deployment. Measured on a single NVIDIA T4 GPU, the standalone XLM-R-large (SOTA) requires 560 million parameters and demands an inference latency of approximately 10.22 ms per sample. By pairing the optimized LR with the lighter XLM-R-base (278 million parameters), our late-fusion system cuts the parameter footprint by 50.3\% and reduces per-sample inference latency to roughly 6.51 ms (a 36.3\% speedup). The integration of the classical model introduces a negligible computational overhead of less than 0.02\% in parameter density and less than 0.1\% in runtime.
+
+\subsection{Fusion Weight and Threshold Selection}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{assets/weight_landscape_twitter.png}}
+\caption{Validation $F_1$ score landscape across the fusion weight search space ($w$) for each transformer architecture. The red markers indicate the optimal configuration ($w^*$) selected during the validation phase.}
+\label{fig:weight_landscape}
+\end{figure}
+
+Fig.~\ref{fig:weight_landscape} illustrates the validation $F_1$ score landscape across the fusion weight search space ($w$) for each transformer pairing. A profound pattern emerges regarding the role of the classical model. Rather than being marginalized by deep learning architectures, the validation search consistently assigns a dominant majority weight ($w^* \geq 0.625$) to the Optimized LR across all configurations. 
+
+For the weakest standalone model, IndoBERT-lem, the search dictates a near-total reliance on the classical signal ($w^* = 0.975$). Most strikingly, even when paired with the highly parameterized XLM-R-large model, the system still assigns 65.0\% of the predictive weight ($w^* = 0.650$) to the Optimized LR. This empirical finding completely reshapes the operational paradigm for this corpus: the classical statistical model acts as the robust primary anchor for the classification decision, while the transformer's attention probabilities function merely as a secondary contextual adjustment. This further solidifies our hypothesis that statistical bag-of-words mechanisms capture the baseline pragmatic structures of Indonesian sarcasm far more efficiently than the raw attention layers of fine-tuned transformers.
+
+\FloatBarrier
+
+\subsection{Qualitative Analysis: Rescued Predictions}
+To understand the linguistic intuition behind the late fusion's success, we conducted a qualitative analysis of the test set predictions. Specifically, we examined cases where the classical Logistic Regression (LR) signal successfully "rescued" the baseline XLM-R-base model from making an incorrect prediction. Table~\ref{tab:qualitative} highlights selected examples of these corrected instances.
+
+\begin{table}[htbp]
+\caption{Qualitative Analysis of Rescued Predictions.}
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c p{3.8cm} c c c}
+\hline
+\textbf{True} & \textbf{Tweet Text} & \textbf{XLM-R} & \textbf{LR} & \textbf{Fused} \\ \hline
+\multicolumn{5}{l}{\textbf{Corrected False Positives}} \\
+0 & \textit{"\textless{}username\textgreater{} \textless{}username\textgreater{} memang benar2 bangsat \textless{}hashtag\textgreater{} \textless{}hashtag\textgreater{}"} & 0.964 & 0.082 & \textbf{0.413} \\
+0 & \textit{"Lord Luhut trending topik. Menteri kesayangan \textless{}username\textgreater{} nih. \textless{}hashtag\textgreater{}"} & 0.991 & 0.153 & \textbf{0.467} \\ \hline
+\multicolumn{5}{l}{\textbf{Corrected False Negatives}} \\
+1 & \textit{"Katanya Ijtima Ulama tapi kok tidak paham basic Islami \textless{}hashtag\textgreater{}"} & 0.256 & 0.957 & \textbf{0.694} \\
+1 & \textit{"Airnya sampai masuk Mall. Mau shopping kali ya? Santun banget ya \textless{}hashtag\textgreater{}"} & 0.356 & 0.788 & \textbf{0.626} \\ \hline
+\end{tabular}
+\label{tab:qualitative}
+\end{center}
+\end{table}
+
+As demonstrated in the first half of Table~\ref{tab:qualitative} (Corrected False Positives), fine-tuned transformers often struggle to differentiate between implicit sarcasm and explicit hostile sentiment (e.g., flaming or hate speech). In the first example, the presence of strong negative profanity causes the XLM-R-base model to trigger a false alarm with a highly confident probability of 0.964. However, the Optimized LR, grounded in document-frequency weighting, correctly identifies this token distribution as explicit non-sarcastic hostility (0.082). The resulting late fusion neutralizes the transformer's overconfidence, successfully pulling the final probability below the decision threshold.
+
+Conversely, the second half of Table~\ref{tab:qualitative} (Corrected False Negatives) illustrates instances where the transformer fails to detect sarcastic contradiction. In the final example regarding a flood, the sarcastic intent is conveyed through a subtle contextual contradiction (\textit{"Santun banget ya"} or "How polite"). While XLM-R-base misses this implicit cue (0.356), the classical model likely anchors onto specific, highly-weighted n-grams associated with Indonesian political and social satire, scoring it at 0.788. This complementary dynamic validates our hypothesis: the classical model acts both as a rigid filter against raw sentiment and as an anchor for highly specific lexical indicators that the transformer occasionally overlooks.
+
+\section{Conclusion}
+This study demonstrates that a fine-tuned transformer remains necessary for high-performance Indonesian sarcasm detection: our classical ensembling ablation confirms that no amount of additional classical models can push the Optimized LR past its own ceiling of 0.7509. However, we show that this transformer's accuracy can be meaningfully improved by fusing it with an almost cost-free classical signal. Our optimization of the baseline Logistic Regression, elevating its $F1$-score from 0.7171 to 0.7509, first confirmed that classical models are frequently under-optimized in prior benchmarks. Interestingly, the validation-selected fusion weight assigns the Optimized LR a majority share ($w^* \geq 0.625$) across every transformer pairing evaluated, including the largest model, suggesting its calibrated statistical signal is trusted more heavily in the final decision than its standalone accuracy alone would suggest.
+
+Furthermore, our proposed late-fusion strategy established a new state-of-the-art operating point by pairing the Optimized LR with XLM-R-base, achieving an $F1$-score of 0.7900. This minimal configuration outperforms the standalone XLM-R-large SOTA~\cite{idsarcasm} in $F1$, driven primarily by a substantial recall gain that allows it to correctly identify considerably more sarcastic tweets, while cutting the parameter footprint by 50.3\% and reducing per-sample inference latency by 36.3\%. Finally, our post-mortem analysis on classical ensembling empirically proved that cross-paradigm collaboration, rather than intra-paradigm complexity, is necessary to break performance ceilings in low-resource settings.
+
+Despite these contributions, this research is bounded by certain limitations. The evaluation was conducted on a relatively compact dataset (538 test samples) sourced exclusively from Twitter (X), which may restrict immediate generalization to other platform dynamics or longer textual formats. Additionally, although the added inference-time computational cost is minimal, deploying this architecture in production requires maintaining and monitoring two independently-versioned model components in parallel, an operational cost not captured by the parameter and latency accounting alone. Future work will focus on evaluating the robustness of this lightweight late-fusion architecture across diverse social media platforms, exploring dynamic token-dependent fusion weights, and testing its applicability to other low-resource figurative language tasks.
+
+\begin{thebibliography}{00}
+\bibitem{idsarcasm} D. Suhartono, W. Wongso, and A. Tri Handoyo, ``IdSarcasm: Benchmarking and evaluating language models for Indonesian sarcasm detection,'' \textit{IEEE Access}, vol. 12, pp. 87323--87332, 2024, doi: 10.1109/ACCESS.2024.3416955.
+\bibitem{lipton2014} Z. C. Lipton, C. Elkan, and B. Naryanaswamy, ``Optimal thresholding of classifiers to maximize F1 measure,'' in \textit{Machine Learning and Knowledge Discovery in Databases (ECML PKDD 2014)}, Lecture Notes in Computer Science, vol. 8725, Springer, 2014, pp. 225--239.
+\bibitem{joshi2017} A. Joshi, P. Bhattacharyya, and M. J. Carman, ``Automatic sarcasm detection: A survey,'' \textit{ACM Computing Surveys}, vol. 50, no. 5, Article 73, 2017.
+\bibitem{maynard2014} D. Maynard and M. A. Greenwood, ``Who cares about sarcastic tweets? Investigating the impact of sarcasm on sentiment analysis,'' in \textit{Proc. 9th Int. Conf. on Language Resources and Evaluation (LREC'14)}, Reykjavik, Iceland, 2014, pp. 4238--4243.
+\bibitem{wijaya2013} H. Wijaya, A. Erwin, A. Soetomo, and M. Galinium, ``Twitter sentiment analysis and insight for Indonesian mobile operators,'' in \textit{Proc. Information Systems Int. Conf. (ISICO)}, 2013, pp. 367--372.
+\bibitem{wibowo2020} A. T. Wibowo, A. Arifianto, and S. D. Budiwati, ``Indonesian sentiment analysis for e-commerce using support vector machine and logistic regression,'' \textit{Journal of Physics: Conference Series}, vol. 1577, no. 1, p. 012015, 2020.
+\bibitem{wilie2020} B. Wilie, K. Vincentio, G. I. Winata, S. Cahyawijaya, X. Li, Z. Y. Lim, S. Soleman, R. Mahendra, P. Fung, S. Bahar, and A. Purwarianti, ``IndoNLU: Benchmark and resources for evaluating Indonesian natural language understanding,'' in \textit{Proc. 1st Conf. Asia-Pacific Chapter of ACL and 10th Int. Joint Conf. on Natural Language Processing (AACL-IJCNLP)}, Suzhou, China, 2020, pp. 843--857.
+\bibitem{conneau2020} A. Conneau, K. Khandelwal, N. Goyal, V. Chaudhary, G. Wenzek, F. Guzm\'an, E. Grave, M. Ott, L. Zettlemoyer, and V. Stoyanov, ``Unsupervised cross-lingual representation learning at scale,'' in \textit{Proc. 58th Annual Meeting of the Association for Computational Linguistics (ACL)}, 2020, pp. 8440--8451.
+\bibitem{golestani2026lightweight} N. E. Golestani and M. H. Moattar, ``Lightweight hybrid adaptive weighted ensemble integrating fine-tuned SBERT with lexical and statistical models for robust Steam review sentiment classification,'' \textit{Discover Computing}, vol. 29, no. 367, 2026, doi: 10.1007/s10791-026-10296-6.
+\bibitem{dror2018hitchhiker} R. Dror, G. Baumer, S. Shlomov, and R. Reichart, ``The Hitchhiker's guide to testing statistical significance in natural language processing,'' in \textit{Proc. 56th Annual Meeting of the Association for Computational Linguistics (ACL)}, 2018, pp. 1383--1392.
+\bibitem{ramya2026hybrid} V. J. Ramya and Y. M. Manu, ``A hybrid explainable machine learning and transformer-based framework for psychological stress detection in women's social media narratives,'' \textit{Discover Artificial Intelligence}, vol. 6, no. 300, 2026, doi: 10.1007/s44163-026-01055-z.
+\bibitem{kittler1998combining} J. Kittler, M. Hatef, R. P. W. Duin, and J. Matas, ``On combining classifiers,'' \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence}, vol. 20, no. 3, pp. 226--239, 1998, doi: 10.1109/34.667881.
+\bibitem{salton1988term} G. Salton and C. Buckley, ``Term-weighting approaches in automatic text retrieval,'' \textit{Information Processing \& Management}, vol. 24, no. 5, pp. 513--523, 1988, doi: 10.1016/0306-4573(88)90021-0.
+\end{thebibliography}
+
+\end{document}
