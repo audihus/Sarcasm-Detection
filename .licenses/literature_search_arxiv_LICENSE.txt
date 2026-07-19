@@ -1,0 +1,4 @@
+literature-search-arxiv skill usage notice
+Timestamp: 2026-07-09 (session)
+User notified: arXiv API Terms of Use apply (https://info.arxiv.org/help/api/index.html).
+Always check the license of individual papers retrieved via this skill before reuse.
